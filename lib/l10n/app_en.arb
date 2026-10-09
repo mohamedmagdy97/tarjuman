@@ -1,0 +1,51 @@
+{
+  "@@locale": "en",
+  "appName": "Tarjuman",
+  "tagline": "Watch any video in Arabic, even offline.",
+  "libraryTitle": "My library",
+  "libraryEmptyTitle": "Your library is empty",
+  "libraryEmptyBody": "Add your first video and watch it in Arabic.",
+  "addVideo": "Add video",
+  "filterAll": "All",
+  "filterReady": "Ready",
+  "filterProcessing": "Processing",
+  "statusReadyOffline": "Ready offline",
+  "statusProcessing": "Processing",
+  "statusOnline": "Online",
+  "statusFailed": "Failed",
+  "noSubtitlesTitle": "No subtitles yet",
+  "noSubtitlesBody": "Add an SRT or VTT file to show it over the video.",
+  "attachSubtitles": "Add subtitle file",
+  "subtitleStyle": "Subtitle style",
+  "size": "Size",
+  "colour": "Colour",
+  "background": "Background",
+  "position": "Position",
+  "bgBox": "Box",
+  "bgOutline": "Outline",
+  "bgNone": "None",
+  "posBottom": "Bottom",
+  "posTop": "Top",
+  "preview": "This is how subtitles will look",
+  "delete": "Delete",
+  "deleteVideoTitle": "Delete video?",
+  "deleteVideoBody": "The video and its subtitles will be removed from this device.",
+  "cancel": "Cancel",
+  "videoImported": "No subtitles",
+  "cuesCount": "{count} lines",
+  "@cuesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errUnsupported": "This file isn't supported. Try an SRT or VTT file in UTF-8.",
+  "errStorage": "Couldn't access the file. Check storage and permissions.",
+  "errNetwork": "No internet connection.",
+  "errModel": "Download the required model first.",
+  "errUnknown": "Something went wrong. Try again.",
+  "playbackError": "Couldn't play this video",
+  "speed": "Speed",
+  "retry": "Retry"
+}

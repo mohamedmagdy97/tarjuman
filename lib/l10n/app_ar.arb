@@ -1,0 +1,51 @@
+{
+  "@@locale": "ar",
+  "appName": "ترجمان",
+  "tagline": "شاهد أي فيديو بالعربي، حتى بدون إنترنت.",
+  "libraryTitle": "مكتبتي",
+  "libraryEmptyTitle": "مكتبتك فارغة",
+  "libraryEmptyBody": "أضف أول فيديو وشاهده بالعربي.",
+  "addVideo": "إضافة فيديو",
+  "filterAll": "الكل",
+  "filterReady": "جاهز",
+  "filterProcessing": "قيد المعالجة",
+  "statusReadyOffline": "جاهز بدون إنترنت",
+  "statusProcessing": "قيد المعالجة",
+  "statusOnline": "أونلاين",
+  "statusFailed": "فشل",
+  "noSubtitlesTitle": "لا توجد ترجمة بعد",
+  "noSubtitlesBody": "أضف ملف ترجمة SRT أو VTT لتظهر فوق الفيديو.",
+  "attachSubtitles": "إضافة ملف ترجمة",
+  "subtitleStyle": "نمط الترجمة",
+  "size": "الحجم",
+  "colour": "اللون",
+  "background": "الخلفية",
+  "position": "المكان",
+  "bgBox": "صندوق",
+  "bgOutline": "حدود",
+  "bgNone": "بدون",
+  "posBottom": "أسفل",
+  "posTop": "أعلى",
+  "preview": "هكذا ستظهر الترجمة",
+  "delete": "حذف",
+  "deleteVideoTitle": "حذف الفيديو؟",
+  "deleteVideoBody": "سيُحذف الفيديو وترجمته من جهازك.",
+  "cancel": "إلغاء",
+  "videoImported": "بدون ترجمة",
+  "cuesCount": "{count} سطر",
+  "@cuesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errUnsupported": "هذا الملف غير مدعوم. جرّب ملف SRT أو VTT بترميز UTF-8.",
+  "errStorage": "تعذّر الوصول للملف. تأكد من المساحة والصلاحيات.",
+  "errNetwork": "لا يوجد اتصال بالإنترنت.",
+  "errModel": "حمّل النموذج المطلوب أولاً.",
+  "errUnknown": "حدث خطأ. حاول مرة أخرى.",
+  "playbackError": "تعذّر تشغيل الفيديو",
+  "speed": "السرعة",
+  "retry": "إعادة المحاولة"
+}
