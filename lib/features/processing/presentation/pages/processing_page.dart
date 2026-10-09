@@ -177,6 +177,24 @@ class ProcessingView extends StatelessWidget {
                 color: failed ? c.error : c.muted,
               ),
             ),
+            if (failed && (s.failure!.message ?? '').isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sm),
+                child: ExpansionTile(
+                  title: Text(
+                    l10n.technicalDetails,
+                    style: AppTypography.caption.copyWith(color: c.muted),
+                  ),
+                  tilePadding: EdgeInsets.zero,
+                  children: [
+                    SelectableText(
+                      '${s.failure.runtimeType}: ${s.failure!.message}',
+                      textDirection: TextDirection.ltr,
+                      style: AppTypography.caption.copyWith(color: c.muted),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: AppSpacing.lg),
             AppButton(
               label: l10n.resume,

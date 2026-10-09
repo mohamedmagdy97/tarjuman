@@ -37,6 +37,7 @@ class VideoRepositoryImpl implements VideoRepository {
   Future<Result<Video>> add({
     required String title,
     required String path,
+    Duration? duration,
   }) async {
     try {
       final id = _uuid.v4();
@@ -46,6 +47,7 @@ class VideoRepositoryImpl implements VideoRepository {
         title: title,
         path: stored,
         createdAt: DateTime.now(),
+        duration: duration,
       );
       await _db.into(_db.videos).insert(_toCompanion(video));
       return Result.success(video);

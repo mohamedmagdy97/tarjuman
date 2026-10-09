@@ -26,7 +26,11 @@ class ImportVideo {
         UnsupportedMediaFailure('Not a readable audio/video file'),
       );
     }
-    final added = await _repository.add(title: file.name, path: file.path);
+    final added = await _repository.add(
+      title: file.name,
+      path: file.path,
+      duration: (probed as Success<Duration>).value,
+    );
     return added.map<Video?>((v) => v);
   }
 }

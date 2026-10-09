@@ -41,6 +41,10 @@ class ImportFromUrl {
         UnsupportedMediaFailure('Not a readable audio/video file'),
       );
     }
-    return _repository.add(title: file.name, path: file.path);
+    return _repository.add(
+      title: file.name,
+      path: file.path,
+      duration: (probed as Success<Duration>).value,
+    );
   }
 }

@@ -40,7 +40,7 @@
       }
     }
   },
-  "errUnsupported": "The file isn't supported or can't be read. Try another one (video or audio, or SRT/VTT for subtitles).",
+  "errUnsupported": "Couldn't read this file as video or audio. Try another file.",
   "errStorage": "Couldn't access the file. Check storage and permissions.",
   "errNetwork": "No internet connection.",
   "errModel": "Download the required model first.",
@@ -150,5 +150,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "errSubtitle": "Invalid subtitle file. Choose an SRT or VTT file in UTF-8.",
+  "technicalDetails": "Technical details",
+  "translateThisVideo": "Translate this video",
+  "orAddSubtitleFile": "or add a ready subtitle file"
 }

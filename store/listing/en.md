@@ -43,6 +43,6 @@ Video Players & Editors
 video subtitles, translation, subtitles, video player, learn english
 
 ## Contact
-Email: [put your support email here]
+Email: mohammedmagdy823@gmail.com
 Website: [optional]
-Privacy policy: [URL after hosting — file ready at store/privacy-policy.html]
+Privacy policy: https://mohamedmagdy97.github.io/tarjuman-privacy/

@@ -3,7 +3,7 @@
 Everything the app can generate is already in `store/`. This file is what **you** do in Play Console.
 
 ## 0. Before you start — decisions that are permanent
-- [ ] **Package name `tech.megtech.tarjuman` cannot change after the first upload.** Confirm it (or tell me to rename now).
+- [x] **Package name: `com.megtech.tarjuman`** (final — it cannot change after the first upload).
 - [ ] **App name:** `Tarjuman` is a working name. Confirm the final Arabic/English names in `store/listing/*.md`.
 - [ ] **Back up** `android/key.properties` and `android/app/upload-keystore.jks` outside the repo. Use Play App Signing
       (Console → Setup → App signing): Google keeps the real signing key, ours is only the *upload* key, which Google
@@ -26,13 +26,24 @@ Everything the app can generate is already in `store/`. This file is what **you*
 | Feature graphic 1024×500 | `store/android/{ar,en}/upload/feature-graphic-1024x500.jpg` |
 | Phone screenshots (8, 1080×1920) | `store/android/{ar,en}/upload/phone-screenshots/*.jpg` |
 | Short / full description, release notes | `store/listing/` |
-| Privacy policy URL | host `store/privacy-policy.html` (any static host, e.g. `admin.dikirnis.tech/tarjuman-privacy.html`) and paste the URL |
+| Privacy policy URL | `https://mohamedmagdy97.github.io/tarjuman-privacy/` (publish `store/privacy-site/` to that repo, see §3b) |
 Screenshots are rendered from the app's real screens with sample content (library, player, processing, setup, models,
 subtitle style, editor, settings). Play accepts JPEG/24-bit PNG without alpha: the `upload/` copies are alpha-free.
 Original PNG masters and raw screens are in `store/android/{ar,en}/` and `store/raw/`.
 
+## 3b. Publish the privacy policy (GitHub Pages)
+```bash
+cd store/privacy-site
+git init -b main && git add . && git commit -m "Privacy policy"
+git remote add origin https://github.com/mohamedmagdy97/tarjuman-privacy.git
+git push -u origin main
+```
+Then GitHub → repo **Settings → Pages → Deploy from a branch → main / (root)**. Open
+https://mohamedmagdy97.github.io/tarjuman-privacy/ and confirm it loads **before** pasting it in Play Console.
+(The same URL is already linked from the app: Settings → Privacy policy.)
+
 ## 4. App content
-- **Privacy policy:** URL from step 3. Fill the support email in the HTML first (search `[ضع بريد الدعم هنا]`).
+- **Privacy policy:** URL from step 3b (support email `mohammedmagdy823@gmail.com` is already in it).
 - **Data safety** (suggested answers — review them yourself, you are responsible for accuracy):
   - Does the app collect or share required user data types? **No data collected by the developer.**
   - Optional online mode: when the user enables it and supplies their own OpenAI key, **audio** (and derived text) is sent to
@@ -50,6 +61,13 @@ Original PNG masters and raw screens are in `store/android/{ar,en}/` and `store/
 3. **Closed testing** (12+ testers, 14 days if required) → apply for production.
 4. Production rollout, ideally staged (10 % → 50 % → 100 %).
 5. Read the **Pre-launch report** Play generates (crashes, accessibility).
+
+## 5b. Technical gates already satisfied by this build (verify again after any dependency change)
+- `targetSdk 36`, `minSdk 24`, AAB, signed with the upload key.
+- **16 KB page size:** all native `.so` must have ELF `p_align >= 0x4000`. `android/build.gradle.kts` forces NDK r28 +
+  `ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES` on plugin modules (the whisper plugin was 4 KB-aligned before). Re-check with the
+  script in `docs/RELEASE.md` ("16 KB check").
+- Native debug symbols (`SYMBOL_TABLE`) are bundled in the AAB for readable native crash reports.
 
 ## 6. Licenses (already handled in-app, keep it that way)
 - In-app Settings → Open-source licenses lists Dart packages plus FFmpeg (LGPL), Whisper (MIT) and the fonts (OFL).

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint;
+
 import 'package:tarjuman/core/cancel/cancel_token.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
@@ -55,6 +57,7 @@ class RunProcessingPipeline {
       if (v != null) {
         await _videos.update(v.copyWith(status: VideoStatus.failed));
       }
+      debugPrint('[pipeline] failed: ${f.runtimeType} ${f.message}');
       out.add(ProcessingFailed(f));
     }
 
@@ -82,9 +85,13 @@ class RunProcessingPipeline {
         ),
       );
 
-      final probed = await _audio.probeDuration(video.path);
-      if (probed case Err(:final failure)) return fail(video, failure);
-      final total = (probed as Success<Duration>).value;
+      // The duration was measured at import; only re-probe if it's missing.
+      var total = video.duration ?? Duration.zero;
+      if (total <= Duration.zero) {
+        final probed = await _audio.probeDuration(video.path);
+        if (probed case Err(:final failure)) return fail(video, failure);
+        total = (probed as Success<Duration>).value;
+      }
 
       // Resume: drop the possibly half-written last chunk, restart from it.
       final existing = await _subtitles.load(videoId);

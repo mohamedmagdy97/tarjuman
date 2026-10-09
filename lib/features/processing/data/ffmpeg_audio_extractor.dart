@@ -11,15 +11,37 @@ class FfmpegAudioExtractor implements AudioExtractor {
   @override
   Future<Result<Duration>> probeDuration(String mediaPath) async {
     final session = await FFprobeKit.getMediaInformation(mediaPath);
-    final seconds = double.tryParse(
-      session.getMediaInformation()?.getDuration() ?? '',
-    );
+    final info = session.getMediaInformation();
+    var seconds = double.tryParse(info?.getDuration() ?? '');
     if (seconds == null || seconds <= 0) {
-      return const Result.failure(
-        UnsupportedMediaFailure('Unreadable media duration'),
-      );
+      // Fallback: parse "Duration: hh:mm:ss.xx" from ffmpeg's banner output.
+      final probe = await FFmpegKit.executeWithArguments([
+        '-hide_banner',
+        '-i',
+        mediaPath,
+      ]);
+      seconds = _durationFromLog(await probe.getAllLogsAsString() ?? '');
+      if (seconds == null || seconds <= 0) {
+        final out = (await session.getAllLogsAsString() ?? '').trim();
+        return Result.failure(
+          UnsupportedMediaFailure(
+            'ffprobe could not read a duration. '
+            '${out.isEmpty ? 'no output' : out}',
+          ),
+        );
+      }
     }
     return Result.success(Duration(milliseconds: (seconds * 1000).round()));
+  }
+
+  double? _durationFromLog(String log) {
+    final m = RegExp(
+      r'Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)',
+    ).firstMatch(log);
+    if (m == null) return null;
+    return int.parse(m.group(1)!) * 3600 +
+        int.parse(m.group(2)!) * 60 +
+        double.parse(m.group(3)!);
   }
 
   @override

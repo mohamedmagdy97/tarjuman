@@ -111,7 +111,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errUnsupported =>
-      'الملف غير مدعوم أو لا يمكن قراءته. جرّب ملفًا آخر (فيديو أو صوت، أو SRT/VTT للترجمة).';
+      'تعذّرت قراءة الملف كفيديو أو صوت. جرّب ملفًا آخر.';
 
   @override
   String get errStorage => 'تعذّر الوصول للملف. تأكد من المساحة والصلاحيات.';
@@ -374,4 +374,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String versionLabel(String version) {
     return 'الإصدار $version';
   }
+
+  @override
+  String get errSubtitle =>
+      'ملف الترجمة غير صالح. اختر ملف SRT أو VTT بترميز UTF-8.';
+
+  @override
+  String get technicalDetails => 'تفاصيل تقنية';
+
+  @override
+  String get translateThisVideo => 'ترجمة هذا الفيديو';
+
+  @override
+  String get orAddSubtitleFile => 'أو أضف ملف ترجمة جاهزًا';
 }

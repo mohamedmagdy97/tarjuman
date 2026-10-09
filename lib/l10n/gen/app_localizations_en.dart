@@ -113,7 +113,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errUnsupported =>
-      'The file isn\'t supported or can\'t be read. Try another one (video or audio, or SRT/VTT for subtitles).';
+      'Couldn\'t read this file as video or audio. Try another file.';
 
   @override
   String get errStorage =>
@@ -381,4 +381,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String versionLabel(String version) {
     return 'Version $version';
   }
+
+  @override
+  String get errSubtitle =>
+      'Invalid subtitle file. Choose an SRT or VTT file in UTF-8.';
+
+  @override
+  String get technicalDetails => 'Technical details';
+
+  @override
+  String get translateThisVideo => 'Translate this video';
+
+  @override
+  String get orAddSubtitleFile => 'or add a ready subtitle file';
 }

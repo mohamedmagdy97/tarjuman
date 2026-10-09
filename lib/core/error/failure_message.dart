@@ -5,6 +5,7 @@ import 'package:tarjuman/l10n/gen/app_localizations.dart';
 String failureMessage(Failure failure, AppLocalizations l10n) =>
     switch (failure) {
       UnsupportedMediaFailure() => l10n.errUnsupported,
+      InvalidSubtitleFailure() => l10n.errSubtitle,
       StorageFailure() => l10n.errStorage,
       NetworkFailure() => l10n.errNetwork,
       ModelMissingFailure() => l10n.errModel,

@@ -94,7 +94,11 @@ class _PlayerViewState extends State<PlayerView> {
                 cubit.engine.buildSurface(),
                 if (state.timeline.isEmpty &&
                     state.status == PlayerStatus.ready)
-                  _NoSubtitles(onAttach: cubit.attachSubtitles),
+                  _NoSubtitles(
+                    onAttach: cubit.attachSubtitles,
+                    onTranslate: () =>
+                        unawaited(context.push('/setup/${state.video?.id}')),
+                  ),
                 AnimatedOpacity(
                   opacity: state.controlsVisible ? 1 : 0,
                   duration: AppMotion.micro,
@@ -335,8 +339,9 @@ class _Controls extends StatelessWidget {
 }
 
 class _NoSubtitles extends StatelessWidget {
-  const _NoSubtitles({required this.onAttach});
+  const _NoSubtitles({required this.onAttach, required this.onTranslate});
   final VoidCallback onAttach;
+  final VoidCallback onTranslate;
 
   @override
   Widget build(BuildContext context) {
@@ -355,9 +360,13 @@ class _NoSubtitles extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             AppButton(
-              label: l10n.attachSubtitles,
-              icon: Icons.closed_caption_outlined,
+              label: l10n.translateThisVideo,
+              icon: Icons.translate_rounded,
+              onPressed: onTranslate,
+            ),
+            TextButton(
               onPressed: onAttach,
+              child: Text(l10n.orAddSubtitleFile),
             ),
           ],
         ),

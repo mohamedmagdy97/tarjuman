@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:tarjuman/core/config/app_config.dart';
 import 'package:tarjuman/core/design_system/components/app_button.dart';
 import 'package:tarjuman/core/design_system/components/app_segmented.dart';
 import 'package:tarjuman/core/design_system/components/switch_tile.dart';
@@ -11,6 +12,7 @@ import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
 import 'package:tarjuman/features/settings/presentation/cubit/app_settings_cubit.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -97,6 +99,17 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ],
                 label(l10n.aboutSection),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.privacy_tip_outlined),
+                  title: Text(l10n.privacyPolicy),
+                  onTap: () => unawaited(
+                    launchUrl(
+                      Uri.parse(AppConfig.privacyPolicyUrl),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                  ),
+                ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.description_outlined),

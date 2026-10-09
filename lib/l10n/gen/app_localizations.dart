@@ -299,7 +299,7 @@ abstract class AppLocalizations {
   /// No description provided for @errUnsupported.
   ///
   /// In ar, this message translates to:
-  /// **'الملف غير مدعوم أو لا يمكن قراءته. جرّب ملفًا آخر (فيديو أو صوت، أو SRT/VTT للترجمة).'**
+  /// **'تعذّرت قراءة الملف كفيديو أو صوت. جرّب ملفًا آخر.'**
   String get errUnsupported;
 
   /// No description provided for @errStorage.
@@ -793,6 +793,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الإصدار {version}'**
   String versionLabel(String version);
+
+  /// No description provided for @errSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملف الترجمة غير صالح. اختر ملف SRT أو VTT بترميز UTF-8.'**
+  String get errSubtitle;
+
+  /// No description provided for @technicalDetails.
+  ///
+  /// In ar, this message translates to:
+  /// **'تفاصيل تقنية'**
+  String get technicalDetails;
+
+  /// No description provided for @translateThisVideo.
+  ///
+  /// In ar, this message translates to:
+  /// **'ترجمة هذا الفيديو'**
+  String get translateThisVideo;
+
+  /// No description provided for @orAddSubtitleFile.
+  ///
+  /// In ar, this message translates to:
+  /// **'أو أضف ملف ترجمة جاهزًا'**
+  String get orAddSubtitleFile;
 }
 
 class _AppLocalizationsDelegate

@@ -37,7 +37,7 @@ class SubtitleParser {
 
     if (cues.isEmpty) {
       return const Result.failure(
-        UnsupportedMediaFailure('No subtitle cues found'),
+        InvalidSubtitleFailure('No subtitle cues found'),
       );
     }
     return Result.success(cues);

@@ -43,6 +43,6 @@
 ترجمة فيديو، ترجمة، subtitles، مشغل فيديو، تعلم الإنجليزية
 
 ## بيانات التواصل
-البريد: [ضع بريد الدعم هنا]
+البريد: mohammedmagdy823@gmail.com
 موقع الويب: [اختياري]
-سياسة الخصوصية: [رابط الصفحة بعد النشر — الملف جاهز في store/privacy-policy.html]
+سياسة الخصوصية: https://mohamedmagdy97.github.io/tarjuman-privacy/

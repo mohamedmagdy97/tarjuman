@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.3.0+4)
+## 9. Current status (v1.3.1+5, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -146,6 +146,8 @@ Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a 
   Regenerate with `STORE_ASSETS=1 flutter test --tags store test/store/store_assets_test.dart --plain-name generate`
   (renders the REAL widgets with sample data, then composes the marketing frames; convert to JPEG with `sips`, see PLAY_STORE_CHECKLIST).
 - CI: `.github/workflows/ci.yml` (analyze + test). 34 tests.
+- Play gates: 16 KB-aligned native libs (gradle override in `android/build.gradle.kts`), native symbols, in-app privacy link →
+  `AppConfig.privacyPolicyUrl` (GitHub Pages repo `mohamedmagdy97/tarjuman-privacy`, content in `store/privacy-site/`).
 
 Known gaps / next:
 - Device spike (RTF, RAM, battery) for tiny.en vs base.en; tune chunk size and `CueSegmenter` on real videos; chunk boundaries can split a sentence.

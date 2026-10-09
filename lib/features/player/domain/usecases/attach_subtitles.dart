@@ -31,7 +31,7 @@ class AttachSubtitles {
       return Result.failure(StorageFailure(e.message));
     } on FormatException {
       return const Result.failure(
-        UnsupportedMediaFailure('Subtitle file must be UTF-8'),
+        InvalidSubtitleFailure('Subtitle file must be UTF-8'),
       );
     }
 
