@@ -39,8 +39,9 @@ class ProcessRange {
       cancel: cancel,
     );
     if (extracted case Err(:final failure)) return Result.failure(failure);
-    if (cancel?.isCancelled ?? false)
+    if (cancel?.isCancelled ?? false) {
       return const Result.failure(CancelledFailure());
+    }
 
     onStage?.call(ProcessingStage.transcribing);
     final transcript = await engines.recognizer.transcribe(wav, cancel: cancel);

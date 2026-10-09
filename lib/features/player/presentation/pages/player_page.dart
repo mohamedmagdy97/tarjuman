@@ -12,9 +12,9 @@ import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/error/failure_message.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_style.dart';
-import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/player/presentation/widgets/subtitle_style_sheet.dart';
+import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 class PlayerPage extends StatelessWidget {

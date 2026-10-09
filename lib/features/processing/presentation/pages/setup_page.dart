@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +19,11 @@ class SetupPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (_) => sl<SetupCubit>()..load(videoId),
+    create: (_) {
+      final cubit = sl<SetupCubit>();
+      unawaited(cubit.load(videoId));
+      return cubit;
+    },
     child: _SetupView(videoId: videoId),
   );
 }

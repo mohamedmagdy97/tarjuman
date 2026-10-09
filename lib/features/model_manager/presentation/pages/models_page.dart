@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarjuman/app/di/injection.dart';
@@ -15,7 +17,11 @@ class ModelsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (_) => sl<ModelsCubit>()..load(),
+    create: (_) {
+      final cubit = sl<ModelsCubit>();
+      unawaited(cubit.load());
+      return cubit;
+    },
     child: const _ModelsView(),
   );
 }

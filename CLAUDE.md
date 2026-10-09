@@ -130,10 +130,23 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.0.0+1)
+## 9. Current status (v1.1.0+2)
 
-Done: design system (tokens + button/pill/chip/progress/empty/video card/SubtitleView), library (drift, import via
-file picker, filter, delete), player (video_player, seek, speed, auto-hiding controls), SRT/VTT import with
-parser, subtitle style sheet persisted, l10n AR/EN, release signing, launcher icon, bundled fonts.
-Not started: audio extraction, ASR (Whisper), ML Kit translation, model manager, live mode, online adapters.
+Built (all phases have code; ASR/translation quality and speed are **NOT yet verified on real devices**):
+- Foundation: design system, library (drift), player (`video_player`), SRT/VTT import, subtitle style sheet, l10n AR/EN.
+- Processing (phases 2–3): `AudioExtractor` (FFmpegKit **audio** build, LGPL — never use the full-GPL variant),
+  `SpeechRecognizer` (whisper.cpp via `whisper_cpp_flutter_plus`), `TextTranslator` (ML Kit), pipeline in 3-minute
+  chunks, cues persisted per chunk, resume after kill (restarts from the last chunk boundary), cancel.
+- Model manager: Whisper `base.en` / `tiny.en` (checksum-pinned catalog) + ML Kit en/ar.
+- Live (phase 4): `LiveSubtitleSession` translates the 30 s window under the playhead + the next; seek re-targets.
+  Live results are **not persisted** (windows may leave gaps; Prepare mode's resume logic assumes contiguous cues).
+- Online (phase 5): OpenAI-compatible ASR + chat-translation adapters, behind consent + API key in the keystore.
+  Unverified without a key. Direct-link video URLs are NOT implemented yet (local files only).
+- Settings: theme, online consent, API key. Release: Android signing, icon, fonts.
+
+Known gaps / next:
+- Device spike (RTF, RAM, battery) for tiny.en vs base.en; tune chunk size and `CueSegmenter` on real videos.
+- Screen may sleep during long processing (no wakelock: `wakelock_plus` conflicts with the pinned deps). Resume covers it.
+- Chunk boundaries can cut a sentence in two; consider overlap or silence-aware cuts after benchmarking.
+- Subtitle editor screen, direct-link sources, iOS build/signing (needs Apple account).
 Release how-to: `docs/RELEASE.md`.

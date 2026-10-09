@@ -19,6 +19,12 @@ import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart'
 import 'package:tarjuman/features/model_manager/data/model_repository_impl.dart';
 import 'package:tarjuman/features/model_manager/domain/repositories/model_repository.dart';
 import 'package:tarjuman/features/model_manager/presentation/cubit/models_cubit.dart';
+import 'package:tarjuman/features/player/data/subtitle_repository_impl.dart';
+import 'package:tarjuman/features/player/domain/repositories/subtitle_repository.dart';
+import 'package:tarjuman/features/player/domain/services/subtitle_parser.dart';
+import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
+import 'package:tarjuman/features/player/domain/usecases/load_player_data.dart';
+import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/processing/data/engine_provider_impl.dart';
 import 'package:tarjuman/features/processing/data/ffmpeg_audio_extractor.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
@@ -31,12 +37,6 @@ import 'package:tarjuman/features/processing/domain/usecases/run_processing_pipe
 import 'package:tarjuman/features/processing/presentation/cubit/processing_cubit.dart';
 import 'package:tarjuman/features/processing/presentation/cubit/setup_cubit.dart';
 import 'package:tarjuman/features/settings/presentation/cubit/app_settings_cubit.dart';
-import 'package:tarjuman/features/player/data/subtitle_repository_impl.dart';
-import 'package:tarjuman/features/player/domain/repositories/subtitle_repository.dart';
-import 'package:tarjuman/features/player/domain/services/subtitle_parser.dart';
-import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
-import 'package:tarjuman/features/player/domain/usecases/load_player_data.dart';
-import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -83,7 +83,7 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => ModelsCubit(sl()))
     ..registerFactory(() => SetupCubit(sl(), sl(), sl(), sl()))
     ..registerSingleton<AppSettingsCubit>(
-      AppSettingsCubit(sl(), sl())..init(),
+      AppSettingsCubit(sl(), sl()),
     );
 }
 
@@ -108,4 +108,7 @@ PlayerCubit newPlayerCubit(String videoId, {EngineKind? liveKind}) =>
       load: sl(),
       attach: sl(),
       settings: sl(),
+      engines: sl(),
+      liveFactory: sl.call<LiveSubtitleSession>,
+      liveKind: liveKind,
     );

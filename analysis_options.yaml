@@ -15,3 +15,6 @@ linter:
   rules:
     public_member_api_docs: false
     lines_longer_than_80_chars: false
+    avoid_dynamic_calls: false
+    one_member_abstracts: false
+    specify_nonobvious_property_types: false

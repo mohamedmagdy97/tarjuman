@@ -152,13 +152,14 @@ class RunProcessingPipeline {
           duration: total,
         ),
       );
-      out.add(
-        const ProcessingProgress(
-          stage: ProcessingStage.translating,
-          fraction: 1,
-        ),
-      );
-      out.add(const ProcessingDone());
+      out
+        ..add(
+          const ProcessingProgress(
+            stage: ProcessingStage.translating,
+            fraction: 1,
+          ),
+        )
+        ..add(const ProcessingDone());
     } finally {
       await engines.dispose();
     }

@@ -54,6 +54,8 @@ class PlayerState extends Equatable {
     bool? controlsVisible,
     Failure? failure,
     bool clearFailure = false,
+    bool? isLive,
+    bool? liveBusy,
   }) => PlayerState(
     status: status ?? this.status,
     video: video ?? this.video,
@@ -63,6 +65,8 @@ class PlayerState extends Equatable {
     activeText: clearActive ? null : activeText ?? this.activeText,
     controlsVisible: controlsVisible ?? this.controlsVisible,
     failure: clearFailure ? null : failure ?? this.failure,
+    isLive: isLive ?? this.isLive,
+    liveBusy: liveBusy ?? this.liveBusy,
   );
 
   @override
@@ -75,6 +79,8 @@ class PlayerState extends Equatable {
     activeText,
     controlsVisible,
     failure,
+    isLive,
+    liveBusy,
   ];
 }
 
@@ -85,10 +91,20 @@ class PlayerCubit extends Cubit<PlayerState> {
     required LoadPlayerData load,
     required AttachSubtitles attach,
     required SettingsStore settings,
+    required EngineProvider engines,
+    required LiveSubtitleSession Function() liveFactory,
+    this.liveKind,
   }) : _load = load,
        _attach = attach,
        _settings = settings,
-       super(PlayerState(style: settings.readSubtitleStyle()));
+       _engines = engines,
+       _liveFactory = liveFactory,
+       super(
+         PlayerState(
+           style: settings.readSubtitleStyle(),
+           isLive: liveKind != null,
+         ),
+       );
 
   final String videoId;
   final PlayerEngine engine;
