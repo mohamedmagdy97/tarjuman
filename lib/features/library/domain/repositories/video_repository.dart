@@ -7,4 +7,5 @@ abstract interface class VideoRepository {
   Future<Result<Video>> add({required String title, required String path});
   Future<Result<void>> update(Video video);
   Future<Result<void>> remove(String id);
+  Future<void> savePosition(String id, Duration position);
 }

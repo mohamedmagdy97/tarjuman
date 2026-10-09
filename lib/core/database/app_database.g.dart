@@ -77,6 +77,18 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _lastPositionMsMeta = const VerificationMeta(
+    'lastPositionMs',
+  );
+  @override
+  late final GeneratedColumn<int> lastPositionMs = GeneratedColumn<int>(
+    'last_position_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -86,6 +98,7 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
     status,
     origin,
     createdAt,
+    lastPositionMs,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -146,6 +159,15 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('last_position_ms')) {
+      context.handle(
+        _lastPositionMsMeta,
+        lastPositionMs.isAcceptableOrUnknown(
+          data['last_position_ms']!,
+          _lastPositionMsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -183,6 +205,10 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      lastPositionMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_position_ms'],
+      )!,
     );
   }
 
@@ -200,6 +226,7 @@ class Video extends DataClass implements Insertable<Video> {
   final String status;
   final String origin;
   final DateTime createdAt;
+  final int lastPositionMs;
   const Video({
     required this.id,
     required this.title,
@@ -208,6 +235,7 @@ class Video extends DataClass implements Insertable<Video> {
     required this.status,
     required this.origin,
     required this.createdAt,
+    required this.lastPositionMs,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -221,6 +249,7 @@ class Video extends DataClass implements Insertable<Video> {
     map['status'] = Variable<String>(status);
     map['origin'] = Variable<String>(origin);
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['last_position_ms'] = Variable<int>(lastPositionMs);
     return map;
   }
 
@@ -235,6 +264,7 @@ class Video extends DataClass implements Insertable<Video> {
       status: Value(status),
       origin: Value(origin),
       createdAt: Value(createdAt),
+      lastPositionMs: Value(lastPositionMs),
     );
   }
 
@@ -251,6 +281,7 @@ class Video extends DataClass implements Insertable<Video> {
       status: serializer.fromJson<String>(json['status']),
       origin: serializer.fromJson<String>(json['origin']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastPositionMs: serializer.fromJson<int>(json['lastPositionMs']),
     );
   }
   @override
@@ -264,6 +295,7 @@ class Video extends DataClass implements Insertable<Video> {
       'status': serializer.toJson<String>(status),
       'origin': serializer.toJson<String>(origin),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastPositionMs': serializer.toJson<int>(lastPositionMs),
     };
   }
 
@@ -275,6 +307,7 @@ class Video extends DataClass implements Insertable<Video> {
     String? status,
     String? origin,
     DateTime? createdAt,
+    int? lastPositionMs,
   }) => Video(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -283,6 +316,7 @@ class Video extends DataClass implements Insertable<Video> {
     status: status ?? this.status,
     origin: origin ?? this.origin,
     createdAt: createdAt ?? this.createdAt,
+    lastPositionMs: lastPositionMs ?? this.lastPositionMs,
   );
   Video copyWithCompanion(VideosCompanion data) {
     return Video(
@@ -295,6 +329,9 @@ class Video extends DataClass implements Insertable<Video> {
       status: data.status.present ? data.status.value : this.status,
       origin: data.origin.present ? data.origin.value : this.origin,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastPositionMs: data.lastPositionMs.present
+          ? data.lastPositionMs.value
+          : this.lastPositionMs,
     );
   }
 
@@ -307,14 +344,23 @@ class Video extends DataClass implements Insertable<Video> {
           ..write('durationMs: $durationMs, ')
           ..write('status: $status, ')
           ..write('origin: $origin, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastPositionMs: $lastPositionMs')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, path, durationMs, status, origin, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    path,
+    durationMs,
+    status,
+    origin,
+    createdAt,
+    lastPositionMs,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -325,7 +371,8 @@ class Video extends DataClass implements Insertable<Video> {
           other.durationMs == this.durationMs &&
           other.status == this.status &&
           other.origin == this.origin &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.lastPositionMs == this.lastPositionMs);
 }
 
 class VideosCompanion extends UpdateCompanion<Video> {
@@ -336,6 +383,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
   final Value<String> status;
   final Value<String> origin;
   final Value<DateTime> createdAt;
+  final Value<int> lastPositionMs;
   final Value<int> rowid;
   const VideosCompanion({
     this.id = const Value.absent(),
@@ -345,6 +393,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
     this.status = const Value.absent(),
     this.origin = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.lastPositionMs = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   VideosCompanion.insert({
@@ -355,6 +404,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
     this.status = const Value.absent(),
     this.origin = const Value.absent(),
     required DateTime createdAt,
+    this.lastPositionMs = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -368,6 +418,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
     Expression<String>? status,
     Expression<String>? origin,
     Expression<DateTime>? createdAt,
+    Expression<int>? lastPositionMs,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -378,6 +429,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
       if (status != null) 'status': status,
       if (origin != null) 'origin': origin,
       if (createdAt != null) 'created_at': createdAt,
+      if (lastPositionMs != null) 'last_position_ms': lastPositionMs,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -390,6 +442,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
     Value<String>? status,
     Value<String>? origin,
     Value<DateTime>? createdAt,
+    Value<int>? lastPositionMs,
     Value<int>? rowid,
   }) {
     return VideosCompanion(
@@ -400,6 +453,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
       status: status ?? this.status,
       origin: origin ?? this.origin,
       createdAt: createdAt ?? this.createdAt,
+      lastPositionMs: lastPositionMs ?? this.lastPositionMs,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -428,6 +482,9 @@ class VideosCompanion extends UpdateCompanion<Video> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (lastPositionMs.present) {
+      map['last_position_ms'] = Variable<int>(lastPositionMs.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -444,6 +501,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
           ..write('status: $status, ')
           ..write('origin: $origin, ')
           ..write('createdAt: $createdAt, ')
+          ..write('lastPositionMs: $lastPositionMs, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -926,6 +984,7 @@ typedef $$VideosTableCreateCompanionBuilder =
       Value<String> status,
       Value<String> origin,
       required DateTime createdAt,
+      Value<int> lastPositionMs,
       Value<int> rowid,
     });
 typedef $$VideosTableUpdateCompanionBuilder =
@@ -937,6 +996,7 @@ typedef $$VideosTableUpdateCompanionBuilder =
       Value<String> status,
       Value<String> origin,
       Value<DateTime> createdAt,
+      Value<int> lastPositionMs,
       Value<int> rowid,
     });
 
@@ -1005,6 +1065,11 @@ class $$VideosTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastPositionMs => $composableBuilder(
+    column: $table.lastPositionMs,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1077,6 +1142,11 @@ class $$VideosTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get lastPositionMs => $composableBuilder(
+    column: $table.lastPositionMs,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$VideosTableAnnotationComposer
@@ -1110,6 +1180,11 @@ class $$VideosTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get lastPositionMs => $composableBuilder(
+    column: $table.lastPositionMs,
+    builder: (column) => column,
+  );
 
   Expression<T> cuesRefs<T extends Object>(
     Expression<T> Function($$CuesTableAnnotationComposer a) f,
@@ -1172,6 +1247,7 @@ class $$VideosTableTableManager
                 Value<String> status = const Value.absent(),
                 Value<String> origin = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<int> lastPositionMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VideosCompanion(
                 id: id,
@@ -1181,6 +1257,7 @@ class $$VideosTableTableManager
                 status: status,
                 origin: origin,
                 createdAt: createdAt,
+                lastPositionMs: lastPositionMs,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1192,6 +1269,7 @@ class $$VideosTableTableManager
                 Value<String> status = const Value.absent(),
                 Value<String> origin = const Value.absent(),
                 required DateTime createdAt,
+                Value<int> lastPositionMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VideosCompanion.insert(
                 id: id,
@@ -1201,6 +1279,7 @@ class $$VideosTableTableManager
                 status: status,
                 origin: origin,
                 createdAt: createdAt,
+                lastPositionMs: lastPositionMs,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

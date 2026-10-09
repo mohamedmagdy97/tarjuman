@@ -6,6 +6,7 @@ import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/presentation/pages/processing_page.dart';
 import 'package:tarjuman/features/processing/presentation/pages/setup_page.dart';
 import 'package:tarjuman/features/settings/presentation/pages/settings_page.dart';
+import 'package:tarjuman/features/subtitle_editor/presentation/pages/editor_page.dart';
 
 EngineKind? _kind(String? raw) => EngineKind.values.asNameMap()[raw];
 
@@ -28,7 +29,12 @@ final appRouter = GoRouter(
       builder: (_, s) => PlayerPage(
         videoId: s.pathParameters['id']!,
         liveKind: _kind(s.uri.queryParameters['live']),
+        startAtMs: int.tryParse(s.uri.queryParameters['t'] ?? ''),
       ),
+    ),
+    GoRoute(
+      path: '/editor/:id',
+      builder: (_, s) => EditorPage(videoId: s.pathParameters['id']!),
     ),
     GoRoute(path: '/models', builder: (_, _) => const ModelsPage()),
     GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),

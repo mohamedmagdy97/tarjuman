@@ -661,6 +661,138 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الإعدادات'**
   String get settings;
+
+  /// No description provided for @showOriginal.
+  ///
+  /// In ar, this message translates to:
+  /// **'إظهار النص الإنجليزي فوق العربي'**
+  String get showOriginal;
+
+  /// No description provided for @editSubtitles.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل الترجمة'**
+  String get editSubtitles;
+
+  /// No description provided for @exportSrt.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصدير SRT'**
+  String get exportSrt;
+
+  /// No description provided for @exportBoth.
+  ///
+  /// In ar, this message translates to:
+  /// **'مع النص الإنجليزي'**
+  String get exportBoth;
+
+  /// No description provided for @searchCues.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابحث في الترجمة'**
+  String get searchCues;
+
+  /// No description provided for @editCueTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل السطر'**
+  String get editCueTitle;
+
+  /// No description provided for @edited.
+  ///
+  /// In ar, this message translates to:
+  /// **'معدّل'**
+  String get edited;
+
+  /// No description provided for @noResults.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد نتائج'**
+  String get noResults;
+
+  /// No description provided for @linesCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count} سطر'**
+  String linesCount(int count);
+
+  /// No description provided for @addFromDevice.
+  ///
+  /// In ar, this message translates to:
+  /// **'من الجهاز'**
+  String get addFromDevice;
+
+  /// No description provided for @addFromLink.
+  ///
+  /// In ar, this message translates to:
+  /// **'من رابط مباشر'**
+  String get addFromLink;
+
+  /// No description provided for @linkTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'رابط الفيديو'**
+  String get linkTitle;
+
+  /// No description provided for @linkHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'رابط مباشر لملف فيديو أو صوت'**
+  String get linkHint;
+
+  /// No description provided for @linkDownload.
+  ///
+  /// In ar, this message translates to:
+  /// **'تنزيل وإضافة'**
+  String get linkDownload;
+
+  /// No description provided for @linkNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'روابط الملفات المباشرة فقط. روابط يوتيوب وأمثالها غير مدعومة.'**
+  String get linkNote;
+
+  /// No description provided for @downloadingVideo.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ تنزيل الفيديو'**
+  String get downloadingVideo;
+
+  /// No description provided for @errLink.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تنزيل الرابط. تأكد أنه رابط مباشر لملف.'**
+  String get errLink;
+
+  /// No description provided for @saveEdit.
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ'**
+  String get saveEdit;
+
+  /// No description provided for @aboutSection.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن التطبيق'**
+  String get aboutSection;
+
+  /// No description provided for @licenses.
+  ///
+  /// In ar, this message translates to:
+  /// **'التراخيص مفتوحة المصدر'**
+  String get licenses;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In ar, this message translates to:
+  /// **'سياسة الخصوصية'**
+  String get privacyPolicy;
+
+  /// No description provided for @versionLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإصدار {version}'**
+  String versionLabel(String version);
 }
 
 class _AppLocalizationsDelegate

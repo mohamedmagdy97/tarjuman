@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tarjuman/core/design_system/components/app_segmented.dart';
 import 'package:tarjuman/core/design_system/components/subtitle_view.dart';
 import 'package:tarjuman/core/design_system/tokens/app_radius.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
@@ -36,9 +37,13 @@ class SubtitleStyleSheet extends StatelessWidget {
                 borderRadius: AppRadius.mdAll,
               ),
               child: SizedBox(
-                height: 84,
+                height: 120,
                 child: Center(
-                  child: SubtitleView(text: l10n.preview, style: style),
+                  child: SubtitleView(
+                    text: l10n.preview,
+                    original: 'This is how subtitles will look',
+                    style: style,
+                  ),
                 ),
               ),
             ),
@@ -90,44 +95,32 @@ class SubtitleStyleSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             _label(context, l10n.background),
             const SizedBox(height: AppSpacing.sm),
-            SegmentedButton<SubtitleBackground>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(
-                  value: SubtitleBackground.box,
-                  label: Text(l10n.bgBox),
-                ),
-                ButtonSegment(
-                  value: SubtitleBackground.outline,
-                  label: Text(l10n.bgOutline),
-                ),
-                ButtonSegment(
-                  value: SubtitleBackground.none,
-                  label: Text(l10n.bgNone),
-                ),
-              ],
-              selected: {style.background},
-              onSelectionChanged: (s) =>
-                  onChanged(style.copyWith(background: s.first)),
+            AppSegmented<SubtitleBackground>(
+              options: {
+                SubtitleBackground.box: l10n.bgBox,
+                SubtitleBackground.outline: l10n.bgOutline,
+                SubtitleBackground.none: l10n.bgNone,
+              },
+              value: style.background,
+              onChanged: (v) => onChanged(style.copyWith(background: v)),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.showOriginal),
+              value: style.showOriginal,
+              onChanged: (v) => onChanged(style.copyWith(showOriginal: v)),
             ),
             const SizedBox(height: AppSpacing.md),
             _label(context, l10n.position),
             const SizedBox(height: AppSpacing.sm),
-            SegmentedButton<SubtitlePosition>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(
-                  value: SubtitlePosition.bottom,
-                  label: Text(l10n.posBottom),
-                ),
-                ButtonSegment(
-                  value: SubtitlePosition.top,
-                  label: Text(l10n.posTop),
-                ),
-              ],
-              selected: {style.position},
-              onSelectionChanged: (s) =>
-                  onChanged(style.copyWith(position: s.first)),
+            AppSegmented<SubtitlePosition>(
+              options: {
+                SubtitlePosition.bottom: l10n.posBottom,
+                SubtitlePosition.top: l10n.posTop,
+              },
+              value: style.position,
+              onChanged: (v) => onChanged(style.copyWith(position: v)),
             ),
           ],
         ),

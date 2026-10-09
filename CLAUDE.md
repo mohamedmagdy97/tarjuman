@@ -130,29 +130,25 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.2.0+3)
+## 9. Current status (v1.3.0+4)
 
-Built (all phases have code; ASR/translation quality and speed are **NOT yet verified on real devices**):
-- Foundation: design system, library (drift), player (`video_player`), SRT/VTT import, subtitle style sheet, l10n AR/EN.
-- Processing (phases 2–3): `AudioExtractor` (FFmpegKit **audio** build, LGPL — never use the full-GPL variant),
-  `SpeechRecognizer` (whisper.cpp via `whisper_cpp_flutter_plus`), `TextTranslator` (ML Kit), pipeline in 3-minute
-  chunks, cues persisted per chunk, resume after kill (restarts from the last chunk boundary), cancel.
-- Model manager: Whisper `base.en` / `tiny.en` (checksum-pinned catalog) + ML Kit en/ar.
-- Live (phase 4): `LiveSubtitleSession` translates the 30 s window under the playhead + the next; seek re-targets.
-  Live results are **not persisted** (windows may leave gaps; Prepare mode's resume logic assumes contiguous cues).
-- Online (phase 5): OpenAI-compatible ASR + chat-translation adapters, behind consent + API key in the keystore.
-  Unverified without a key. Direct-link video URLs are NOT implemented yet (local files only).
-- Any-format input: picker uses `FileType.any`; import validates by content (FFprobe must read a duration), not by
-  extension. Playback = media_kit; audio extraction = FFmpegKit audio build (demuxers verified in the binary: avi, flv,
-  mkv/webm, mov/mp4/3gp, wmv/asf, ts, mpeg, ogg, wav, mp3, flac, amr, ac3, dts, rm; decoders: aac, ac3, mp3, vorbis,
-  opus, flac, wma, alac, amr, dca, pcm). Exotic video-only/DRM files are still rejected.
-- Settings: theme, online consent, API key. Release: Android signing, icon, fonts.
-- Emulator note: the Pixel_9 AVD has 2 GB RAM and the OS kills the debug app during the file picker. Test on a real
-  device (or raise `hw.ramSize` to 4096 in `~/.android/avd/Pixel_9.avd/config.ini`).
+Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
+- Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
+  SRT/VTT import, subtitle style sheet (incl. bilingual EN-over-AR), resume-from-last-position, l10n AR/EN.
+- Any-format input: picker `FileType.any`, validated by content (FFprobe duration) not extension; direct-link import
+  (https; plain http is blocked by Android cleartext policy). FFmpeg audio build (LGPL) verified in-binary for avi/flv/mkv/mov/wmv/ts/ogg/wav/mp3/flac/amr/ac3/dts.
+- Processing: 3-minute chunks, cues persisted per chunk, resume after kill, cancel; Whisper (whisper.cpp) + ML Kit; wakelock during jobs.
+- Live mode: translates the 30 s window under the playhead + next; not persisted.
+- Subtitle editor: search, edit a line, tap-to-jump, export SRT (optionally with English) via share sheet.
+- Online (OpenAI-compatible ASR + chat translation): consent + key in keystore. Unverified without a key.
+- Model manager (Whisper base.en/tiny.en + ML Kit en/ar), settings (theme, online consent, key, open-source licenses page).
+- Store kit in `store/`: Play listing AR/EN, privacy policy HTML, checklist, icon, feature graphics, 8 screenshots per language.
+  Regenerate with `STORE_ASSETS=1 flutter test --tags store test/store/store_assets_test.dart --plain-name generate`
+  (renders the REAL widgets with sample data, then composes the marketing frames; convert to JPEG with `sips`, see PLAY_STORE_CHECKLIST).
+- CI: `.github/workflows/ci.yml` (analyze + test). 34 tests.
 
 Known gaps / next:
-- Device spike (RTF, RAM, battery) for tiny.en vs base.en; tune chunk size and `CueSegmenter` on real videos.
-- Screen is kept awake during processing via `wakelock_plus`; if the app is still killed, resume covers it.
-- Chunk boundaries can cut a sentence in two; consider overlap or silence-aware cuts after benchmarking.
-- Subtitle editor screen, direct-link sources, iOS build/signing (needs Apple account).
-Release how-to: `docs/RELEASE.md`.
+- Device spike (RTF, RAM, battery) for tiny.en vs base.en; tune chunk size and `CueSegmenter` on real videos; chunk boundaries can split a sentence.
+- Background processing as a foreground service/notification; extra source languages; crash reporting (Sentry/Crashlytics); APK size (~76 MB).
+- iOS build/signing (needs Apple account); hosting the privacy policy + support email placeholders in `store/`.
+Release how-to: `docs/RELEASE.md`. Play launch steps: `store/PLAY_STORE_CHECKLIST.md`.

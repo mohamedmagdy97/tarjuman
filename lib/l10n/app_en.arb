@@ -114,5 +114,41 @@
   "errOnlineNotConfigured": "Enable online translation and add an API key in Settings.",
   "liveHint": "Live subtitles aren't saved. Use Prepare to keep them.",
   "translateVideo": "Translate this video",
-  "settings": "Settings"
+  "settings": "Settings",
+  "showOriginal": "Show English above Arabic",
+  "editSubtitles": "Edit subtitles",
+  "exportSrt": "Export SRT",
+  "exportBoth": "Include English",
+  "searchCues": "Search subtitles",
+  "editCueTitle": "Edit line",
+  "edited": "Edited",
+  "noResults": "No results",
+  "linesCount": "{count} lines",
+  "@linesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addFromDevice": "From device",
+  "addFromLink": "From direct link",
+  "linkTitle": "Video link",
+  "linkHint": "Direct link to a video or audio file",
+  "linkDownload": "Download and add",
+  "linkNote": "Direct file links only. YouTube-style page links aren't supported.",
+  "downloadingVideo": "Downloading video",
+  "errLink": "Couldn't download this link. Make sure it's a direct file link.",
+  "saveEdit": "Save",
+  "aboutSection": "About",
+  "licenses": "Open-source licenses",
+  "privacyPolicy": "Privacy policy",
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }

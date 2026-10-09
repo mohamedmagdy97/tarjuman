@@ -7,6 +7,7 @@ import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
+import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
 import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart';
@@ -16,6 +17,8 @@ class _MockWatch extends Mock implements WatchLibrary {}
 class _MockImport extends Mock implements ImportVideo {}
 
 class _MockDelete extends Mock implements DeleteVideo {}
+
+class _MockImportUrl extends Mock implements ImportFromUrl {}
 
 Video video(String id, VideoStatus s) => Video(
   id: id,
@@ -38,7 +41,8 @@ void main() {
   });
   tearDown(() => stream.close());
 
-  LibraryCubit build() => LibraryCubit(watch, import, _MockDelete());
+  LibraryCubit build() =>
+      LibraryCubit(watch, import, _MockImportUrl(), _MockDelete());
 
   blocTest<LibraryCubit, LibraryState>(
     'emits videos once the stream delivers and stops loading',

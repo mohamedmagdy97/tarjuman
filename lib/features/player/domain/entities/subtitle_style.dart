@@ -12,6 +12,7 @@ class SubtitleStyle extends Equatable {
     this.color = SubtitleColorPreset.white,
     this.background = SubtitleBackground.box,
     this.position = SubtitlePosition.bottom,
+    this.showOriginal = false,
   });
 
   static const minFontSize = 16.0;
@@ -22,18 +23,29 @@ class SubtitleStyle extends Equatable {
   final SubtitleBackground background;
   final SubtitlePosition position;
 
+  /// Show the English source line above the Arabic one.
+  final bool showOriginal;
+
   SubtitleStyle copyWith({
     double? fontSize,
     SubtitleColorPreset? color,
     SubtitleBackground? background,
     SubtitlePosition? position,
+    bool? showOriginal,
   }) => SubtitleStyle(
     fontSize: (fontSize ?? this.fontSize).clamp(minFontSize, maxFontSize),
     color: color ?? this.color,
     background: background ?? this.background,
     position: position ?? this.position,
+    showOriginal: showOriginal ?? this.showOriginal,
   );
 
   @override
-  List<Object?> get props => [fontSize, color, background, position];
+  List<Object?> get props => [
+    fontSize,
+    color,
+    background,
+    position,
+    showOriginal,
+  ];
 }

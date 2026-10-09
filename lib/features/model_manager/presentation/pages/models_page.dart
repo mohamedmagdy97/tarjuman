@@ -22,12 +22,12 @@ class ModelsPage extends StatelessWidget {
       unawaited(cubit.load());
       return cubit;
     },
-    child: const _ModelsView(),
+    child: const ModelsView(),
   );
 }
 
-class _ModelsView extends StatelessWidget {
-  const _ModelsView();
+class ModelsView extends StatelessWidget {
+  const ModelsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +95,18 @@ class _ModelTile extends StatelessWidget {
 
     final Widget action;
     if (downloading) {
-      action = const SizedBox.square(
-        dimension: 24,
-        child: CircularProgressIndicator(strokeWidth: 2.5),
-      );
+      action = p == null
+          ? const SizedBox.square(
+              dimension: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.5),
+            )
+          : Directionality(
+              textDirection: TextDirection.ltr,
+              child: Text(
+                '${(p * 100).round()}%',
+                style: AppTypography.timecode.copyWith(color: c.primaryText),
+              ),
+            );
     } else if (model.installed) {
       action = IconButton(
         tooltip: l10n.delete,

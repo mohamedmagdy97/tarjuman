@@ -11,6 +11,9 @@ abstract interface class SubtitleRepository {
     SubtitleOrigin origin,
   );
 
+  /// Edits one cue's Arabic text (identified by its start time).
+  Future<Result<void>> updateText(String videoId, Duration start, String text);
+
   /// Adds cues without changing the video's status (incremental processing).
   Future<Result<void>> append(String videoId, List<SubtitleCue> cues);
 

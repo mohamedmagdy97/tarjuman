@@ -8,6 +8,7 @@ import 'package:tarjuman/core/platform/media/player_engine.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
+import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_style.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_timeline.dart';
 import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
@@ -26,6 +27,7 @@ class PlayerState extends Equatable {
     this.snapshot = const PlaybackSnapshot(),
     this.style = const SubtitleStyle(),
     this.activeText,
+    this.activeOriginal,
     this.controlsVisible = true,
     this.failure,
     this.isLive = false,
@@ -38,6 +40,8 @@ class PlayerState extends Equatable {
   final PlaybackSnapshot snapshot;
   final SubtitleStyle style;
   final String? activeText;
+  final String? activeOriginal;
+
   final bool controlsVisible;
   final Failure? failure;
   final bool isLive;
@@ -50,6 +54,8 @@ class PlayerState extends Equatable {
     PlaybackSnapshot? snapshot,
     SubtitleStyle? style,
     String? activeText,
+    String? activeOriginal,
+
     bool clearActive = false,
     bool? controlsVisible,
     Failure? failure,
@@ -63,6 +69,8 @@ class PlayerState extends Equatable {
     snapshot: snapshot ?? this.snapshot,
     style: style ?? this.style,
     activeText: clearActive ? null : activeText ?? this.activeText,
+    activeOriginal: clearActive ? null : activeOriginal ?? this.activeOriginal,
+
     controlsVisible: controlsVisible ?? this.controlsVisible,
     failure: clearFailure ? null : failure ?? this.failure,
     isLive: isLive ?? this.isLive,
@@ -77,6 +85,7 @@ class PlayerState extends Equatable {
     snapshot,
     style,
     activeText,
+    activeOriginal,
     controlsVisible,
     failure,
     isLive,
@@ -87,6 +96,8 @@ class PlayerState extends Equatable {
 class PlayerCubit extends Cubit<PlayerState> {
   PlayerCubit({
     required this.videoId,
+    required VideoRepository videos,
+
     required this.engine,
     required LoadPlayerData load,
     required AttachSubtitles attach,
@@ -94,7 +105,9 @@ class PlayerCubit extends Cubit<PlayerState> {
     required EngineProvider engines,
     required LiveSubtitleSession Function() liveFactory,
     this.liveKind,
-  }) : _load = load,
+    this.startAt,
+  }) : _videos = videos,
+       _load = load,
        _attach = attach,
        _settings = settings,
        _engines = engines,
@@ -111,6 +124,12 @@ class PlayerCubit extends Cubit<PlayerState> {
   final LoadPlayerData _load;
   final AttachSubtitles _attach;
   final SettingsStore _settings;
+  final VideoRepository _videos;
+
+  /// Explicit start position (e.g. jump from the editor); null = resume.
+  final Duration? startAt;
+  Timer? _saveTimer;
+
   final EngineProvider _engines;
   final LiveSubtitleSession Function() _liveFactory;
   final EngineKind? liveKind;
@@ -131,7 +150,33 @@ class PlayerCubit extends Cubit<PlayerState> {
     emit(state.copyWith(video: d.video, timeline: d.timeline));
     _sub = engine.snapshots.listen(_onSnapshot);
     await engine.open(d.video.path);
+    _saveTimer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => _savePosition(),
+    );
+    final resume = startAt ?? d.video.lastPosition;
+    if (resume > const Duration(seconds: 5)) {
+      await _awaitReady();
+      await engine.seekTo(resume);
+    }
     await engine.play();
+  }
+
+  Future<void> _awaitReady() async {
+    if (state.snapshot.isReady) return;
+    await engine.snapshots
+        .firstWhere((s) => s.isReady)
+        .timeout(const Duration(seconds: 10), onTimeout: () => state.snapshot);
+  }
+
+  void _savePosition() {
+    final s = state.snapshot;
+    if (!s.isReady || state.video == null) return;
+    // Near the end = finished: restart from the beginning next time.
+    final done = s.duration - s.position < const Duration(seconds: 10);
+    unawaited(
+      _videos.savePosition(videoId, done ? Duration.zero : s.position),
+    );
   }
 
   void _onSnapshot(PlaybackSnapshot s) {
@@ -151,6 +196,7 @@ class PlayerCubit extends Cubit<PlayerState> {
         status: s.isReady ? PlayerStatus.ready : PlayerStatus.loading,
         snapshot: s,
         activeText: cue?.text,
+        activeOriginal: cue?.original,
         clearActive: cue == null,
       ),
     );
@@ -171,6 +217,7 @@ class PlayerCubit extends Cubit<PlayerState> {
           liveBusy: u.busy,
           failure: u.failure,
           activeText: cue?.text,
+          activeOriginal: cue?.original,
           clearActive: cue == null,
         ),
       );
@@ -242,6 +289,8 @@ class PlayerCubit extends Cubit<PlayerState> {
 
   @override
   Future<void> close() async {
+    _saveTimer?.cancel();
+    _savePosition();
     _hideTimer?.cancel();
     await _sub?.cancel();
     await _liveSub?.cancel();

@@ -4,7 +4,7 @@ import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
 
-enum PillTone { ready, processing, online, failed }
+enum PillTone { ready, processing, online, failed, neutral }
 
 class StatusPill extends StatelessWidget {
   const StatusPill({required this.label, required this.tone, super.key});
@@ -20,6 +20,7 @@ class StatusPill extends StatelessWidget {
       PillTone.processing => c.primaryText,
       PillTone.online => c.info,
       PillTone.failed => c.error,
+      PillTone.neutral => c.muted,
     };
     return DecoratedBox(
       decoration: BoxDecoration(

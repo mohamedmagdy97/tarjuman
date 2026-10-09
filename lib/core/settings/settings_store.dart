@@ -44,6 +44,7 @@ class SharedPrefsSettingsStore implements SettingsStore {
   static const _color = 'subtitle.color';
   static const _bg = 'subtitle.background';
   static const _pos = 'subtitle.position';
+  static const _orig = 'subtitle.original';
   static const _theme = 'app.theme';
   static const _consent = 'online.consent';
 
@@ -63,6 +64,7 @@ class SharedPrefsSettingsStore implements SettingsStore {
       ),
       background: pick(SubtitleBackground.values, _bg, SubtitleBackground.box),
       position: pick(SubtitlePosition.values, _pos, SubtitlePosition.bottom),
+      showOriginal: _prefs.getBool(_orig) ?? false,
     );
   }
 
@@ -72,6 +74,7 @@ class SharedPrefsSettingsStore implements SettingsStore {
     await _prefs.setString(_color, s.color.name);
     await _prefs.setString(_bg, s.background.name);
     await _prefs.setString(_pos, s.position.name);
+    await _prefs.setBool(_orig, s.showOriginal);
   }
 
   @override

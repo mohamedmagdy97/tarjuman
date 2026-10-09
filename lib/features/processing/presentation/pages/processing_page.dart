@@ -5,6 +5,7 @@ import 'package:tarjuman/app/di/injection.dart';
 import 'package:tarjuman/core/design_system/components/app_button.dart';
 import 'package:tarjuman/core/design_system/components/app_progress_bar.dart';
 import 'package:tarjuman/core/design_system/components/stage_stepper.dart';
+import 'package:tarjuman/core/design_system/components/status_pill.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
@@ -21,12 +22,12 @@ class ProcessingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (_) => newProcessingCubit(videoId, kind)..start(),
-    child: _ProcessingView(videoId: videoId),
+    child: ProcessingView(videoId: videoId),
   );
 }
 
-class _ProcessingView extends StatelessWidget {
-  const _ProcessingView({required this.videoId});
+class ProcessingView extends StatelessWidget {
+  const ProcessingView({required this.videoId, super.key});
   final String videoId;
 
   @override
@@ -50,6 +51,18 @@ class _ProcessingView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: StatusPill(
+                        label: cubit.kind == EngineKind.online
+                            ? l10n.engineOnline
+                            : l10n.engineOffline,
+                        tone: cubit.kind == EngineKind.online
+                            ? PillTone.online
+                            : PillTone.ready,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
                     Text(
                       l10n.overallProgress,
                       style: AppTypography.caption.copyWith(color: c.muted),

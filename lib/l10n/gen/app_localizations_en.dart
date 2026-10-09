@@ -309,4 +309,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get showOriginal => 'Show English above Arabic';
+
+  @override
+  String get editSubtitles => 'Edit subtitles';
+
+  @override
+  String get exportSrt => 'Export SRT';
+
+  @override
+  String get exportBoth => 'Include English';
+
+  @override
+  String get searchCues => 'Search subtitles';
+
+  @override
+  String get editCueTitle => 'Edit line';
+
+  @override
+  String get edited => 'Edited';
+
+  @override
+  String get noResults => 'No results';
+
+  @override
+  String linesCount(int count) {
+    return '$count lines';
+  }
+
+  @override
+  String get addFromDevice => 'From device';
+
+  @override
+  String get addFromLink => 'From direct link';
+
+  @override
+  String get linkTitle => 'Video link';
+
+  @override
+  String get linkHint => 'Direct link to a video or audio file';
+
+  @override
+  String get linkDownload => 'Download and add';
+
+  @override
+  String get linkNote =>
+      'Direct file links only. YouTube-style page links aren\'t supported.';
+
+  @override
+  String get downloadingVideo => 'Downloading video';
+
+  @override
+  String get errLink =>
+      'Couldn\'t download this link. Make sure it\'s a direct file link.';
+
+  @override
+  String get saveEdit => 'Save';
+
+  @override
+  String get aboutSection => 'About';
+
+  @override
+  String get licenses => 'Open-source licenses';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String versionLabel(String version) {
+    return 'Version $version';
+  }
 }

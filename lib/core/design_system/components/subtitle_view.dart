@@ -16,9 +16,18 @@ extension SubtitleColorValue on SubtitleColorPreset {
 
 /// Renders one cue. Stateless: knows nothing about the player.
 class SubtitleView extends StatelessWidget {
-  const SubtitleView({required this.text, required this.style, super.key});
+  const SubtitleView({
+    required this.text,
+    required this.style,
+    this.original,
+    super.key,
+  });
 
   final String? text;
+
+  /// English source line, shown above the Arabic when the style asks for it.
+  final String? original;
+
   final SubtitleStyle style;
 
   @override
@@ -48,18 +57,33 @@ class SubtitleView extends StatelessWidget {
                   horizontal: 12,
                   vertical: 6,
                 ),
-                child: Text(
-                  text!,
-                  textAlign: TextAlign.center,
-                  textDirection: TextDirection.rtl,
-                  style: outline
-                      ? base.copyWith(
-                          shadows: const [
-                            Shadow(blurRadius: 3),
-                            Shadow(blurRadius: 6),
-                          ],
-                        )
-                      : base,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (style.showOriginal && original != null)
+                      Text(
+                        original!,
+                        textAlign: TextAlign.center,
+                        textDirection: TextDirection.ltr,
+                        style: base.copyWith(
+                          fontSize: style.fontSize * .68,
+                          color: color.withValues(alpha: .72),
+                        ),
+                      ),
+                    Text(
+                      text!,
+                      textAlign: TextAlign.center,
+                      textDirection: TextDirection.rtl,
+                      style: outline
+                          ? base.copyWith(
+                              shadows: const [
+                                Shadow(blurRadius: 3),
+                                Shadow(blurRadius: 6),
+                              ],
+                            )
+                          : base,
+                    ),
+                  ],
                 ),
               ),
             ),

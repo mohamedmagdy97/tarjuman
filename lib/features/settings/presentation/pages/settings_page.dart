@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tarjuman/core/design_system/components/app_button.dart';
 import 'package:tarjuman/core/design_system/components/app_segmented.dart';
 import 'package:tarjuman/core/design_system/components/switch_tile.dart';
@@ -93,11 +96,28 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                   ),
                 ],
+                label(l10n.aboutSection),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.description_outlined),
+                  title: Text(l10n.licenses),
+                  onTap: () => unawaited(_showLicenses(context)),
+                ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Future<void> _showLicenses(BuildContext context) async {
+    final info = await PackageInfo.fromPlatform();
+    if (!context.mounted) return;
+    showLicensePage(
+      context: context,
+      applicationName: AppLocalizations.of(context).appName,
+      applicationVersion: info.version,
     );
   }
 }

@@ -8,11 +8,14 @@ import 'package:tarjuman/core/database/app_database.dart';
 import 'package:tarjuman/core/platform/media/media_kit_engine.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/data/file_picker_media_picker.dart';
+import 'package:tarjuman/features/library/data/http_file_downloader.dart';
 import 'package:tarjuman/features/library/data/media_storage.dart';
 import 'package:tarjuman/features/library/data/video_repository_impl.dart';
+import 'package:tarjuman/features/library/domain/ports/file_downloader.dart';
 import 'package:tarjuman/features/library/domain/ports/media_picker.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
+import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
 import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart';
@@ -22,6 +25,7 @@ import 'package:tarjuman/features/model_manager/presentation/cubit/models_cubit.
 import 'package:tarjuman/features/player/data/subtitle_repository_impl.dart';
 import 'package:tarjuman/features/player/domain/repositories/subtitle_repository.dart';
 import 'package:tarjuman/features/player/domain/services/subtitle_parser.dart';
+import 'package:tarjuman/features/player/domain/services/subtitle_serializer.dart';
 import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
 import 'package:tarjuman/features/player/domain/usecases/load_player_data.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
@@ -37,6 +41,11 @@ import 'package:tarjuman/features/processing/domain/usecases/run_processing_pipe
 import 'package:tarjuman/features/processing/presentation/cubit/processing_cubit.dart';
 import 'package:tarjuman/features/processing/presentation/cubit/setup_cubit.dart';
 import 'package:tarjuman/features/settings/presentation/cubit/app_settings_cubit.dart';
+import 'package:tarjuman/features/subtitle_editor/data/share_plus_subtitle_exporter.dart';
+import 'package:tarjuman/features/subtitle_editor/domain/ports/subtitle_exporter.dart';
+import 'package:tarjuman/features/subtitle_editor/domain/usecases/edit_cue_text.dart';
+import 'package:tarjuman/features/subtitle_editor/domain/usecases/export_subtitles.dart';
+import 'package:tarjuman/features/subtitle_editor/presentation/cubit/editor_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -61,7 +70,13 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => DeleteVideo(sl()))
     ..registerFactory(() => LoadPlayerData(sl(), sl()))
     ..registerFactory(() => AttachSubtitles(sl(), sl(), sl()))
-    ..registerFactory(() => LibraryCubit(sl(), sl(), sl()))
+    ..registerLazySingleton<FileDownloader>(HttpFileDownloader.new)
+    ..registerFactory(() => ImportFromUrl(sl(), sl(), sl()))
+    ..registerFactory(() => LibraryCubit(sl(), sl(), sl(), sl()))
+    ..registerLazySingleton(() => const SubtitleSerializer())
+    ..registerLazySingleton<SubtitleExporter>(SharePlusSubtitleExporter.new)
+    ..registerFactory(() => EditCueText(sl()))
+    ..registerFactory(() => ExportSubtitles(sl(), sl(), sl(), sl()))
     ..registerSingleton<SecretStore>(const KeystoreSecretStore())
     ..registerLazySingleton<ModelRepository>(ModelRepositoryImpl.new)
     ..registerLazySingleton<AudioExtractor>(FfmpegAudioExtractor.new)
@@ -101,14 +116,26 @@ ProcessingCubit newProcessingCubit(String videoId, EngineKind kind) =>
     );
 
 /// Player cubits are per-video and own a fresh engine.
-PlayerCubit newPlayerCubit(String videoId, {EngineKind? liveKind}) =>
-    PlayerCubit(
-      videoId: videoId,
-      engine: MediaKitEngine(),
-      load: sl(),
-      attach: sl(),
-      settings: sl(),
-      engines: sl(),
-      liveFactory: sl.call<LiveSubtitleSession>,
-      liveKind: liveKind,
-    );
+PlayerCubit newPlayerCubit(
+  String videoId, {
+  EngineKind? liveKind,
+  Duration? startAt,
+}) => PlayerCubit(
+  videoId: videoId,
+  videos: sl(),
+  startAt: startAt,
+  engine: MediaKitEngine(),
+  load: sl(),
+  attach: sl(),
+  settings: sl(),
+  engines: sl(),
+  liveFactory: sl.call<LiveSubtitleSession>,
+  liveKind: liveKind,
+);
+
+EditorCubit newEditorCubit(String videoId) => EditorCubit(
+  videoId: videoId,
+  subtitles: sl(),
+  edit: sl(),
+  export: sl(),
+);

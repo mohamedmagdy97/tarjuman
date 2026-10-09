@@ -97,4 +97,24 @@ class SubtitleRepositoryImpl implements SubtitleRepository {
         .go();
     return const Result.success(null);
   }
+
+  @override
+  Future<Result<void>> updateText(
+    String videoId,
+    Duration start,
+    String text,
+  ) async {
+    await (_db.update(_db.cues)..where(
+          (t) =>
+              t.videoId.equals(videoId) &
+              t.startMs.equals(start.inMilliseconds),
+        ))
+        .write(
+          db.CuesCompanion(
+            body: Value(text),
+            status: Value(CueStatus.edited.name),
+          ),
+        );
+    return const Result.success(null);
+  }
 }

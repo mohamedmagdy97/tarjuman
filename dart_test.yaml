@@ -1,0 +1,3 @@
+tags:
+  store:
+    description: Generates Play Store graphics into store/ (slow). Run with STORE_ASSETS=1.

@@ -303,4 +303,75 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings => 'الإعدادات';
+
+  @override
+  String get showOriginal => 'إظهار النص الإنجليزي فوق العربي';
+
+  @override
+  String get editSubtitles => 'تعديل الترجمة';
+
+  @override
+  String get exportSrt => 'تصدير SRT';
+
+  @override
+  String get exportBoth => 'مع النص الإنجليزي';
+
+  @override
+  String get searchCues => 'ابحث في الترجمة';
+
+  @override
+  String get editCueTitle => 'تعديل السطر';
+
+  @override
+  String get edited => 'معدّل';
+
+  @override
+  String get noResults => 'لا توجد نتائج';
+
+  @override
+  String linesCount(int count) {
+    return '$count سطر';
+  }
+
+  @override
+  String get addFromDevice => 'من الجهاز';
+
+  @override
+  String get addFromLink => 'من رابط مباشر';
+
+  @override
+  String get linkTitle => 'رابط الفيديو';
+
+  @override
+  String get linkHint => 'رابط مباشر لملف فيديو أو صوت';
+
+  @override
+  String get linkDownload => 'تنزيل وإضافة';
+
+  @override
+  String get linkNote =>
+      'روابط الملفات المباشرة فقط. روابط يوتيوب وأمثالها غير مدعومة.';
+
+  @override
+  String get downloadingVideo => 'جارٍ تنزيل الفيديو';
+
+  @override
+  String get errLink => 'تعذّر تنزيل الرابط. تأكد أنه رابط مباشر لملف.';
+
+  @override
+  String get saveEdit => 'حفظ';
+
+  @override
+  String get aboutSection => 'عن التطبيق';
+
+  @override
+  String get licenses => 'التراخيص مفتوحة المصدر';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String versionLabel(String version) {
+    return 'الإصدار $version';
+  }
 }

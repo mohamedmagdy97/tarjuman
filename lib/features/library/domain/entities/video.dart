@@ -14,6 +14,7 @@ class Video extends Equatable {
     this.duration,
     this.status = VideoStatus.imported,
     this.origin = SubtitleOrigin.none,
+    this.lastPosition = Duration.zero,
   });
 
   final String id;
@@ -23,6 +24,7 @@ class Video extends Equatable {
   final Duration? duration;
   final VideoStatus status;
   final SubtitleOrigin origin;
+  final Duration lastPosition;
 
   bool get hasSubtitles => origin != SubtitleOrigin.none;
 
@@ -30,6 +32,7 @@ class Video extends Equatable {
     Duration? duration,
     VideoStatus? status,
     SubtitleOrigin? origin,
+    Duration? lastPosition,
   }) => Video(
     id: id,
     title: title,
@@ -38,6 +41,7 @@ class Video extends Equatable {
     duration: duration ?? this.duration,
     status: status ?? this.status,
     origin: origin ?? this.origin,
+    lastPosition: lastPosition ?? this.lastPosition,
   );
 
   @override
@@ -49,5 +53,6 @@ class Video extends Equatable {
     duration,
     status,
     origin,
+    lastPosition,
   ];
 }

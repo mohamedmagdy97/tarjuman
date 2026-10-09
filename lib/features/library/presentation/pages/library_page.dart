@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tarjuman/app/di/injection.dart';
 import 'package:tarjuman/core/design_system/components/app_chip.dart';
+import 'package:tarjuman/core/design_system/components/app_progress_bar.dart';
 import 'package:tarjuman/core/design_system/components/empty_state.dart';
 import 'package:tarjuman/core/design_system/components/status_pill.dart';
 import 'package:tarjuman/core/design_system/components/video_card.dart';
@@ -22,22 +23,37 @@ class LibraryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (_) => sl<LibraryCubit>(),
-    child: const _LibraryView(),
+    child: const LibraryView(),
   );
 }
 
-class _LibraryView extends StatelessWidget {
-  const _LibraryView();
+class LibraryView extends StatefulWidget {
+  const LibraryView({super.key});
+
+  @override
+  State<LibraryView> createState() => _LibraryViewState();
+}
+
+class _LibraryViewState extends State<LibraryView> {
+  var _progressOpen = false;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return BlocConsumer<LibraryCubit, LibraryState>(
       listenWhen: (a, b) =>
+          a.downloading != b.downloading ||
           (b.failure != null && a.failure != b.failure) ||
           (b.importedId != null && a.importedId != b.importedId),
       listener: (context, state) {
         final cubit = context.read<LibraryCubit>();
+        if (state.downloading && !_progressOpen) {
+          _progressOpen = true;
+          unawaited(_showProgress(context, cubit));
+        } else if (!state.downloading && _progressOpen) {
+          _progressOpen = false;
+          Navigator.of(context, rootNavigator: true).pop();
+        }
         if (state.failure != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(failureMessage(state.failure!, l10n))),
@@ -76,7 +92,9 @@ class _LibraryView extends StatelessWidget {
           floatingActionButton: state.videos.isEmpty
               ? null
               : FloatingActionButton.extended(
-                  onPressed: state.importing ? null : cubit.importVideo,
+                  onPressed: state.importing
+                      ? null
+                      : () => unawaited(_showAddSheet(context, cubit)),
                   backgroundColor: context.colors.primary,
                   foregroundColor: context.colors.onPrimary,
                   icon: const Icon(Icons.add),
@@ -85,6 +103,102 @@ class _LibraryView extends StatelessWidget {
           body: SafeArea(child: _body(context, state, cubit, l10n)),
         );
       },
+    );
+  }
+
+  Future<void> _showAddSheet(BuildContext context, LibraryCubit cubit) async {
+    final l10n = AppLocalizations.of(context);
+    final choice = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.video_file_outlined),
+              title: Text(l10n.addFromDevice),
+              onTap: () => Navigator.pop(ctx, true),
+            ),
+            ListTile(
+              leading: const Icon(Icons.link_rounded),
+              title: Text(l10n.addFromLink),
+              onTap: () => Navigator.pop(ctx, false),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null || !context.mounted) return;
+    if (choice) {
+      await cubit.importVideo();
+    } else {
+      await _askLink(context, cubit);
+    }
+  }
+
+  Future<void> _askLink(BuildContext context, LibraryCubit cubit) async {
+    final l10n = AppLocalizations.of(context);
+    final controller = TextEditingController();
+    final url = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.linkTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.url,
+              textDirection: TextDirection.ltr,
+              decoration: InputDecoration(hintText: l10n.linkHint),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.linkNote,
+              style: AppTypography.caption.copyWith(color: ctx.colors.muted),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            child: Text(l10n.linkDownload),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (url != null && url.trim().isNotEmpty) {
+      unawaited(cubit.importFromUrl(url));
+    }
+  }
+
+  Future<void> _showProgress(BuildContext context, LibraryCubit cubit) {
+    final l10n = AppLocalizations.of(context);
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => BlocProvider.value(
+        value: cubit,
+        child: BlocBuilder<LibraryCubit, LibraryState>(
+          builder: (context, s) => AlertDialog(
+            title: Text(l10n.downloadingVideo),
+            content: AppProgressBar(value: s.downloadProgress),
+            actions: [
+              TextButton(
+                onPressed: cubit.cancelDownload,
+                child: Text(l10n.cancel),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -103,7 +217,9 @@ class _LibraryView extends StatelessWidget {
         title: l10n.libraryEmptyTitle,
         body: l10n.libraryEmptyBody,
         actionLabel: l10n.addVideo,
-        onAction: state.importing ? null : cubit.importVideo,
+        onAction: state.importing
+            ? null
+            : () => unawaited(_showAddSheet(context, cubit)),
       );
     }
     final filters = {
@@ -135,7 +251,8 @@ class _LibraryView extends StatelessWidget {
             title: v.title,
             pillLabel: _pillLabel(v, l10n),
             pillTone: _pillTone(v),
-            caption: v.hasSubtitles ? '' : l10n.videoImported,
+            caption: '',
+            durationLabel: _duration(v.duration),
             onTap: () => unawaited(
               context.push(
                 v.status == VideoStatus.ready
@@ -147,6 +264,15 @@ class _LibraryView extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  String? _duration(Duration? d) {
+    if (d == null) return null;
+    String two(int n) => n.toString().padLeft(2, '0');
+    final h = d.inHours;
+    final m = two(d.inMinutes.remainder(60));
+    final s = two(d.inSeconds.remainder(60));
+    return h > 0 ? '$h:$m:$s' : '$m:$s';
   }
 
   String _pillLabel(Video v, AppLocalizations l10n) => switch (v.status) {

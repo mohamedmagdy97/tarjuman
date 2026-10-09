@@ -18,29 +18,39 @@ import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 class PlayerPage extends StatelessWidget {
-  const PlayerPage({required this.videoId, this.liveKind, super.key});
+  const PlayerPage({
+    required this.videoId,
+    this.liveKind,
+    this.startAtMs,
+    super.key,
+  });
   final String videoId;
   final EngineKind? liveKind;
+  final int? startAtMs;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (_) {
-      final cubit = newPlayerCubit(videoId, liveKind: liveKind);
+      final cubit = newPlayerCubit(
+        videoId,
+        liveKind: liveKind,
+        startAt: startAtMs == null ? null : Duration(milliseconds: startAtMs!),
+      );
       unawaited(cubit.start());
       return cubit;
     },
-    child: const _PlayerView(),
+    child: const PlayerView(),
   );
 }
 
-class _PlayerView extends StatefulWidget {
-  const _PlayerView();
+class PlayerView extends StatefulWidget {
+  const PlayerView({super.key});
 
   @override
-  State<_PlayerView> createState() => _PlayerViewState();
+  State<PlayerView> createState() => _PlayerViewState();
 }
 
-class _PlayerViewState extends State<_PlayerView> {
+class _PlayerViewState extends State<PlayerView> {
   @override
   void initState() {
     super.initState();
@@ -85,7 +95,6 @@ class _PlayerViewState extends State<_PlayerView> {
                 if (state.timeline.isEmpty &&
                     state.status == PlayerStatus.ready)
                   _NoSubtitles(onAttach: cubit.attachSubtitles),
-                _SubtitleLayer(state: state),
                 AnimatedOpacity(
                   opacity: state.controlsVisible ? 1 : 0,
                   duration: AppMotion.micro,
@@ -94,6 +103,8 @@ class _PlayerViewState extends State<_PlayerView> {
                     child: _Controls(state: state),
                   ),
                 ),
+                // Above the controls scrim so subtitles are never dimmed.
+                _SubtitleLayer(state: state),
               ],
             ),
           ),
@@ -124,7 +135,11 @@ class _SubtitleLayer extends StatelessWidget {
           child: Align(
             alignment: top ? Alignment.topCenter : Alignment.bottomCenter,
             child: IgnorePointer(
-              child: SubtitleView(text: state.activeText, style: state.style),
+              child: SubtitleView(
+                text: state.activeText,
+                original: state.activeOriginal,
+                style: state.style,
+              ),
             ),
           ),
         ),
@@ -164,7 +179,7 @@ class _Controls extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () => context.pop(),
-                    icon: const Icon(Icons.arrow_forward_rounded),
+                    icon: const Icon(Icons.arrow_back_rounded),
                     color: Colors.white,
                     tooltip: MaterialLocalizations.of(
                       context,
@@ -253,6 +268,20 @@ class _Controls extends StatelessWidget {
                             IconButton(
                               onPressed: cubit.attachSubtitles,
                               icon: const Icon(Icons.closed_caption_outlined),
+                              color: Colors.white,
+                            ),
+                            IconButton(
+                              tooltip: AppLocalizations.of(
+                                context,
+                              ).editSubtitles,
+                              onPressed: state.timeline.isEmpty
+                                  ? null
+                                  : () => unawaited(
+                                      context.push(
+                                        '/editor/${state.video?.id}',
+                                      ),
+                                    ),
+                              icon: const Icon(Icons.edit_note_rounded),
                               color: Colors.white,
                             ),
                             IconButton(

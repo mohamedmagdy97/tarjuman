@@ -27,6 +27,7 @@ class AppChip extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 48),
           child: Center(
+            widthFactor: 1,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: selected ? c.primary : c.raised,

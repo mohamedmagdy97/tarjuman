@@ -24,12 +24,12 @@ class SetupPage extends StatelessWidget {
       unawaited(cubit.load(videoId));
       return cubit;
     },
-    child: _SetupView(videoId: videoId),
+    child: SetupView(videoId: videoId),
   );
 }
 
-class _SetupView extends StatelessWidget {
-  const _SetupView({required this.videoId});
+class SetupView extends StatelessWidget {
+  const SetupView({required this.videoId, super.key});
   final String videoId;
 
   @override

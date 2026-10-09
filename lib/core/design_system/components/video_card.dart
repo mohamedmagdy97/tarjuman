@@ -46,10 +46,47 @@ class VideoCard extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: AlignmentDirectional.topEnd,
                       end: AlignmentDirectional.bottomStart,
-                      colors: [c.raised, c.surface],
+                      colors: _thumbColors(title),
                     ),
                   ),
-                  child: Icon(Icons.play_arrow_rounded, color: c.muted),
+                  child: Stack(
+                    children: [
+                      const Center(
+                        child: Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white70,
+                          size: 30,
+                        ),
+                      ),
+                      if (durationLabel != null)
+                        PositionedDirectional(
+                          end: 6,
+                          bottom: 5,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: .62),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 1,
+                              ),
+                              child: Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: Text(
+                                  durationLabel!,
+                                  style: AppTypography.timecode.copyWith(
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -69,11 +106,13 @@ class VideoCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   StatusPill(label: pillLabel, tone: pillTone),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    caption,
-                    style: AppTypography.caption.copyWith(color: c.muted),
-                  ),
+                  if (caption.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      caption,
+                      style: AppTypography.caption.copyWith(color: c.muted),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -82,4 +121,16 @@ class VideoCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Deterministic per-title gradient so the list has visual rhythm until real
+/// frame thumbnails exist.
+List<Color> _thumbColors(String seed) {
+  final hue =
+      (seed.codeUnits.fold<int>(7, (a, b) => (a * 31 + b) & 0xffff) % 360)
+          .toDouble();
+  return [
+    HSLColor.fromAHSL(1, hue, .45, .30).toColor(),
+    HSLColor.fromAHSL(1, (hue + 40) % 360, .50, .12).toColor(),
+  ];
 }

@@ -80,6 +80,7 @@ class VideoRepositoryImpl implements VideoRepository {
         : Duration(milliseconds: r.durationMs!),
     status: VideoStatus.values.byName(r.status),
     origin: SubtitleOrigin.values.byName(r.origin),
+    lastPosition: Duration(milliseconds: r.lastPositionMs),
   );
 
   db.VideosCompanion _toCompanion(Video v) => db.VideosCompanion(
@@ -90,5 +91,12 @@ class VideoRepositoryImpl implements VideoRepository {
     status: Value(v.status.name),
     origin: Value(v.origin.name),
     createdAt: Value(v.createdAt),
+    lastPositionMs: Value(v.lastPosition.inMilliseconds),
   );
+
+  @override
+  Future<void> savePosition(String id, Duration position) =>
+      (_db.update(_db.videos)..where((t) => t.id.equals(id))).write(
+        db.VideosCompanion(lastPositionMs: Value(position.inMilliseconds)),
+      );
 }

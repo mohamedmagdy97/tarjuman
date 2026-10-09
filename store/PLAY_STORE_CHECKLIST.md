@@ -1,0 +1,62 @@
+# Google Play — launch checklist (Tarjuman)
+
+Everything the app can generate is already in `store/`. This file is what **you** do in Play Console.
+
+## 0. Before you start — decisions that are permanent
+- [ ] **Package name `tech.megtech.tarjuman` cannot change after the first upload.** Confirm it (or tell me to rename now).
+- [ ] **App name:** `Tarjuman` is a working name. Confirm the final Arabic/English names in `store/listing/*.md`.
+- [ ] **Back up** `android/key.properties` and `android/app/upload-keystore.jks` outside the repo. Use Play App Signing
+      (Console → Setup → App signing): Google keeps the real signing key, ours is only the *upload* key, which Google
+      can reset if it is ever lost.
+
+## 1. Account
+- [ ] Google Play developer account (one-time registration fee, identity verification).
+- [ ] **Personal accounts created after Nov 2023** must run a *closed test with at least 12 testers for 14 consecutive days*
+      before they can apply for production access. Verify the current rule in Play Console → Dashboard. Plan for it:
+      invite testers early. (Organization accounts are exempt.)
+
+## 2. Create the app
+- App name, default language **Arabic**, add English. App (not game), **Free**.
+- Declarations: contains ads → **No**. Government/financial/health/news → No.
+
+## 3. Store listing (copy from `store/listing/ar.md`, `en.md`)
+| Field | File |
+|---|---|
+| App icon 512×512 | `store/android/icon-512.png` |
+| Feature graphic 1024×500 | `store/android/{ar,en}/upload/feature-graphic-1024x500.jpg` |
+| Phone screenshots (8, 1080×1920) | `store/android/{ar,en}/upload/phone-screenshots/*.jpg` |
+| Short / full description, release notes | `store/listing/` |
+| Privacy policy URL | host `store/privacy-policy.html` (any static host, e.g. `admin.dikirnis.tech/tarjuman-privacy.html`) and paste the URL |
+Screenshots are rendered from the app's real screens with sample content (library, player, processing, setup, models,
+subtitle style, editor, settings). Play accepts JPEG/24-bit PNG without alpha: the `upload/` copies are alpha-free.
+Original PNG masters and raw screens are in `store/android/{ar,en}/` and `store/raw/`.
+
+## 4. App content
+- **Privacy policy:** URL from step 3. Fill the support email in the HTML first (search `[ضع بريد الدعم هنا]`).
+- **Data safety** (suggested answers — review them yourself, you are responsible for accuracy):
+  - Does the app collect or share required user data types? **No data collected by the developer.**
+  - Optional online mode: when the user enables it and supplies their own OpenAI key, **audio** (and derived text) is sent to
+    OpenAI for processing → declare *Audio files* as **shared**, purpose *App functionality*, **optional**, encrypted in transit.
+  - Data deletion: nothing is stored server-side by us; users delete local data in-app or by uninstalling.
+- **Content rating** questionnaire: no violence/sexual content/gambling/UGC sharing → expected "Everyone".
+- **Target audience:** 13+ / adults, **not** designed for children.
+- **App access:** all features available without login.
+- Ads: none. Permissions: only `INTERNET` (mic permission is explicitly removed from the manifest).
+
+## 5. Release
+1. Console → Testing → **Internal testing** → upload `dist/tarjuman-<version>.aab` → add yourself → install from the Play link.
+   Run the on-device checklist in `.claude/rules/testing.md` (release mode, real phone).
+2. Fix what internal testing finds, bump `version:` in `pubspec.yaml` (`+N` must increase for every upload).
+3. **Closed testing** (12+ testers, 14 days if required) → apply for production.
+4. Production rollout, ideally staged (10 % → 50 % → 100 %).
+5. Read the **Pre-launch report** Play generates (crashes, accessibility).
+
+## 6. Licenses (already handled in-app, keep it that way)
+- In-app Settings → Open-source licenses lists Dart packages plus FFmpeg (LGPL), Whisper (MIT) and the fonts (OFL).
+- Never swap `ffmpeg_kit_flutter_new_audio` for the GPL packages (would force the whole app to GPL).
+- Review ML Kit's terms (`docs/LICENSES.md`) before enabling any paid tier.
+
+## 7. After launch
+- Reply to reviews, watch Android vitals (crashes/ANRs). Consider adding Sentry/Crashlytics.
+- Known product limits to mention in support replies: needs a one-time model download; machine translation can err;
+  only direct file links; iOS version not released yet.

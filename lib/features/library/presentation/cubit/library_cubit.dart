@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tarjuman/core/cancel/cancel_token.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
+import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
 
@@ -19,12 +21,18 @@ class LibraryState extends Equatable {
     this.failure,
     this.importing = false,
     this.importedId,
+    this.downloading = false,
+    this.downloadProgress,
   });
 
   final List<Video> videos;
   final LibraryFilter filter;
   final bool loading;
   final bool importing;
+  final bool downloading;
+
+  /// 0..1, or null when unknown / indeterminate.
+  final double? downloadProgress;
 
   /// One-shot: id of a just-imported video, to open its setup screen.
   final String? importedId;
@@ -49,12 +57,20 @@ class LibraryState extends Equatable {
     bool clearFailure = false,
     String? importedId,
     bool clearImported = false,
+    bool? downloading,
+    double? downloadProgress,
+    bool clearProgress = false,
   }) => LibraryState(
     videos: videos ?? this.videos,
     filter: filter ?? this.filter,
     loading: loading ?? this.loading,
     importing: importing ?? this.importing,
     failure: clearFailure ? null : failure ?? this.failure,
+    importedId: clearImported ? null : importedId ?? this.importedId,
+    downloading: downloading ?? this.downloading,
+    downloadProgress: clearProgress
+        ? null
+        : downloadProgress ?? this.downloadProgress,
   );
 
   @override
@@ -65,11 +81,13 @@ class LibraryState extends Equatable {
     importing,
     failure,
     importedId,
+    downloading,
+    downloadProgress,
   ];
 }
 
 class LibraryCubit extends Cubit<LibraryState> {
-  LibraryCubit(this._watch, this._import, this._delete)
+  LibraryCubit(this._watch, this._import, this._importUrl, this._delete)
     : super(const LibraryState()) {
     _sub = _watch().listen(
       (v) => emit(state.copyWith(videos: v, loading: false)),
@@ -78,6 +96,9 @@ class LibraryCubit extends Cubit<LibraryState> {
 
   final WatchLibrary _watch;
   final ImportVideo _import;
+  final ImportFromUrl _importUrl;
+  CancelToken? _download;
+
   final DeleteVideo _delete;
   late final StreamSubscription<List<Video>> _sub;
 
@@ -99,6 +120,39 @@ class LibraryCubit extends Cubit<LibraryState> {
       },
     );
   }
+
+  Future<void> importFromUrl(String url) async {
+    final token = _download = CancelToken();
+    emit(state.copyWith(downloading: true, clearProgress: true));
+    final result = await _importUrl(
+      url,
+      cancel: token,
+      onProgress: (f) => emit(
+        state.copyWith(downloadProgress: f, clearProgress: f == null),
+      ),
+    );
+    _download = null;
+    emit(
+      switch (result) {
+        Err(:final failure) when failure is CancelledFailure => state.copyWith(
+          downloading: false,
+          clearProgress: true,
+        ),
+        Err(:final failure) => state.copyWith(
+          downloading: false,
+          clearProgress: true,
+          failure: failure,
+        ),
+        Success(:final value) => state.copyWith(
+          downloading: false,
+          clearProgress: true,
+          importedId: value.id,
+        ),
+      },
+    );
+  }
+
+  void cancelDownload() => _download?.cancel();
 
   Future<void> delete(String id) => _delete(id);
 

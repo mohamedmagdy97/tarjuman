@@ -114,5 +114,41 @@
   "errOnlineNotConfigured": "فعّل الترجمة عبر الإنترنت وأضف مفتاح API من الإعدادات.",
   "liveHint": "الترجمة المباشرة لا تُحفظ. استخدم «جهّز ثم شاهد» لحفظها.",
   "translateVideo": "ترجمة هذا الفيديو",
-  "settings": "الإعدادات"
+  "settings": "الإعدادات",
+  "showOriginal": "إظهار النص الإنجليزي فوق العربي",
+  "editSubtitles": "تعديل الترجمة",
+  "exportSrt": "تصدير SRT",
+  "exportBoth": "مع النص الإنجليزي",
+  "searchCues": "ابحث في الترجمة",
+  "editCueTitle": "تعديل السطر",
+  "edited": "معدّل",
+  "noResults": "لا توجد نتائج",
+  "linesCount": "{count} سطر",
+  "@linesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addFromDevice": "من الجهاز",
+  "addFromLink": "من رابط مباشر",
+  "linkTitle": "رابط الفيديو",
+  "linkHint": "رابط مباشر لملف فيديو أو صوت",
+  "linkDownload": "تنزيل وإضافة",
+  "linkNote": "روابط الملفات المباشرة فقط. روابط يوتيوب وأمثالها غير مدعومة.",
+  "downloadingVideo": "جارٍ تنزيل الفيديو",
+  "errLink": "تعذّر تنزيل الرابط. تأكد أنه رابط مباشر لملف.",
+  "saveEdit": "حفظ",
+  "aboutSection": "عن التطبيق",
+  "licenses": "التراخيص مفتوحة المصدر",
+  "privacyPolicy": "سياسة الخصوصية",
+  "versionLabel": "الإصدار {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }
