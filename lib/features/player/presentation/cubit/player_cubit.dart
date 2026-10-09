@@ -12,6 +12,9 @@ import 'package:tarjuman/features/player/domain/entities/subtitle_style.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_timeline.dart';
 import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
 import 'package:tarjuman/features/player/domain/usecases/load_player_data.dart';
+import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
+import 'package:tarjuman/features/processing/domain/usecases/live_subtitle_session.dart';
 
 enum PlayerStatus { loading, ready, error }
 
@@ -25,6 +28,8 @@ class PlayerState extends Equatable {
     this.activeText,
     this.controlsVisible = true,
     this.failure,
+    this.isLive = false,
+    this.liveBusy = false,
   });
 
   final PlayerStatus status;
@@ -35,6 +40,8 @@ class PlayerState extends Equatable {
   final String? activeText;
   final bool controlsVisible;
   final Failure? failure;
+  final bool isLive;
+  final bool liveBusy;
 
   PlayerState copyWith({
     PlayerStatus? status,
@@ -88,7 +95,13 @@ class PlayerCubit extends Cubit<PlayerState> {
   final LoadPlayerData _load;
   final AttachSubtitles _attach;
   final SettingsStore _settings;
+  final EngineProvider _engines;
+  final LiveSubtitleSession Function() _liveFactory;
+  final EngineKind? liveKind;
 
+  LiveSubtitleSession? _session;
+  StreamSubscription<LiveUpdate>? _liveSub;
+  var _liveStarting = false;
   StreamSubscription<PlaybackSnapshot>? _sub;
   Timer? _hideTimer;
 
@@ -110,6 +123,11 @@ class PlayerCubit extends Cubit<PlayerState> {
       emit(state.copyWith(status: PlayerStatus.error, snapshot: s));
       return;
     }
+    _session?.onPosition(s.position);
+    if (liveKind != null && s.isReady && _session == null && !_liveStarting) {
+      _liveStarting = true;
+      unawaited(_startLive(s.duration, s.position));
+    }
     // Active cue comes from the media position (audio time), never wall-clock.
     final cue = state.timeline.activeAt(s.position);
     emit(
@@ -120,6 +138,34 @@ class PlayerCubit extends Cubit<PlayerState> {
         clearActive: cue == null,
       ),
     );
+  }
+
+  Future<void> _startLive(Duration total, Duration position) async {
+    final acquired = await _engines.acquire(liveKind!);
+    if (acquired case Err(:final failure)) {
+      emit(state.copyWith(failure: failure));
+      return;
+    }
+    final session = _liveFactory();
+    _liveSub = session.updates.listen((u) {
+      final cue = u.timeline.activeAt(state.snapshot.position);
+      emit(
+        state.copyWith(
+          timeline: u.timeline,
+          liveBusy: u.busy,
+          failure: u.failure,
+          activeText: cue?.text,
+          clearActive: cue == null,
+        ),
+      );
+    });
+    _session = session
+      ..start(
+        mediaPath: state.video!.path,
+        engines: (acquired as Success<EngineSet>).value,
+        total: total,
+        position: position,
+      );
   }
 
   Future<void> togglePlay() async {
@@ -182,6 +228,8 @@ class PlayerCubit extends Cubit<PlayerState> {
   Future<void> close() async {
     _hideTimer?.cancel();
     await _sub?.cancel();
+    await _liveSub?.cancel();
+    await _session?.stop();
     await engine.dispose();
     return super.close();
   }

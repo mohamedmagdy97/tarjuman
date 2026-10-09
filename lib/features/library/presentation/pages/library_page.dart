@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -31,12 +33,22 @@ class _LibraryView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return BlocConsumer<LibraryCubit, LibraryState>(
-      listenWhen: (a, b) => b.failure != null && a.failure != b.failure,
+      listenWhen: (a, b) =>
+          (b.failure != null && a.failure != b.failure) ||
+          (b.importedId != null && a.importedId != b.importedId),
       listener: (context, state) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(failureMessage(state.failure!, l10n))),
-        );
-        context.read<LibraryCubit>().failureShown();
+        final cubit = context.read<LibraryCubit>();
+        if (state.failure != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(failureMessage(state.failure!, l10n))),
+          );
+          cubit.failureShown();
+        }
+        if (state.importedId != null) {
+          final id = state.importedId!;
+          cubit.importedHandled();
+          unawaited(context.push('/setup/$id'));
+        }
       },
       builder: (context, state) {
         final cubit = context.read<LibraryCubit>();
@@ -48,6 +60,18 @@ class _LibraryView extends StatelessWidget {
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
+            actions: [
+              IconButton(
+                tooltip: l10n.modelsTitle,
+                onPressed: () => unawaited(context.push('/models')),
+                icon: const Icon(Icons.download_for_offline_outlined),
+              ),
+              IconButton(
+                tooltip: l10n.settings,
+                onPressed: () => unawaited(context.push('/settings')),
+                icon: const Icon(Icons.settings_outlined),
+              ),
+            ],
           ),
           floatingActionButton: state.videos.isEmpty
               ? null
@@ -112,7 +136,13 @@ class _LibraryView extends StatelessWidget {
             pillLabel: _pillLabel(v, l10n),
             pillTone: _pillTone(v),
             caption: v.hasSubtitles ? '' : l10n.videoImported,
-            onTap: () => context.push('/player/${v.id}'),
+            onTap: () => unawaited(
+              context.push(
+                v.status == VideoStatus.ready
+                    ? '/player/${v.id}'
+                    : '/setup/${v.id}',
+              ),
+            ),
             onLongPress: () => _confirmDelete(context, v, cubit, l10n),
           ),
       ],

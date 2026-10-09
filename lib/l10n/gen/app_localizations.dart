@@ -343,6 +343,324 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'إعادة المحاولة'**
   String get retry;
+
+  /// No description provided for @setupTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ترجمة الفيديو'**
+  String get setupTitle;
+
+  /// No description provided for @modeTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'طريقة الترجمة'**
+  String get modeTitle;
+
+  /// No description provided for @modePrepare.
+  ///
+  /// In ar, this message translates to:
+  /// **'جهّز ثم شاهد'**
+  String get modePrepare;
+
+  /// No description provided for @modeLive.
+  ///
+  /// In ar, this message translates to:
+  /// **'مباشرة أثناء التشغيل'**
+  String get modeLive;
+
+  /// No description provided for @modePrepareHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'تُحفظ الترجمة وتعمل بدون إنترنت لاحقًا.'**
+  String get modePrepareHint;
+
+  /// No description provided for @modeLiveHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'تظهر أثناء المشاهدة وقد تتأخر بضع ثوانٍ، ولا تُحفظ.'**
+  String get modeLiveHint;
+
+  /// No description provided for @engineTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مكان المعالجة'**
+  String get engineTitle;
+
+  /// No description provided for @engineOffline.
+  ///
+  /// In ar, this message translates to:
+  /// **'على الجهاز'**
+  String get engineOffline;
+
+  /// No description provided for @engineOfflineHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصوت لا يغادر هاتفك'**
+  String get engineOfflineHint;
+
+  /// No description provided for @engineOnline.
+  ///
+  /// In ar, this message translates to:
+  /// **'عبر الإنترنت'**
+  String get engineOnline;
+
+  /// No description provided for @engineOnlineHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'يُرسل الصوت إلى خدمة خارجية بعد موافقتك'**
+  String get engineOnlineHint;
+
+  /// No description provided for @modelsReady.
+  ///
+  /// In ar, this message translates to:
+  /// **'النماذج جاهزة: التعرف على الكلام والترجمة للعربية.'**
+  String get modelsReady;
+
+  /// No description provided for @modelsMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحتاج تحميل نماذج الترجمة أولاً.'**
+  String get modelsMissing;
+
+  /// No description provided for @manageModels.
+  ///
+  /// In ar, this message translates to:
+  /// **'إدارة النماذج'**
+  String get manageModels;
+
+  /// No description provided for @startTranslation.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ الترجمة'**
+  String get startTranslation;
+
+  /// No description provided for @onlineSetupNeeded.
+  ///
+  /// In ar, this message translates to:
+  /// **'فعّل الترجمة عبر الإنترنت وأضف المفتاح من الإعدادات.'**
+  String get onlineSetupNeeded;
+
+  /// No description provided for @processingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ الترجمة'**
+  String get processingTitle;
+
+  /// No description provided for @overallProgress.
+  ///
+  /// In ar, this message translates to:
+  /// **'التقدم الكلي'**
+  String get overallProgress;
+
+  /// No description provided for @stagePreparing.
+  ///
+  /// In ar, this message translates to:
+  /// **'التجهيز'**
+  String get stagePreparing;
+
+  /// No description provided for @stageExtract.
+  ///
+  /// In ar, this message translates to:
+  /// **'استخراج الصوت'**
+  String get stageExtract;
+
+  /// No description provided for @stageTranscribe.
+  ///
+  /// In ar, this message translates to:
+  /// **'التعرف على الكلام'**
+  String get stageTranscribe;
+
+  /// No description provided for @stageTranslate.
+  ///
+  /// In ar, this message translates to:
+  /// **'الترجمة إلى العربية'**
+  String get stageTranslate;
+
+  /// No description provided for @remainingTime.
+  ///
+  /// In ar, this message translates to:
+  /// **'متبقي نحو {time}'**
+  String remainingTime(String time);
+
+  /// No description provided for @progressSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'يُحفظ تقدمك تلقائيًا ويكمل من حيث توقف.'**
+  String get progressSaved;
+
+  /// No description provided for @watchNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'شاهد الآن'**
+  String get watchNow;
+
+  /// No description provided for @processingDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتملت الترجمة'**
+  String get processingDone;
+
+  /// No description provided for @resume.
+  ///
+  /// In ar, this message translates to:
+  /// **'استكمال'**
+  String get resume;
+
+  /// No description provided for @processingFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'توقفت المعالجة'**
+  String get processingFailed;
+
+  /// No description provided for @processingCancelled.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الإيقاف. تقدمك محفوظ ويمكنك الاستكمال.'**
+  String get processingCancelled;
+
+  /// No description provided for @modelsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'النماذج'**
+  String get modelsTitle;
+
+  /// No description provided for @speechModels.
+  ///
+  /// In ar, this message translates to:
+  /// **'التعرف على الكلام'**
+  String get speechModels;
+
+  /// No description provided for @translationModels.
+  ///
+  /// In ar, this message translates to:
+  /// **'الترجمة'**
+  String get translationModels;
+
+  /// No description provided for @download.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحميل'**
+  String get download;
+
+  /// No description provided for @installed.
+  ///
+  /// In ar, this message translates to:
+  /// **'مثبّت'**
+  String get installed;
+
+  /// No description provided for @sizeMb.
+  ///
+  /// In ar, this message translates to:
+  /// **'{mb} ميجا'**
+  String sizeMb(int mb);
+
+  /// No description provided for @downloading.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ التحميل'**
+  String get downloading;
+
+  /// No description provided for @modelsDownloadFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر التحميل. تأكد من الاتصال وحاول مجددًا.'**
+  String get modelsDownloadFailed;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإعدادات'**
+  String get settingsTitle;
+
+  /// No description provided for @themeTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'المظهر'**
+  String get themeTitle;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In ar, this message translates to:
+  /// **'تلقائي'**
+  String get themeSystem;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In ar, this message translates to:
+  /// **'داكن'**
+  String get themeDark;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاتح'**
+  String get themeLight;
+
+  /// No description provided for @onlineSection.
+  ///
+  /// In ar, this message translates to:
+  /// **'المعالجة عبر الإنترنت'**
+  String get onlineSection;
+
+  /// No description provided for @onlineConsentTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الترجمة عبر الإنترنت'**
+  String get onlineConsentTitle;
+
+  /// No description provided for @onlineConsentBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'يُرسل صوت الفيديو إلى خدمة OpenAI بعد موافقتك. المعالجة على الجهاز تبقى الأساس.'**
+  String get onlineConsentBody;
+
+  /// No description provided for @apiKeyLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفتاح OpenAI API'**
+  String get apiKeyLabel;
+
+  /// No description provided for @apiKeySaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حفظ المفتاح'**
+  String get apiKeySaved;
+
+  /// No description provided for @save.
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ'**
+  String get save;
+
+  /// No description provided for @liveTranslating.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ الترجمة…'**
+  String get liveTranslating;
+
+  /// No description provided for @errOnlineNotConfigured.
+  ///
+  /// In ar, this message translates to:
+  /// **'فعّل الترجمة عبر الإنترنت وأضف مفتاح API من الإعدادات.'**
+  String get errOnlineNotConfigured;
+
+  /// No description provided for @liveHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'الترجمة المباشرة لا تُحفظ. استخدم «جهّز ثم شاهد» لحفظها.'**
+  String get liveHint;
+
+  /// No description provided for @translateVideo.
+  ///
+  /// In ar, this message translates to:
+  /// **'ترجمة هذا الفيديو'**
+  String get translateVideo;
+
+  /// No description provided for @settings.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإعدادات'**
+  String get settings;
 }
 
 class _AppLocalizationsDelegate

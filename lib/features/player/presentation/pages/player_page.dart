@@ -12,18 +12,20 @@ import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/error/failure_message.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_style.dart';
+import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/player/presentation/widgets/subtitle_style_sheet.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 class PlayerPage extends StatelessWidget {
-  const PlayerPage({required this.videoId, super.key});
+  const PlayerPage({required this.videoId, this.liveKind, super.key});
   final String videoId;
+  final EngineKind? liveKind;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (_) {
-      final cubit = newPlayerCubit(videoId);
+      final cubit = newPlayerCubit(videoId, liveKind: liveKind);
       unawaited(cubit.start());
       return cubit;
     },
@@ -168,6 +170,25 @@ class _Controls extends StatelessWidget {
                       context,
                     ).backButtonTooltip,
                   ),
+                  if (state.liveBusy)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: Row(
+                        children: [
+                          const SizedBox.square(
+                            dimension: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            AppLocalizations.of(context).liveTranslating,
+                            style: AppTypography.caption.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   Expanded(
                     child: Text(
                       state.video?.title ?? '',

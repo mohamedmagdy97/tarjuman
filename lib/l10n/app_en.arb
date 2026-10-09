@@ -47,5 +47,72 @@
   "errUnknown": "Something went wrong. Try again.",
   "playbackError": "Couldn't play this video",
   "speed": "Speed",
-  "retry": "Retry"
+  "retry": "Retry",
+  "setupTitle": "Translate video",
+  "modeTitle": "Translation mode",
+  "modePrepare": "Prepare, then watch",
+  "modeLive": "Live while playing",
+  "modePrepareHint": "Subtitles are saved and work offline later.",
+  "modeLiveHint": "Appear while you watch, may lag a few seconds, and aren't saved.",
+  "engineTitle": "Where to process",
+  "engineOffline": "On this device",
+  "engineOfflineHint": "Audio never leaves your phone",
+  "engineOnline": "Online",
+  "engineOnlineHint": "Audio is sent to an external service after you consent",
+  "modelsReady": "Models ready: speech recognition and Arabic translation.",
+  "modelsMissing": "Download the translation models first.",
+  "manageModels": "Manage models",
+  "startTranslation": "Start translation",
+  "onlineSetupNeeded": "Enable online translation and add your key in Settings.",
+  "processingTitle": "Translating",
+  "overallProgress": "Overall progress",
+  "stagePreparing": "Preparing",
+  "stageExtract": "Extracting audio",
+  "stageTranscribe": "Recognising speech",
+  "stageTranslate": "Translating to Arabic",
+  "remainingTime": "About {time} left",
+  "@remainingTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "progressSaved": "Progress is saved automatically and resumes where it stopped.",
+  "watchNow": "Watch now",
+  "processingDone": "Translation complete",
+  "resume": "Resume",
+  "processingFailed": "Processing stopped",
+  "processingCancelled": "Stopped. Your progress is saved and you can resume.",
+  "modelsTitle": "Models",
+  "speechModels": "Speech recognition",
+  "translationModels": "Translation",
+  "download": "Download",
+  "installed": "Installed",
+  "sizeMb": "{mb} MB",
+  "@sizeMb": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  },
+  "downloading": "Downloading",
+  "modelsDownloadFailed": "Download failed. Check your connection and try again.",
+  "settingsTitle": "Settings",
+  "themeTitle": "Appearance",
+  "themeSystem": "System",
+  "themeDark": "Dark",
+  "themeLight": "Light",
+  "onlineSection": "Online processing",
+  "onlineConsentTitle": "Online translation",
+  "onlineConsentBody": "Video audio is sent to OpenAI after your consent. On-device stays the default.",
+  "apiKeyLabel": "OpenAI API key",
+  "apiKeySaved": "Key saved",
+  "save": "Save",
+  "liveTranslating": "Translating…",
+  "errOnlineNotConfigured": "Enable online translation and add an API key in Settings.",
+  "liveHint": "Live subtitles aren't saved. Use Prepare to keep them.",
+  "translateVideo": "Translate this video",
+  "settings": "Settings"
 }

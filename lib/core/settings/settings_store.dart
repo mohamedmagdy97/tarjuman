@@ -1,9 +1,39 @@
+import 'package:flutter/material.dart' show ThemeMode;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_style.dart';
 
 abstract interface class SettingsStore {
   SubtitleStyle readSubtitleStyle();
   Future<void> writeSubtitleStyle(SubtitleStyle style);
+
+  ThemeMode readThemeMode();
+  Future<void> writeThemeMode(ThemeMode mode);
+
+  bool readOnlineConsent();
+  Future<void> writeOnlineConsent({required bool value});
+}
+
+/// API keys live in the platform keystore, never in shared preferences.
+abstract interface class SecretStore {
+  Future<String?> readApiKey();
+  Future<void> writeApiKey(String? key);
+}
+
+class KeystoreSecretStore implements SecretStore {
+  const KeystoreSecretStore([
+    this._storage = const FlutterSecureStorage(),
+  ]);
+  final FlutterSecureStorage _storage;
+  static const _key = 'online.api_key';
+
+  @override
+  Future<String?> readApiKey() => _storage.read(key: _key);
+
+  @override
+  Future<void> writeApiKey(String? key) => key == null || key.isEmpty
+      ? _storage.delete(key: _key)
+      : _storage.write(key: _key, value: key);
 }
 
 class SharedPrefsSettingsStore implements SettingsStore {
@@ -14,6 +44,8 @@ class SharedPrefsSettingsStore implements SettingsStore {
   static const _color = 'subtitle.color';
   static const _bg = 'subtitle.background';
   static const _pos = 'subtitle.position';
+  static const _theme = 'app.theme';
+  static const _consent = 'online.consent';
 
   @override
   SubtitleStyle readSubtitleStyle() {
@@ -41,4 +73,19 @@ class SharedPrefsSettingsStore implements SettingsStore {
     await _prefs.setString(_bg, s.background.name);
     await _prefs.setString(_pos, s.position.name);
   }
+
+  @override
+  ThemeMode readThemeMode() =>
+      ThemeMode.values.asNameMap()[_prefs.getString(_theme)] ?? ThemeMode.dark;
+
+  @override
+  Future<void> writeThemeMode(ThemeMode mode) =>
+      _prefs.setString(_theme, mode.name);
+
+  @override
+  bool readOnlineConsent() => _prefs.getBool(_consent) ?? false;
+
+  @override
+  Future<void> writeOnlineConsent({required bool value}) =>
+      _prefs.setBool(_consent, value);
 }

@@ -27,3 +27,8 @@ final class CancelledFailure extends Failure {
 final class UnknownFailure extends Failure {
   const UnknownFailure([super.message]);
 }
+
+/// Online mode requested without consent or API key.
+final class OnlineNotConfiguredFailure extends Failure {
+  const OnlineNotConfiguredFailure([super.message]);
+}

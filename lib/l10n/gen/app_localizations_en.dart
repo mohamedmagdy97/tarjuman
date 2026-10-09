@@ -136,4 +136,177 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
+
+  @override
+  String get setupTitle => 'Translate video';
+
+  @override
+  String get modeTitle => 'Translation mode';
+
+  @override
+  String get modePrepare => 'Prepare, then watch';
+
+  @override
+  String get modeLive => 'Live while playing';
+
+  @override
+  String get modePrepareHint => 'Subtitles are saved and work offline later.';
+
+  @override
+  String get modeLiveHint =>
+      'Appear while you watch, may lag a few seconds, and aren\'t saved.';
+
+  @override
+  String get engineTitle => 'Where to process';
+
+  @override
+  String get engineOffline => 'On this device';
+
+  @override
+  String get engineOfflineHint => 'Audio never leaves your phone';
+
+  @override
+  String get engineOnline => 'Online';
+
+  @override
+  String get engineOnlineHint =>
+      'Audio is sent to an external service after you consent';
+
+  @override
+  String get modelsReady =>
+      'Models ready: speech recognition and Arabic translation.';
+
+  @override
+  String get modelsMissing => 'Download the translation models first.';
+
+  @override
+  String get manageModels => 'Manage models';
+
+  @override
+  String get startTranslation => 'Start translation';
+
+  @override
+  String get onlineSetupNeeded =>
+      'Enable online translation and add your key in Settings.';
+
+  @override
+  String get processingTitle => 'Translating';
+
+  @override
+  String get overallProgress => 'Overall progress';
+
+  @override
+  String get stagePreparing => 'Preparing';
+
+  @override
+  String get stageExtract => 'Extracting audio';
+
+  @override
+  String get stageTranscribe => 'Recognising speech';
+
+  @override
+  String get stageTranslate => 'Translating to Arabic';
+
+  @override
+  String remainingTime(String time) {
+    return 'About $time left';
+  }
+
+  @override
+  String get progressSaved =>
+      'Progress is saved automatically and resumes where it stopped.';
+
+  @override
+  String get watchNow => 'Watch now';
+
+  @override
+  String get processingDone => 'Translation complete';
+
+  @override
+  String get resume => 'Resume';
+
+  @override
+  String get processingFailed => 'Processing stopped';
+
+  @override
+  String get processingCancelled =>
+      'Stopped. Your progress is saved and you can resume.';
+
+  @override
+  String get modelsTitle => 'Models';
+
+  @override
+  String get speechModels => 'Speech recognition';
+
+  @override
+  String get translationModels => 'Translation';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get installed => 'Installed';
+
+  @override
+  String sizeMb(int mb) {
+    return '$mb MB';
+  }
+
+  @override
+  String get downloading => 'Downloading';
+
+  @override
+  String get modelsDownloadFailed =>
+      'Download failed. Check your connection and try again.';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get themeTitle => 'Appearance';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get onlineSection => 'Online processing';
+
+  @override
+  String get onlineConsentTitle => 'Online translation';
+
+  @override
+  String get onlineConsentBody =>
+      'Video audio is sent to OpenAI after your consent. On-device stays the default.';
+
+  @override
+  String get apiKeyLabel => 'OpenAI API key';
+
+  @override
+  String get apiKeySaved => 'Key saved';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get liveTranslating => 'Translating…';
+
+  @override
+  String get errOnlineNotConfigured =>
+      'Enable online translation and add an API key in Settings.';
+
+  @override
+  String get liveHint =>
+      'Live subtitles aren\'t saved. Use Prepare to keep them.';
+
+  @override
+  String get translateVideo => 'Translate this video';
+
+  @override
+  String get settings => 'Settings';
 }

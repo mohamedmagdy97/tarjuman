@@ -8,5 +8,6 @@ String failureMessage(Failure failure, AppLocalizations l10n) =>
       StorageFailure() => l10n.errStorage,
       NetworkFailure() => l10n.errNetwork,
       ModelMissingFailure() => l10n.errModel,
+      OnlineNotConfiguredFailure() => l10n.errOnlineNotConfigured,
       CancelledFailure() || UnknownFailure() => l10n.errUnknown,
     };

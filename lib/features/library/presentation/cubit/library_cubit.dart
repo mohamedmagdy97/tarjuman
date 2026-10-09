@@ -18,12 +18,16 @@ class LibraryState extends Equatable {
     this.loading = true,
     this.failure,
     this.importing = false,
+    this.importedId,
   });
 
   final List<Video> videos;
   final LibraryFilter filter;
   final bool loading;
   final bool importing;
+
+  /// One-shot: id of a just-imported video, to open its setup screen.
+  final String? importedId;
 
   /// One-shot: the page shows it and calls [LibraryCubit.failureShown].
   final Failure? failure;
@@ -43,6 +47,8 @@ class LibraryState extends Equatable {
     bool? importing,
     Failure? failure,
     bool clearFailure = false,
+    String? importedId,
+    bool clearImported = false,
   }) => LibraryState(
     videos: videos ?? this.videos,
     filter: filter ?? this.filter,
@@ -52,7 +58,14 @@ class LibraryState extends Equatable {
   );
 
   @override
-  List<Object?> get props => [videos, filter, loading, importing, failure];
+  List<Object?> get props => [
+    videos,
+    filter,
+    loading,
+    importing,
+    failure,
+    importedId,
+  ];
 }
 
 class LibraryCubit extends Cubit<LibraryState> {
@@ -79,7 +92,10 @@ class LibraryCubit extends Cubit<LibraryState> {
           importing: false,
           failure: failure,
         ),
-        Success() => state.copyWith(importing: false),
+        Success(:final value) => state.copyWith(
+          importing: false,
+          importedId: value?.id,
+        ),
       },
     );
   }
@@ -87,6 +103,8 @@ class LibraryCubit extends Cubit<LibraryState> {
   Future<void> delete(String id) => _delete(id);
 
   void failureShown() => emit(state.copyWith(clearFailure: true));
+
+  void importedHandled() => emit(state.copyWith(clearImported: true));
 
   @override
   Future<void> close() {

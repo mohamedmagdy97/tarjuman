@@ -47,5 +47,72 @@
   "errUnknown": "حدث خطأ. حاول مرة أخرى.",
   "playbackError": "تعذّر تشغيل الفيديو",
   "speed": "السرعة",
-  "retry": "إعادة المحاولة"
+  "retry": "إعادة المحاولة",
+  "setupTitle": "ترجمة الفيديو",
+  "modeTitle": "طريقة الترجمة",
+  "modePrepare": "جهّز ثم شاهد",
+  "modeLive": "مباشرة أثناء التشغيل",
+  "modePrepareHint": "تُحفظ الترجمة وتعمل بدون إنترنت لاحقًا.",
+  "modeLiveHint": "تظهر أثناء المشاهدة وقد تتأخر بضع ثوانٍ، ولا تُحفظ.",
+  "engineTitle": "مكان المعالجة",
+  "engineOffline": "على الجهاز",
+  "engineOfflineHint": "الصوت لا يغادر هاتفك",
+  "engineOnline": "عبر الإنترنت",
+  "engineOnlineHint": "يُرسل الصوت إلى خدمة خارجية بعد موافقتك",
+  "modelsReady": "النماذج جاهزة: التعرف على الكلام والترجمة للعربية.",
+  "modelsMissing": "تحتاج تحميل نماذج الترجمة أولاً.",
+  "manageModels": "إدارة النماذج",
+  "startTranslation": "ابدأ الترجمة",
+  "onlineSetupNeeded": "فعّل الترجمة عبر الإنترنت وأضف المفتاح من الإعدادات.",
+  "processingTitle": "جارٍ الترجمة",
+  "overallProgress": "التقدم الكلي",
+  "stagePreparing": "التجهيز",
+  "stageExtract": "استخراج الصوت",
+  "stageTranscribe": "التعرف على الكلام",
+  "stageTranslate": "الترجمة إلى العربية",
+  "remainingTime": "متبقي نحو {time}",
+  "@remainingTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "progressSaved": "يُحفظ تقدمك تلقائيًا ويكمل من حيث توقف.",
+  "watchNow": "شاهد الآن",
+  "processingDone": "اكتملت الترجمة",
+  "resume": "استكمال",
+  "processingFailed": "توقفت المعالجة",
+  "processingCancelled": "تم الإيقاف. تقدمك محفوظ ويمكنك الاستكمال.",
+  "modelsTitle": "النماذج",
+  "speechModels": "التعرف على الكلام",
+  "translationModels": "الترجمة",
+  "download": "تحميل",
+  "installed": "مثبّت",
+  "sizeMb": "{mb} ميجا",
+  "@sizeMb": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  },
+  "downloading": "جارٍ التحميل",
+  "modelsDownloadFailed": "تعذّر التحميل. تأكد من الاتصال وحاول مجددًا.",
+  "settingsTitle": "الإعدادات",
+  "themeTitle": "المظهر",
+  "themeSystem": "تلقائي",
+  "themeDark": "داكن",
+  "themeLight": "فاتح",
+  "onlineSection": "المعالجة عبر الإنترنت",
+  "onlineConsentTitle": "الترجمة عبر الإنترنت",
+  "onlineConsentBody": "يُرسل صوت الفيديو إلى خدمة OpenAI بعد موافقتك. المعالجة على الجهاز تبقى الأساس.",
+  "apiKeyLabel": "مفتاح OpenAI API",
+  "apiKeySaved": "تم حفظ المفتاح",
+  "save": "حفظ",
+  "liveTranslating": "جارٍ الترجمة…",
+  "errOnlineNotConfigured": "فعّل الترجمة عبر الإنترنت وأضف مفتاح API من الإعدادات.",
+  "liveHint": "الترجمة المباشرة لا تُحفظ. استخدم «جهّز ثم شاهد» لحفظها.",
+  "translateVideo": "ترجمة هذا الفيديو",
+  "settings": "الإعدادات"
 }
