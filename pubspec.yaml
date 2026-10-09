@@ -1,13 +1,12 @@
 name: tarjuman
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.1.0+2
+version: 1.2.0+3
 
 environment:
   sdk: ^3.11.5
 
 dependencies:
-  connectivity_plus: ^7.3.2
   drift: 2.31.0
   drift_flutter: 0.2.7
   equatable: ^3.0.0
@@ -24,12 +23,15 @@ dependencies:
   google_mlkit_translation: ^0.14.0
   http: ^1.6.0
   intl: ^0.20.2
+  media_kit: ^1.2.6
+  media_kit_libs_video: ^1.0.7
+  media_kit_video: ^1.2.5
   meta: ^1.17.0
   path: ^1.9.1
   path_provider: ^2.1.6
   shared_preferences: ^2.5.6
   uuid: ^4.6.0
-  video_player: ^2.11.1
+  wakelock_plus: ^1.7.0
   whisper_cpp_flutter_plus: ^0.5.1
 
 dev_dependencies:

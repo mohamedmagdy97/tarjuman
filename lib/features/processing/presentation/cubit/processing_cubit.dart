@@ -6,6 +6,7 @@ import 'package:tarjuman/core/cancel/cancel_token.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/usecases/run_processing_pipeline.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 enum ProcessingStatus { running, done, failed, cancelled }
 
@@ -64,6 +65,7 @@ class ProcessingCubit extends Cubit<ProcessingState> {
 
   void start() {
     _cancel = CancelToken();
+    unawaited(WakelockPlus.enable()); // keep the screen on during long jobs
     emit(const ProcessingState());
     _sub = _pipeline(videoId: videoId, kind: kind, cancel: _cancel).listen(
       (e) => emit(
@@ -92,8 +94,17 @@ class ProcessingCubit extends Cubit<ProcessingState> {
   void cancel() => _cancel.cancel();
 
   @override
+  void onChange(Change<ProcessingState> change) {
+    super.onChange(change);
+    if (change.nextState.status != ProcessingStatus.running) {
+      unawaited(WakelockPlus.disable());
+    }
+  }
+
+  @override
   Future<void> close() async {
     _cancel.cancel();
+    unawaited(WakelockPlus.disable());
     await _sub?.cancel();
     return super.close();
   }

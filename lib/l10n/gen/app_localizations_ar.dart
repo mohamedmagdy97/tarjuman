@@ -111,7 +111,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errUnsupported =>
-      'هذا الملف غير مدعوم. جرّب ملف SRT أو VTT بترميز UTF-8.';
+      'الملف غير مدعوم أو لا يمكن قراءته. جرّب ملفًا آخر (فيديو أو صوت، أو SRT/VTT للترجمة).';
 
   @override
   String get errStorage => 'تعذّر الوصول للملف. تأكد من المساحة والصلاحيات.';

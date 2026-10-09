@@ -55,7 +55,7 @@ running it on **real Android + iPhone devices in release mode**.
 | Models / state | plain immutable classes + `equatable` (no `freezed`: its analyzer range conflicts with `drift_dev` on the current Dart SDK) |
 | Local DB | `drift` pinned to 2.31.0 / `drift_dev` 2.31.0 / `drift_flutter` 0.2.7 (newer ones need a newer Dart SDK) — videos, cues, later jobs |
 | Prefs | `shared_preferences` behind a `SettingsStore` port |
-| Player | `video_player` behind `PlayerEngine` (`core/platform/media`) — swap to `media_kit` if we need mkv/track control |
+| Player | `media_kit` (libmpv) behind `PlayerEngine` (`core/platform/media`) — plays practically any container/codec |
 | Audio extraction | FFmpeg (community fork — **spike & license-check before adopting**) behind `AudioExtractor` |
 | ASR | `whisper.cpp` binding behind `SpeechRecognizer` |
 | Translation | `google_mlkit_translation` behind `TextTranslator` |
@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.1.0+2)
+## 9. Current status (v1.2.0+3)
 
 Built (all phases have code; ASR/translation quality and speed are **NOT yet verified on real devices**):
 - Foundation: design system, library (drift), player (`video_player`), SRT/VTT import, subtitle style sheet, l10n AR/EN.
@@ -142,11 +142,17 @@ Built (all phases have code; ASR/translation quality and speed are **NOT yet ver
   Live results are **not persisted** (windows may leave gaps; Prepare mode's resume logic assumes contiguous cues).
 - Online (phase 5): OpenAI-compatible ASR + chat-translation adapters, behind consent + API key in the keystore.
   Unverified without a key. Direct-link video URLs are NOT implemented yet (local files only).
+- Any-format input: picker uses `FileType.any`; import validates by content (FFprobe must read a duration), not by
+  extension. Playback = media_kit; audio extraction = FFmpegKit audio build (demuxers verified in the binary: avi, flv,
+  mkv/webm, mov/mp4/3gp, wmv/asf, ts, mpeg, ogg, wav, mp3, flac, amr, ac3, dts, rm; decoders: aac, ac3, mp3, vorbis,
+  opus, flac, wma, alac, amr, dca, pcm). Exotic video-only/DRM files are still rejected.
 - Settings: theme, online consent, API key. Release: Android signing, icon, fonts.
+- Emulator note: the Pixel_9 AVD has 2 GB RAM and the OS kills the debug app during the file picker. Test on a real
+  device (or raise `hw.ramSize` to 4096 in `~/.android/avd/Pixel_9.avd/config.ini`).
 
 Known gaps / next:
 - Device spike (RTF, RAM, battery) for tiny.en vs base.en; tune chunk size and `CueSegmenter` on real videos.
-- Screen may sleep during long processing (no wakelock: `wakelock_plus` conflicts with the pinned deps). Resume covers it.
+- Screen is kept awake during processing via `wakelock_plus`; if the app is still killed, resume covers it.
 - Chunk boundaries can cut a sentence in two; consider overlap or silence-aware cuts after benchmarking.
 - Subtitle editor screen, direct-link sources, iOS build/signing (needs Apple account).
 Release how-to: `docs/RELEASE.md`.

@@ -5,7 +5,7 @@ import 'package:tarjuman/features/library/domain/ports/media_picker.dart';
 
 class FilePickerMediaPicker implements MediaPicker {
   @override
-  Future<Result<PickedFile?>> pickVideo() => _pick(FileType.video);
+  Future<Result<PickedFile?>> pickVideo() => _pick(FileType.any);
 
   @override
   Future<Result<PickedFile?>> pickSubtitle() => _pick(

@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tarjuman/core/database/app_database.dart';
-import 'package:tarjuman/core/platform/media/video_player_engine.dart';
+import 'package:tarjuman/core/platform/media/media_kit_engine.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/data/file_picker_media_picker.dart';
 import 'package:tarjuman/features/library/data/media_storage.dart';
@@ -57,7 +57,7 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton(() => const SubtitleParser())
     ..registerFactory(() => WatchLibrary(sl()))
-    ..registerFactory(() => ImportVideo(sl(), sl()))
+    ..registerFactory(() => ImportVideo(sl(), sl(), sl()))
     ..registerFactory(() => DeleteVideo(sl()))
     ..registerFactory(() => LoadPlayerData(sl(), sl()))
     ..registerFactory(() => AttachSubtitles(sl(), sl(), sl()))
@@ -104,7 +104,7 @@ ProcessingCubit newProcessingCubit(String videoId, EngineKind kind) =>
 PlayerCubit newPlayerCubit(String videoId, {EngineKind? liveKind}) =>
     PlayerCubit(
       videoId: videoId,
-      engine: VideoPlayerEngine(),
+      engine: MediaKitEngine(),
       load: sl(),
       attach: sl(),
       settings: sl(),

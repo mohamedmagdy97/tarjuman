@@ -299,7 +299,7 @@ abstract class AppLocalizations {
   /// No description provided for @errUnsupported.
   ///
   /// In ar, this message translates to:
-  /// **'هذا الملف غير مدعوم. جرّب ملف SRT أو VTT بترميز UTF-8.'**
+  /// **'الملف غير مدعوم أو لا يمكن قراءته. جرّب ملفًا آخر (فيديو أو صوت، أو SRT/VTT للترجمة).'**
   String get errUnsupported;
 
   /// No description provided for @errStorage.

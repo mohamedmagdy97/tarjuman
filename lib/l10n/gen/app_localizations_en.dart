@@ -113,7 +113,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errUnsupported =>
-      'This file isn\'t supported. Try an SRT or VTT file in UTF-8.';
+      'The file isn\'t supported or can\'t be read. Try another one (video or audio, or SRT/VTT for subtitles).';
 
   @override
   String get errStorage =>
