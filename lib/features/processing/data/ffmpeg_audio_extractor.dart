@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:ffmpeg_kit_flutter_new_audio/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_new_audio/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter_new_audio/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_audio/return_code.dart';
 import 'package:tarjuman/core/cancel/cancel_token.dart';
@@ -53,6 +56,8 @@ class FfmpegAudioExtractor implements AudioExtractor {
     CancelToken? cancel,
   }) async {
     String secs(Duration d) => (d.inMilliseconds / 1000).toStringAsFixed(3);
+    // executeWithArgumentsAsync returns immediately; wait for the complete callback.
+    final done = Completer<FFmpegSession>();
     final session = await FFmpegKit.executeWithArgumentsAsync(
       [
         '-y',
@@ -73,16 +78,22 @@ class FfmpegAudioExtractor implements AudioExtractor {
         'pcm_s16le',
         outPath,
       ],
+      done.complete,
     );
     cancel?.onCancel(session.cancel);
 
+    await done.future;
     final code = await session.getReturnCode();
     if (cancel?.isCancelled ?? false) {
       return const Result.failure(CancelledFailure());
     }
     if (ReturnCode.isSuccess(code)) return Result.success(outPath);
+    final logs = (await session.getAllLogsAsString() ?? '').trim();
+    final tail = logs.length > 600 ? logs.substring(logs.length - 600) : logs;
     return Result.failure(
-      UnsupportedMediaFailure(await session.getFailStackTrace()),
+      UnsupportedMediaFailure(
+        'ffmpeg exit ${code?.getValue()}: ${tail.isEmpty ? 'no output' : tail}',
+      ),
     );
   }
 }

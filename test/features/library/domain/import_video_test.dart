@@ -39,7 +39,11 @@ void main() {
       () => probe.probeDuration('/c/x.avi'),
     ).thenAnswer((_) async => const Result.success(Duration(minutes: 2)));
     when(
-      () => repo.add(title: 'x.avi', path: '/c/x.avi'),
+      () => repo.add(
+        title: 'x.avi',
+        path: '/c/x.avi',
+        duration: const Duration(minutes: 2),
+      ),
     ).thenAnswer((_) async => Result.success(video()));
 
     final res = await import();

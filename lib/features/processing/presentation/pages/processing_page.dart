@@ -117,7 +117,7 @@ class ProcessingView extends StatelessWidget {
           label: order[i].$2,
           state: finished || i < activeIndex
               ? StageState.done
-              : i == activeIndex && s.status == ProcessingStatus.running
+              : i == activeIndex && s.status != ProcessingStatus.done
               ? StageState.active
               : StageState.pending,
         ),
