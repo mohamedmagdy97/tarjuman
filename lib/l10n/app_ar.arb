@@ -154,5 +154,19 @@
   "errSubtitle": "ملف الترجمة غير صالح. اختر ملف SRT أو VTT بترميز UTF-8.",
   "technicalDetails": "تفاصيل تقنية",
   "translateThisVideo": "ترجمة هذا الفيديو",
-  "orAddSubtitleFile": "أو أضف ملف ترجمة جاهزًا"
+  "orAddSubtitleFile": "أو أضف ملف ترجمة جاهزًا",
+  "addFromGallery": "من معرض الفيديو",
+  "deviceVideosTitle": "فيديوهات الجهاز",
+  "galleryPermissionTitle": "نحتاج إذن عرض الفيديوهات",
+  "galleryPermissionBody": "نعرض فيديوهات هاتفك داخل التطبيق لتختار منها. لا نرفع شيئًا ولا ننسخ الملفات.",
+  "openSettings": "فتح الإعدادات",
+  "noDeviceVideos": "لا توجد فيديوهات على الجهاز",
+  "filterFavorites": "المفضلة",
+  "addFavorite": "إضافة للمفضلة",
+  "removeFavorite": "إزالة من المفضلة",
+  "audioTrack": "مسار الصوت",
+  "embeddedSubtitles": "ترجمة مدمجة في الملف",
+  "subtitlesOff": "إيقاف",
+  "loopAB": "تكرار مقطع (أ-ب)",
+  "tracks": "المسارات"
 }

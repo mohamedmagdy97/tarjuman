@@ -12,4 +12,12 @@ abstract interface class VideoRepository {
   Future<Result<void>> update(Video video);
   Future<Result<void>> remove(String id);
   Future<void> savePosition(String id, Duration position);
+  Future<void> setFavorite(String id, {required bool value});
+
+  /// Registers a file that stays where it is (not copied or moved).
+  Future<Result<Video>> addExternal({
+    required String title,
+    required String path,
+    Duration? duration,
+  });
 }

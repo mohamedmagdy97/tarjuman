@@ -387,4 +387,47 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get orAddSubtitleFile => 'أو أضف ملف ترجمة جاهزًا';
+
+  @override
+  String get addFromGallery => 'من معرض الفيديو';
+
+  @override
+  String get deviceVideosTitle => 'فيديوهات الجهاز';
+
+  @override
+  String get galleryPermissionTitle => 'نحتاج إذن عرض الفيديوهات';
+
+  @override
+  String get galleryPermissionBody =>
+      'نعرض فيديوهات هاتفك داخل التطبيق لتختار منها. لا نرفع شيئًا ولا ننسخ الملفات.';
+
+  @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
+  String get noDeviceVideos => 'لا توجد فيديوهات على الجهاز';
+
+  @override
+  String get filterFavorites => 'المفضلة';
+
+  @override
+  String get addFavorite => 'إضافة للمفضلة';
+
+  @override
+  String get removeFavorite => 'إزالة من المفضلة';
+
+  @override
+  String get audioTrack => 'مسار الصوت';
+
+  @override
+  String get embeddedSubtitles => 'ترجمة مدمجة في الملف';
+
+  @override
+  String get subtitlesOff => 'إيقاف';
+
+  @override
+  String get loopAB => 'تكرار مقطع (أ-ب)';
+
+  @override
+  String get tracks => 'المسارات';
 }

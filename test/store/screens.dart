@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tarjuman/core/design_system/tokens/app_theme.dart';
+import 'package:tarjuman/core/platform/device/brightness_control.dart';
 import 'package:tarjuman/core/platform/media/player_engine.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
@@ -10,6 +11,7 @@ import 'package:tarjuman/features/library/domain/repositories/video_repository.d
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
+import 'package:tarjuman/features/library/domain/usecases/toggle_favorite.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
 import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart';
 import 'package:tarjuman/features/library/presentation/pages/library_page.dart';
@@ -75,6 +77,8 @@ class _MImportUrl extends Mock implements ImportFromUrl {}
 
 class _MDelete extends Mock implements DeleteVideo {}
 
+class _MFavorite extends Mock implements ToggleFavorite {}
+
 class _MVideos extends Mock implements VideoRepository {}
 
 class _MSubs extends Mock implements SubtitleRepository {}
@@ -93,12 +97,22 @@ class _MExport extends Mock implements ExportSubtitles {}
 
 class _MLive extends Mock implements LiveSubtitleSession {}
 
+class _Brightness implements BrightnessControl {
+  @override
+  Future<double> current() async => .5;
+  @override
+  Future<void> set(double value) async {}
+  @override
+  Future<void> reset() async {}
+}
+
 class _PlayerC extends PlayerCubit {
   _PlayerC(PlayerState s)
     : super(
         videoId: 'v',
         videos: _MVideos(),
         engine: SceneEngine(),
+        brightness: _Brightness(),
         load: _MLoad(),
         attach: _MAttach(),
         settings: _Settings(),
@@ -315,7 +329,13 @@ Map<String, Widget Function(Locale)> storeScreens() => {
   '01-library': (l) {
     final watch = _MWatch();
     when(watch.call).thenAnswer((_) => Stream.value(sampleVideos));
-    final cubit = LibraryCubit(watch, _MImport(), _MImportUrl(), _MDelete());
+    final cubit = LibraryCubit(
+      watch,
+      _MImport(),
+      _MImportUrl(),
+      _MDelete(),
+      _MFavorite(),
+    );
     return _app(
       l,
       BlocProvider.value(value: cubit, child: const LibraryView()),

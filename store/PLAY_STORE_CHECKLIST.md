@@ -62,6 +62,12 @@ https://mohamedmagdy97.github.io/tarjuman-privacy/ and confirm it loads **before
 4. Production rollout, ideally staged (10 % → 50 % → 100 %).
 5. Read the **Pre-launch report** Play generates (crashes, accessibility).
 
+## 4b. Photo & video permissions (new in 1.4.0)
+The app declares `READ_MEDIA_VIDEO` to list the phone's videos in-app. Play restricts this permission: in Play Console →
+App content → **Photo and video permissions** you must declare it and justify "core functionality = video player /
+browsing the device's videos". If you prefer to avoid the declaration, remove the permission and the "From video gallery"
+entry (`features/device_videos`) and keep only the system file picker.
+
 ## 5b. Technical gates already satisfied by this build (verify again after any dependency change)
 - `targetSdk 36`, `minSdk 24`, AAB, signed with the upload key.
 - **16 KB page size:** all native `.so` must have ELF `p_align >= 0x4000`. `android/build.gradle.kts` forces NDK r28 +

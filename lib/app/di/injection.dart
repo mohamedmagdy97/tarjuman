@@ -5,8 +5,13 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tarjuman/core/database/app_database.dart';
+import 'package:tarjuman/core/platform/device/brightness_control.dart';
 import 'package:tarjuman/core/platform/media/media_kit_engine.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
+import 'package:tarjuman/features/device_videos/data/photo_manager_device_video_source.dart';
+import 'package:tarjuman/features/device_videos/domain/ports/device_video_source.dart';
+import 'package:tarjuman/features/device_videos/domain/usecases/add_device_video.dart';
+import 'package:tarjuman/features/device_videos/presentation/cubit/device_videos_cubit.dart';
 import 'package:tarjuman/features/library/data/file_picker_media_picker.dart';
 import 'package:tarjuman/features/library/data/http_file_downloader.dart';
 import 'package:tarjuman/features/library/data/media_storage.dart';
@@ -17,6 +22,7 @@ import 'package:tarjuman/features/library/domain/repositories/video_repository.d
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
+import 'package:tarjuman/features/library/domain/usecases/toggle_favorite.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
 import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart';
 import 'package:tarjuman/features/model_manager/data/model_repository_impl.dart';
@@ -70,9 +76,16 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => DeleteVideo(sl()))
     ..registerFactory(() => LoadPlayerData(sl(), sl()))
     ..registerFactory(() => AttachSubtitles(sl(), sl(), sl()))
+    ..registerLazySingleton<BrightnessControl>(ScreenBrightnessControl.new)
+    ..registerLazySingleton<DeviceVideoSource>(
+      PhotoManagerDeviceVideoSource.new,
+    )
+    ..registerFactory(() => AddDeviceVideo(sl(), sl()))
+    ..registerFactory(() => DeviceVideosCubit(sl(), sl()))
     ..registerLazySingleton<FileDownloader>(HttpFileDownloader.new)
     ..registerFactory(() => ImportFromUrl(sl(), sl(), sl()))
-    ..registerFactory(() => LibraryCubit(sl(), sl(), sl(), sl()))
+    ..registerFactory(() => ToggleFavorite(sl()))
+    ..registerFactory(() => LibraryCubit(sl(), sl(), sl(), sl(), sl()))
     ..registerLazySingleton(() => const SubtitleSerializer())
     ..registerLazySingleton<SubtitleExporter>(SharePlusSubtitleExporter.new)
     ..registerFactory(() => EditCueText(sl()))
@@ -125,6 +138,7 @@ PlayerCubit newPlayerCubit(
   videos: sl(),
   startAt: startAt,
   engine: MediaKitEngine(),
+  brightness: sl(),
   load: sl(),
   attach: sl(),
   settings: sl(),

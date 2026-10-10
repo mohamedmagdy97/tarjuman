@@ -9,6 +9,7 @@ import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
+import 'package:tarjuman/features/library/domain/usecases/toggle_favorite.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
 import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart';
 
@@ -19,6 +20,8 @@ class _MockImport extends Mock implements ImportVideo {}
 class _MockDelete extends Mock implements DeleteVideo {}
 
 class _MockImportUrl extends Mock implements ImportFromUrl {}
+
+class _MockFavorite extends Mock implements ToggleFavorite {}
 
 Video video(String id, VideoStatus s) => Video(
   id: id,
@@ -41,8 +44,13 @@ void main() {
   });
   tearDown(() => stream.close());
 
-  LibraryCubit build() =>
-      LibraryCubit(watch, import, _MockImportUrl(), _MockDelete());
+  LibraryCubit build() => LibraryCubit(
+    watch,
+    import,
+    _MockImportUrl(),
+    _MockDelete(),
+    _MockFavorite(),
+  );
 
   blocTest<LibraryCubit, LibraryState>(
     'emits videos once the stream delivers and stops loading',
@@ -66,6 +74,19 @@ void main() {
       c.setFilter(LibraryFilter.ready);
     },
     verify: (c) => expect(c.state.visible.map((v) => v.id), ['a']),
+  );
+
+  blocTest<LibraryCubit, LibraryState>(
+    'favorites filter keeps only starred videos',
+    build: build,
+    act: (c) {
+      stream.add([
+        video('a', VideoStatus.ready),
+        video('b', VideoStatus.ready).copyWith(isFavorite: true),
+      ]);
+      c.setFilter(LibraryFilter.favorites);
+    },
+    verify: (c) => expect(c.state.visible.map((v) => v.id), ['b']),
   );
 
   blocTest<LibraryCubit, LibraryState>(

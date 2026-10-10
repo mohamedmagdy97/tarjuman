@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Lists the gallery's videos only (no images/audio). -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <!-- Pulled in by the whisper plugin; we never record audio from the mic. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
     <application

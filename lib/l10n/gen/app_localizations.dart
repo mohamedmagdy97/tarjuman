@@ -817,6 +817,90 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'أو أضف ملف ترجمة جاهزًا'**
   String get orAddSubtitleFile;
+
+  /// No description provided for @addFromGallery.
+  ///
+  /// In ar, this message translates to:
+  /// **'من معرض الفيديو'**
+  String get addFromGallery;
+
+  /// No description provided for @deviceVideosTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيديوهات الجهاز'**
+  String get deviceVideosTitle;
+
+  /// No description provided for @galleryPermissionTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحتاج إذن عرض الفيديوهات'**
+  String get galleryPermissionTitle;
+
+  /// No description provided for @galleryPermissionBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'نعرض فيديوهات هاتفك داخل التطبيق لتختار منها. لا نرفع شيئًا ولا ننسخ الملفات.'**
+  String get galleryPermissionBody;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In ar, this message translates to:
+  /// **'فتح الإعدادات'**
+  String get openSettings;
+
+  /// No description provided for @noDeviceVideos.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد فيديوهات على الجهاز'**
+  String get noDeviceVideos;
+
+  /// No description provided for @filterFavorites.
+  ///
+  /// In ar, this message translates to:
+  /// **'المفضلة'**
+  String get filterFavorites;
+
+  /// No description provided for @addFavorite.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة للمفضلة'**
+  String get addFavorite;
+
+  /// No description provided for @removeFavorite.
+  ///
+  /// In ar, this message translates to:
+  /// **'إزالة من المفضلة'**
+  String get removeFavorite;
+
+  /// No description provided for @audioTrack.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسار الصوت'**
+  String get audioTrack;
+
+  /// No description provided for @embeddedSubtitles.
+  ///
+  /// In ar, this message translates to:
+  /// **'ترجمة مدمجة في الملف'**
+  String get embeddedSubtitles;
+
+  /// No description provided for @subtitlesOff.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيقاف'**
+  String get subtitlesOff;
+
+  /// No description provided for @loopAB.
+  ///
+  /// In ar, this message translates to:
+  /// **'تكرار مقطع (أ-ب)'**
+  String get loopAB;
+
+  /// No description provided for @tracks.
+  ///
+  /// In ar, this message translates to:
+  /// **'المسارات'**
+  String get tracks;
 }
 
 class _AppLocalizationsDelegate

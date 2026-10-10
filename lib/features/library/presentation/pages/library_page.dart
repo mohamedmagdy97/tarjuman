@@ -115,6 +115,14 @@ class _LibraryViewState extends State<LibraryView> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
+              leading: const Icon(Icons.video_library_outlined),
+              title: Text(l10n.addFromGallery),
+              onTap: () {
+                Navigator.pop(ctx);
+                unawaited(context.push('/device-videos'));
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.video_file_outlined),
               title: Text(l10n.addFromDevice),
               onTap: () => Navigator.pop(ctx, true),
@@ -226,6 +234,7 @@ class _LibraryViewState extends State<LibraryView> {
       LibraryFilter.all: l10n.filterAll,
       LibraryFilter.ready: l10n.filterReady,
       LibraryFilter.processing: l10n.filterProcessing,
+      LibraryFilter.favorites: l10n.filterFavorites,
     };
     return ListView(
       padding: const EdgeInsetsDirectional.fromSTEB(
@@ -253,6 +262,11 @@ class _LibraryViewState extends State<LibraryView> {
             pillTone: _pillTone(v),
             caption: '',
             durationLabel: _duration(v.duration),
+            isFavorite: v.isFavorite,
+            favoriteTooltip: v.isFavorite
+                ? l10n.removeFavorite
+                : l10n.addFavorite,
+            onFavorite: () => unawaited(cubit.toggleFavorite(v)),
             onTap: () => unawaited(
               context.push(
                 v.status == VideoStatus.ready

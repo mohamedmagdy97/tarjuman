@@ -394,4 +394,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orAddSubtitleFile => 'or add a ready subtitle file';
+
+  @override
+  String get addFromGallery => 'From video gallery';
+
+  @override
+  String get deviceVideosTitle => 'Device videos';
+
+  @override
+  String get galleryPermissionTitle => 'Permission needed to show videos';
+
+  @override
+  String get galleryPermissionBody =>
+      'We list your phone\'s videos inside the app so you can pick one. Nothing is uploaded and files aren\'t copied.';
+
+  @override
+  String get openSettings => 'Open settings';
+
+  @override
+  String get noDeviceVideos => 'No videos on this device';
+
+  @override
+  String get filterFavorites => 'Favorites';
+
+  @override
+  String get addFavorite => 'Add to favorites';
+
+  @override
+  String get removeFavorite => 'Remove from favorites';
+
+  @override
+  String get audioTrack => 'Audio track';
+
+  @override
+  String get embeddedSubtitles => 'Embedded subtitles';
+
+  @override
+  String get subtitlesOff => 'Off';
+
+  @override
+  String get loopAB => 'A-B repeat';
+
+  @override
+  String get tracks => 'Tracks';
 }

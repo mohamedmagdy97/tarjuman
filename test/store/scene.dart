@@ -80,6 +80,12 @@ class SceneEngine implements PlayerEngine {
   @override
   Future<void> setSpeed(double speed) async {}
   @override
+  Future<void> setVolume(double volume) async {}
+  @override
+  Future<void> setAudioTrack(String id) async {}
+  @override
+  Future<void> setSubtitleTrack(String? id) async {}
+  @override
   Widget buildSurface() => const SceneBackdrop();
   @override
   Future<void> dispose() async {}

@@ -65,7 +65,7 @@ class VideoRepositoryImpl implements VideoRepository {
   @override
   Future<Result<void>> remove(String id) async {
     final current = await get(id);
-    if (current case Success(:final value)) {
+    if (current case Success(:final value) when !value.isExternal) {
       await _storage.delete(value.path);
     }
     await (_db.delete(_db.videos)..where((t) => t.id.equals(id))).go();
@@ -83,6 +83,8 @@ class VideoRepositoryImpl implements VideoRepository {
     status: VideoStatus.values.byName(r.status),
     origin: SubtitleOrigin.values.byName(r.origin),
     lastPosition: Duration(milliseconds: r.lastPositionMs),
+    isFavorite: r.isFavorite,
+    isExternal: r.isExternal,
   );
 
   db.VideosCompanion _toCompanion(Video v) => db.VideosCompanion(
@@ -94,6 +96,8 @@ class VideoRepositoryImpl implements VideoRepository {
     origin: Value(v.origin.name),
     createdAt: Value(v.createdAt),
     lastPositionMs: Value(v.lastPosition.inMilliseconds),
+    isFavorite: Value(v.isFavorite),
+    isExternal: Value(v.isExternal),
   );
 
   @override
@@ -101,4 +105,33 @@ class VideoRepositoryImpl implements VideoRepository {
       (_db.update(_db.videos)..where((t) => t.id.equals(id))).write(
         db.VideosCompanion(lastPositionMs: Value(position.inMilliseconds)),
       );
+
+  @override
+  Future<void> setFavorite(String id, {required bool value}) =>
+      (_db.update(_db.videos)..where((t) => t.id.equals(id))).write(
+        db.VideosCompanion(isFavorite: Value(value)),
+      );
+
+  @override
+  Future<Result<Video>> addExternal({
+    required String title,
+    required String path,
+    Duration? duration,
+  }) async {
+    // Re-adding the same gallery file returns the existing entry.
+    final existing = await (_db.select(
+      _db.videos,
+    )..where((t) => t.path.equals(path))).getSingleOrNull();
+    if (existing != null) return Result.success(_toEntity(existing));
+    final video = Video(
+      id: _uuid.v4(),
+      title: title,
+      path: path,
+      createdAt: DateTime.now(),
+      duration: duration,
+      isExternal: true,
+    );
+    await _db.into(_db.videos).insert(_toCompanion(video));
+    return Result.success(video);
+  }
 }

@@ -9,9 +9,10 @@ import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
+import 'package:tarjuman/features/library/domain/usecases/toggle_favorite.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
 
-enum LibraryFilter { all, ready, processing }
+enum LibraryFilter { all, ready, processing, favorites }
 
 class LibraryState extends Equatable {
   const LibraryState({
@@ -46,6 +47,7 @@ class LibraryState extends Equatable {
       videos.where((v) => v.status == VideoStatus.ready).toList(),
     LibraryFilter.processing =>
       videos.where((v) => v.status == VideoStatus.processing).toList(),
+    LibraryFilter.favorites => videos.where((v) => v.isFavorite).toList(),
   };
 
   LibraryState copyWith({
@@ -87,8 +89,13 @@ class LibraryState extends Equatable {
 }
 
 class LibraryCubit extends Cubit<LibraryState> {
-  LibraryCubit(this._watch, this._import, this._importUrl, this._delete)
-    : super(const LibraryState()) {
+  LibraryCubit(
+    this._watch,
+    this._import,
+    this._importUrl,
+    this._delete,
+    this._favorite,
+  ) : super(const LibraryState()) {
     _sub = _watch().listen(
       (v) => emit(state.copyWith(videos: v, loading: false)),
     );
@@ -100,6 +107,7 @@ class LibraryCubit extends Cubit<LibraryState> {
   CancelToken? _download;
 
   final DeleteVideo _delete;
+  final ToggleFavorite _favorite;
   late final StreamSubscription<List<Video>> _sub;
 
   void setFilter(LibraryFilter f) => emit(state.copyWith(filter: f));
@@ -155,6 +163,8 @@ class LibraryCubit extends Cubit<LibraryState> {
   void cancelDownload() => _download?.cancel();
 
   Future<void> delete(String id) => _delete(id);
+
+  Future<void> toggleFavorite(Video v) => _favorite(v.id, value: !v.isFavorite);
 
   void failureShown() => emit(state.copyWith(clearFailure: true));
 

@@ -1,6 +1,15 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 
+class MediaTrack extends Equatable {
+  const MediaTrack({required this.id, required this.label});
+  final String id;
+  final String label;
+
+  @override
+  List<Object?> get props => [id, label];
+}
+
 class PlaybackSnapshot extends Equatable {
   const PlaybackSnapshot({
     this.position = Duration.zero,
@@ -9,6 +18,10 @@ class PlaybackSnapshot extends Equatable {
     this.isReady = false,
     this.speed = 1,
     this.error,
+    this.audioTracks = const [],
+    this.subtitleTracks = const [],
+    this.selectedAudio,
+    this.selectedSubtitle,
   });
 
   final Duration position;
@@ -18,6 +31,14 @@ class PlaybackSnapshot extends Equatable {
   final double speed;
   final String? error;
 
+  /// Embedded tracks (the auto/off pseudo-tracks are filtered out).
+  final List<MediaTrack> audioTracks;
+  final List<MediaTrack> subtitleTracks;
+  final String? selectedAudio;
+
+  /// null = embedded subtitles off.
+  final String? selectedSubtitle;
+
   @override
   List<Object?> get props => [
     position,
@@ -26,6 +47,10 @@ class PlaybackSnapshot extends Equatable {
     isReady,
     speed,
     error,
+    audioTracks,
+    subtitleTracks,
+    selectedAudio,
+    selectedSubtitle,
   ];
 }
 
@@ -38,6 +63,13 @@ abstract interface class PlayerEngine {
   Future<void> pause();
   Future<void> seekTo(Duration position);
   Future<void> setSpeed(double speed);
+
+  /// 0..1
+  Future<void> setVolume(double volume);
+  Future<void> setAudioTrack(String id);
+
+  /// null turns embedded subtitles off.
+  Future<void> setSubtitleTrack(String? id);
   Widget buildSurface();
   Future<void> dispose();
 }

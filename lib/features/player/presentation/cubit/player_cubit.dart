@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarjuman/core/design_system/tokens/app_motion.dart';
 import 'package:tarjuman/core/error/failure.dart';
+import 'package:tarjuman/core/platform/device/brightness_control.dart';
 import 'package:tarjuman/core/platform/media/player_engine.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
@@ -19,6 +20,21 @@ import 'package:tarjuman/features/processing/domain/usecases/live_subtitle_sessi
 
 enum PlayerStatus { loading, ready, error }
 
+enum HudKind { seekBack, seekForward, volume, brightness, loop }
+
+/// Transient on-screen feedback for gestures (volume bar, +10 s, ...).
+class PlayerHud extends Equatable {
+  const PlayerHud(this.kind, {this.value, this.label});
+  final HudKind kind;
+
+  /// 0..1 for volume/brightness bars.
+  final double? value;
+  final String? label;
+
+  @override
+  List<Object?> get props => [kind, value, label];
+}
+
 class PlayerState extends Equatable {
   const PlayerState({
     this.status = PlayerStatus.loading,
@@ -32,6 +48,10 @@ class PlayerState extends Equatable {
     this.failure,
     this.isLive = false,
     this.liveBusy = false,
+    this.loopA,
+    this.loopB,
+    this.volume = 1,
+    this.hud,
   });
 
   final PlayerStatus status;
@@ -46,6 +66,12 @@ class PlayerState extends Equatable {
   final Failure? failure;
   final bool isLive;
   final bool liveBusy;
+
+  /// A-B repeat markers (both set = looping).
+  final Duration? loopA;
+  final Duration? loopB;
+  final double volume;
+  final PlayerHud? hud;
 
   PlayerState copyWith({
     PlayerStatus? status,
@@ -62,6 +88,12 @@ class PlayerState extends Equatable {
     bool clearFailure = false,
     bool? isLive,
     bool? liveBusy,
+    Duration? loopA,
+    Duration? loopB,
+    bool clearLoop = false,
+    double? volume,
+    PlayerHud? hud,
+    bool clearHud = false,
   }) => PlayerState(
     status: status ?? this.status,
     video: video ?? this.video,
@@ -75,6 +107,10 @@ class PlayerState extends Equatable {
     failure: clearFailure ? null : failure ?? this.failure,
     isLive: isLive ?? this.isLive,
     liveBusy: liveBusy ?? this.liveBusy,
+    loopA: clearLoop ? null : loopA ?? this.loopA,
+    loopB: clearLoop ? null : loopB ?? this.loopB,
+    volume: volume ?? this.volume,
+    hud: clearHud ? null : hud ?? this.hud,
   );
 
   @override
@@ -90,6 +126,10 @@ class PlayerState extends Equatable {
     failure,
     isLive,
     liveBusy,
+    loopA,
+    loopB,
+    volume,
+    hud,
   ];
 }
 
@@ -99,6 +139,7 @@ class PlayerCubit extends Cubit<PlayerState> {
     required VideoRepository videos,
 
     required this.engine,
+    required BrightnessControl brightness,
     required LoadPlayerData load,
     required AttachSubtitles attach,
     required SettingsStore settings,
@@ -106,7 +147,8 @@ class PlayerCubit extends Cubit<PlayerState> {
     required LiveSubtitleSession Function() liveFactory,
     this.liveKind,
     this.startAt,
-  }) : _videos = videos,
+  }) : _brightness = brightness,
+       _videos = videos,
        _load = load,
        _attach = attach,
        _settings = settings,
@@ -125,6 +167,9 @@ class PlayerCubit extends Cubit<PlayerState> {
   final AttachSubtitles _attach;
   final SettingsStore _settings;
   final VideoRepository _videos;
+  final BrightnessControl _brightness;
+  Timer? _hudTimer;
+  double? _brightnessLevel;
 
   /// Explicit start position (e.g. jump from the editor); null = resume.
   final Duration? startAt;
@@ -185,6 +230,11 @@ class PlayerCubit extends Cubit<PlayerState> {
       return;
     }
     _session?.onPosition(s.position);
+    final a = state.loopA;
+    final b = state.loopB;
+    if (a != null && b != null && s.position >= b) {
+      unawaited(engine.seekTo(a));
+    }
     if (liveKind != null && s.isReady && _session == null && !_liveStarting) {
       _liveStarting = true;
       unawaited(_startLive(s.duration, s.position));
@@ -287,11 +337,73 @@ class PlayerCubit extends Cubit<PlayerState> {
 
   void failureShown() => emit(state.copyWith(clearFailure: true));
 
+  // ---- gestures ----------------------------------------------------------
+
+  void _showHud(PlayerHud hud) {
+    _hudTimer?.cancel();
+    emit(state.copyWith(hud: hud));
+    _hudTimer = Timer(const Duration(milliseconds: 900), () {
+      if (!isClosed) emit(state.copyWith(clearHud: true));
+    });
+  }
+
+  Future<void> seekBy(Duration delta) async {
+    final s = state.snapshot;
+    final target = s.position + delta;
+    final clamped = target < Duration.zero
+        ? Duration.zero
+        : (target > s.duration ? s.duration : target);
+    await engine.seekTo(clamped);
+    _showHud(
+      PlayerHud(
+        delta.isNegative ? HudKind.seekBack : HudKind.seekForward,
+        label: '${delta.inSeconds.abs()}',
+      ),
+    );
+  }
+
+  Future<void> adjustVolume(double delta) async {
+    final v = (state.volume + delta).clamp(0.0, 1.0);
+    emit(state.copyWith(volume: v));
+    await engine.setVolume(v);
+    _showHud(PlayerHud(HudKind.volume, value: v));
+  }
+
+  Future<void> adjustBrightness(double delta) async {
+    final current = _brightnessLevel ?? await _brightness.current();
+    final v = (current + delta).clamp(0.02, 1.0);
+    _brightnessLevel = v;
+    await _brightness.set(v);
+    _showHud(PlayerHud(HudKind.brightness, value: v));
+  }
+
+  /// A-B repeat: tap once to set A, again to set B (loop starts), again to clear.
+  void cycleLoop() {
+    final pos = state.snapshot.position;
+    if (state.loopA == null) {
+      emit(state.copyWith(loopA: pos));
+      _showHud(const PlayerHud(HudKind.loop, label: 'A'));
+    } else if (state.loopB == null) {
+      if (pos <= state.loopA!) return;
+      emit(state.copyWith(loopB: pos));
+      _showHud(const PlayerHud(HudKind.loop, label: 'A-B'));
+    } else {
+      emit(state.copyWith(clearLoop: true));
+      _showHud(const PlayerHud(HudKind.loop, label: '—'));
+    }
+  }
+
+  Future<void> selectAudio(String id) => engine.setAudioTrack(id);
+
+  Future<void> selectSubtitleTrack(String? id) => engine.setSubtitleTrack(id);
+
   @override
   Future<void> close() async {
     _saveTimer?.cancel();
     _savePosition();
     _hideTimer?.cancel();
+    _hudTimer?.cancel();
+    unawaited(_brightness.reset());
     await _sub?.cancel();
     await _liveSub?.cancel();
     await _session?.stop();

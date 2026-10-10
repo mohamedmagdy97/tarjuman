@@ -51,6 +51,20 @@ class PlayerView extends StatefulWidget {
 }
 
 class _PlayerViewState extends State<PlayerView> {
+  double _tapX = 0;
+  var _dragOnLeft = true;
+
+  void _onDoubleTap(BuildContext context, PlayerCubit cubit) {
+    final w = MediaQuery.sizeOf(context).width;
+    if (_tapX < w * .4) {
+      unawaited(cubit.seekBy(const Duration(seconds: -10)));
+    } else if (_tapX > w * .6) {
+      unawaited(cubit.seekBy(const Duration(seconds: 10)));
+    } else {
+      unawaited(cubit.togglePlay());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -88,6 +102,19 @@ class _PlayerViewState extends State<PlayerView> {
           body: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: cubit.toggleControls,
+            onDoubleTapDown: (d) => _tapX = d.localPosition.dx,
+            onDoubleTap: () => _onDoubleTap(context, cubit),
+            onVerticalDragStart: (d) => _dragOnLeft =
+                d.localPosition.dx < MediaQuery.sizeOf(context).width / 2,
+            onVerticalDragUpdate: (d) {
+              final h = MediaQuery.sizeOf(context).height;
+              final delta = -d.delta.dy / (h * .55);
+              unawaited(
+                _dragOnLeft
+                    ? cubit.adjustBrightness(delta)
+                    : cubit.adjustVolume(delta),
+              );
+            },
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -109,6 +136,7 @@ class _PlayerViewState extends State<PlayerView> {
                 ),
                 // Above the controls scrim so subtitles are never dimmed.
                 _SubtitleLayer(state: state),
+                if (state.hud != null) _HudView(hud: state.hud!),
               ],
             ),
           ),
@@ -270,6 +298,27 @@ class _Controls extends StatelessWidget {
                         Row(
                           children: [
                             IconButton(
+                              tooltip: AppLocalizations.of(context).loopAB,
+                              onPressed: cubit.cycleLoop,
+                              icon: Icon(
+                                state.loopB != null
+                                    ? Icons.repeat_on_rounded
+                                    : Icons.repeat_rounded,
+                              ),
+                              color: state.loopA != null
+                                  ? const Color(0xFFFFC93C)
+                                  : Colors.white,
+                            ),
+                            if (state.snapshot.audioTracks.length > 1 ||
+                                state.snapshot.subtitleTracks.isNotEmpty)
+                              IconButton(
+                                tooltip: AppLocalizations.of(context).tracks,
+                                onPressed: () =>
+                                    unawaited(_openTracks(context)),
+                                icon: const Icon(Icons.audiotrack_rounded),
+                                color: Colors.white,
+                              ),
+                            IconButton(
                               onPressed: cubit.attachSubtitles,
                               icon: const Icon(Icons.closed_caption_outlined),
                               color: Colors.white,
@@ -317,6 +366,63 @@ class _Controls extends StatelessWidget {
     final m = two(d.inMinutes.remainder(60));
     final s = two(d.inSeconds.remainder(60));
     return h > 0 ? '$h:$m:$s' : '$m:$s';
+  }
+
+  Future<void> _openTracks(BuildContext context) async {
+    final cubit = context.read<PlayerCubit>();
+    final l10n = AppLocalizations.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (_) => BlocProvider.value(
+        value: cubit,
+        child: BlocBuilder<PlayerCubit, PlayerState>(
+          buildWhen: (a, b) => a.snapshot != b.snapshot,
+          builder: (context, s) {
+            final snap = s.snapshot;
+            Widget header(String t) => Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Text(t, style: AppTypography.heading),
+            );
+            return SafeArea(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  if (snap.audioTracks.length > 1) ...[
+                    header(l10n.audioTrack),
+                    for (final t in snap.audioTracks)
+                      ListTile(
+                        title: Text(t.label),
+                        trailing: snap.selectedAudio == t.id
+                            ? const Icon(Icons.check_rounded)
+                            : null,
+                        onTap: () => unawaited(cubit.selectAudio(t.id)),
+                      ),
+                  ],
+                  if (snap.subtitleTracks.isNotEmpty) ...[
+                    header(l10n.embeddedSubtitles),
+                    ListTile(
+                      title: Text(l10n.subtitlesOff),
+                      trailing: snap.selectedSubtitle == null
+                          ? const Icon(Icons.check_rounded)
+                          : null,
+                      onTap: () => unawaited(cubit.selectSubtitleTrack(null)),
+                    ),
+                    for (final t in snap.subtitleTracks)
+                      ListTile(
+                        title: Text(t.label),
+                        trailing: snap.selectedSubtitle == t.id
+                            ? const Icon(Icons.check_rounded)
+                            : null,
+                        onTap: () => unawaited(cubit.selectSubtitleTrack(t.id)),
+                      ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _openStyle(BuildContext context) async {
@@ -395,6 +501,64 @@ class _Error extends StatelessWidget {
               onPressed: onBack,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HudView extends StatelessWidget {
+  const _HudView({required this.hud});
+  final PlayerHud hud;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = switch (hud.kind) {
+      HudKind.seekBack => Icons.replay_10_rounded,
+      HudKind.seekForward => Icons.forward_10_rounded,
+      HudKind.volume =>
+        (hud.value ?? 0) == 0
+            ? Icons.volume_off_rounded
+            : Icons.volume_up_rounded,
+      HudKind.brightness => Icons.brightness_6_rounded,
+      HudKind.loop => Icons.repeat_rounded,
+    };
+    return IgnorePointer(
+      child: Align(
+        alignment: const Alignment(0, -.55),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xCC05070B),
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: Colors.white),
+                if (hud.value != null) ...[
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 110,
+                    child: LinearProgressIndicator(
+                      value: hud.value,
+                      minHeight: 5,
+                      color: const Color(0xFFFFC93C),
+                      backgroundColor: Colors.white24,
+                    ),
+                  ),
+                ],
+                if (hud.label != null) ...[
+                  const SizedBox(width: 10),
+                  Text(
+                    hud.label!,
+                    style: AppTypography.label.copyWith(color: Colors.white),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

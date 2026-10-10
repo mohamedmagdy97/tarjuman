@@ -13,6 +13,9 @@ class VideoCard extends StatelessWidget {
     required this.caption,
     required this.onTap,
     this.onLongPress,
+    this.isFavorite = false,
+    this.onFavorite,
+    this.favoriteTooltip,
     this.durationLabel,
     super.key,
   });
@@ -24,6 +27,9 @@ class VideoCard extends StatelessWidget {
   final String? durationLabel;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
+  final bool isFavorite;
+  final VoidCallback? onFavorite;
+  final String? favoriteTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +122,15 @@ class VideoCard extends StatelessWidget {
                 ],
               ),
             ),
+            if (onFavorite != null)
+              IconButton(
+                tooltip: favoriteTooltip,
+                onPressed: onFavorite,
+                icon: Icon(
+                  isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
+                  color: isFavorite ? c.primary : c.muted,
+                ),
+              ),
           ],
         ),
       ),
