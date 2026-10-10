@@ -163,5 +163,64 @@
   "embeddedSubtitles": "ترجمة مدمجة في الملف",
   "subtitlesOff": "إيقاف",
   "loopAB": "تكرار مقطع (أ-ب)",
-  "tracks": "المسارات"
+  "tracks": "المسارات",
+  "studyMode": "وضع المذاكرة",
+  "previousSentence": "الجملة السابقة",
+  "nextSentence": "الجملة التالية",
+  "repeatSentence": "كرّر الجملة",
+  "tapAWord": "اضغط على أي كلمة لترى معناها",
+  "saveWord": "حفظ الكلمة",
+  "wordSaved": "تم الحفظ",
+  "myVocabulary": "كلماتي",
+  "vocabularyEmpty": "لم تحفظ كلمات بعد",
+  "vocabularyEmptyBody": "أثناء المشاهدة افتح وضع المذاكرة واضغط على أي كلمة لحفظها.",
+  "translatingWord": "جارٍ الترجمة…",
+  "wordNeedsModels": "حمّل نموذج الترجمة للغة أولاً من شاشة النماذج.",
+  "deleteWord": "حذف الكلمة",
+  "subtitleTiming": "توقيت الترجمة",
+  "subtitleLater": "أبطأ",
+  "subtitleEarlier": "أسرع",
+  "resetTiming": "إعادة الضبط",
+  "seconds": "{value} ث",
+  "@seconds": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "rotateScreen": "تدوير الشاشة",
+  "sourceLanguageTitle": "لغة كلام الفيديو",
+  "recommendedForDevice": "موصى به لجهازك",
+  "multilingualModel": "متعدد اللغات",
+  "skip": "تخطي",
+  "next": "التالي",
+  "start": "ابدأ",
+  "onb1Title": "ترجمة عربية لأي فيديو إنجليزي",
+  "onb1Body": "أضف فيديو من هاتفك أو من رابط مباشر، ويظهر لك الكلام مترجمًا بالعربية فوق الصورة.",
+  "onb2Title": "على جهازك، بدون إنترنت",
+  "onb2Body": "المعالجة تتم على الهاتف فلا يغادر الصوت جهازك. اختر «جهّز ثم شاهد» لتحفظ الترجمة وتعيد مشاهدتها.",
+  "onb3Title": "جهّز التطبيق مرة واحدة",
+  "onb3Body": "نحمّل نماذج التعرف على الكلام والترجمة (نحو ١٥٠ إلى ٢٥٠ ميجابايت). يفضَّل أن تكون على واي فاي. يمكنك أيضًا تخطيها وتحميلها لاحقًا من شاشة النماذج.",
+  "onbDownloadNow": "حمّل النماذج الآن",
+  "onbModelsDone": "كل شيء جاهز. اضغط ابدأ.",
+  "onbDownloading": "جارٍ تحميل النموذج {step} من {total}…",
+  "@onbDownloading": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationProgress": "{percent}٪ مكتمل",
+  "@notificationProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

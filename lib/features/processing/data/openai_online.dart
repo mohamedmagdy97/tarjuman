@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:tarjuman/core/cancel/cancel_token.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/entities/transcript_segment.dart';
 import 'package:tarjuman/features/processing/domain/ports/speech_recognizer.dart';
 import 'package:tarjuman/features/processing/domain/ports/text_translator.dart';
@@ -18,10 +19,14 @@ Failure _httpFailure(http.Response r) => r.statusCode == 401
 /// Cloud ASR (OpenAI-compatible `/audio/transcriptions`). Audio leaves the
 /// device — only constructed after explicit user consent.
 class OnlineSpeechRecognizer implements SpeechRecognizer {
-  OnlineSpeechRecognizer(this._apiKey, {http.Client? client})
-    : _client = client ?? http.Client();
+  OnlineSpeechRecognizer(
+    this._apiKey, {
+    this.language = SourceLanguage.en,
+    http.Client? client,
+  }) : _client = client ?? http.Client();
 
   final String _apiKey;
+  final SourceLanguage language;
   final http.Client _client;
   static const model = 'whisper-1';
 
@@ -38,7 +43,7 @@ class OnlineSpeechRecognizer implements SpeechRecognizer {
             )
             ..headers['Authorization'] = 'Bearer $_apiKey'
             ..fields['model'] = model
-            ..fields['language'] = 'en'
+            ..fields['language'] = language.code
             ..fields['response_format'] = 'verbose_json'
             ..fields['timestamp_granularities[]'] = 'segment'
             ..files.add(await http.MultipartFile.fromPath('file', wavPath));
@@ -72,10 +77,14 @@ class OnlineSpeechRecognizer implements SpeechRecognizer {
 
 /// Cloud translation through a chat model; keeps line count 1:1.
 class OnlineTextTranslator implements TextTranslator {
-  OnlineTextTranslator(this._apiKey, {http.Client? client})
-    : _client = client ?? http.Client();
+  OnlineTextTranslator(
+    this._apiKey, {
+    this.language = SourceLanguage.en,
+    http.Client? client,
+  }) : _client = client ?? http.Client();
 
   final String _apiKey;
+  final SourceLanguage language;
   final http.Client _client;
   static const model = 'gpt-4o-mini';
   static const _batch = 25;
@@ -114,7 +123,7 @@ class OnlineTextTranslator implements TextTranslator {
             {
               'role': 'system',
               'content':
-                  'Translate each English subtitle line to natural '
+                  'Translate each ${language.nativeName} subtitle line to natural '
                   'Modern Standard Arabic. Keep meaning, keep it short. '
                   'Reply as JSON {"translations": [...]} with exactly the same '
                   'number of items, in order.',

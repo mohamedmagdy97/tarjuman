@@ -9,6 +9,7 @@ import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
 import 'package:tarjuman/features/player/domain/repositories/subtitle_repository.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/ports/audio_extractor.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
 import 'package:tarjuman/features/processing/domain/usecases/process_range.dart';
@@ -41,15 +42,19 @@ class RunProcessingPipeline {
     required String videoId,
     required EngineKind kind,
     required CancelToken cancel,
+    SourceLanguage language = SourceLanguage.en,
   }) {
     final out = StreamController<ProcessingEvent>();
-    unawaited(_run(videoId, kind, cancel, out).whenComplete(out.close));
+    unawaited(
+      _run(videoId, kind, language, cancel, out).whenComplete(out.close),
+    );
     return out.stream;
   }
 
   Future<void> _run(
     String videoId,
     EngineKind kind,
+    SourceLanguage language,
     CancelToken cancel,
     StreamController<ProcessingEvent> out,
   ) async {
@@ -68,7 +73,7 @@ class RunProcessingPipeline {
     }
     var video = (got as Success<Video>).value;
 
-    final acquired = await _engines.acquire(kind);
+    final acquired = await _engines.acquire(kind, language: language);
     if (acquired case Err(:final failure)) {
       out.add(ProcessingFailed(failure));
       return;

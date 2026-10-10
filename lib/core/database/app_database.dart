@@ -29,13 +29,22 @@ class Cues extends Table {
   TextColumn get status => text().withDefault(const Constant('committed'))();
 }
 
-@DriftDatabase(tables: [Videos, Cues])
+/// Words saved from the study sheet.
+class Vocabulary extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get word => text()();
+  TextColumn get translation => text()();
+  TextColumn get sentence => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
+@DriftDatabase(tables: [Videos, Cues, Vocabulary])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'tarjuman'));
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -43,6 +52,7 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (m, from, to) async {
       if (from < 2) await m.addColumn(videos, videos.lastPositionMs);
       if (from < 3) await m.addColumn(videos, videos.isFavorite);
+      if (from < 4) await m.createTable(vocabulary);
     },
     onCreate: (m) async {
       await m.createAll();

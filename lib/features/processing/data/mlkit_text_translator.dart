@@ -2,13 +2,18 @@ import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 import 'package:tarjuman/core/cancel/cancel_token.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/ports/text_translator.dart';
 
 class MlKitTextTranslator implements TextTranslator {
-  final OnDeviceTranslator _translator = OnDeviceTranslator(
-    sourceLanguage: TranslateLanguage.english,
-    targetLanguage: TranslateLanguage.arabic,
-  );
+  MlKitTextTranslator(SourceLanguage language)
+    : _translator = OnDeviceTranslator(
+        sourceLanguage:
+            BCP47Code.fromRawValue(language.code) ?? TranslateLanguage.english,
+        targetLanguage: TranslateLanguage.arabic,
+      );
+
+  final OnDeviceTranslator _translator;
 
   @override
   Future<Result<List<String>>> translateBatch(

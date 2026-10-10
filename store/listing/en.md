@@ -16,6 +16,10 @@ What you get:
 • On-device processing: speech recognition with Whisper and translation with ML Kit, with no audio sent to a server.
 • Resumes where it stopped: if the app closes mid-job, finished parts are kept.
 • Subtitle editor: search and edit any line, then export an SRT file to share.
+• Study mode: step between sentences, repeat any line, tap a word to see its meaning and save it to My words.
+• Multiple languages: English, French, Spanish, German, Italian, Portuguese, Turkish and Russian to Arabic.
+• Playback controls: double-tap to skip 10 s, drag for volume and brightness, A-B repeat, subtitle timing, audio track picker.
+• Processing continues in the background with a progress notification.
 • Full control of the look: font size, colour, background, position, and an option to show English above the Arabic for language learners.
 • Remembers where you stopped in each video.
 • Optional online processing with your own OpenAI key. It is off by default and only runs with your consent.
@@ -29,12 +33,12 @@ Good to know:
 • Only direct file links are supported. YouTube-style page links and DRM-protected content are not.
 • Processing uses CPU and battery. For long videos keep the screen on and the phone charging.
 
-## What's new (max 500) — 1.3.0
-• Subtitle editor: search, edit and export SRT
-• Import any video or audio format, or download from a direct link
-• Resume playback from where you stopped
-• Show English above Arabic
-• Design and stability improvements
+## What's new (max 500) — 1.5.0
+• Study mode and the My words dictionary
+• Eight source languages to Arabic
+• Background processing with a notification
+• Player gestures, A-B repeat and subtitle timing
+• Welcome flow and a model recommended for your device
 
 ## Category
 Video Players & Editors

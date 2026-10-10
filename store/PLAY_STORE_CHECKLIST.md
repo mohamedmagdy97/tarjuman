@@ -62,10 +62,19 @@ https://mohamedmagdy97.github.io/tarjuman-privacy/ and confirm it loads **before
 4. Production rollout, ideally staged (10 % → 50 % → 100 %).
 5. Read the **Pre-launch report** Play generates (crashes, accessibility).
 
-## 4b. Permissions
-The app asks for **no sensitive permissions**: only `INTERNET` (and normal-level `ACCESS_NETWORK_STATE`/`WAKE_LOCK`).
-Videos are picked with the system photo/video picker or file browser, which need no permission and no Play declaration.
-Do not add `READ_MEDIA_VIDEO`/`READ_EXTERNAL_STORAGE`/`MANAGE_EXTERNAL_STORAGE`: they trigger extra policy forms.
+## 4b. Permissions and the foreground-service declaration
+Declared in the manifest: `INTERNET`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_DATA_SYNC`, `POST_NOTIFICATIONS`
+(+ normal-level `ACCESS_NETWORK_STATE`, `WAKE_LOCK`). Nothing sensitive: videos come from the system photo/video picker
+or file browser, no storage/media/mic/location/contacts permissions.
+
+**Play Console → App content → Foreground service permissions** (required because of `FOREGROUND_SERVICE_DATA_SYNC`):
+- Type: **Data sync**.
+- Description to paste: "The user starts an on-device translation of a video. The foreground service keeps that job
+  running, with a progress notification, if the user switches to another app. It stops when the job finishes, fails or is
+  cancelled. It never starts on its own or at boot."
+- Video (they may ask for it): record the phone: start a translation, press Home, show the progress notification, return.
+- User-initiated, visible notification, stops itself; `RECEIVE_BOOT_COMPLETED` and the boot receivers are removed.
+Do not add `READ_MEDIA_VIDEO`/`READ_EXTERNAL_STORAGE`/`MANAGE_EXTERNAL_STORAGE`.
 
 ## 5b. Technical gates already satisfied by this build (verify again after any dependency change)
 - `targetSdk 36`, `minSdk 24`, AAB, signed with the upload key.

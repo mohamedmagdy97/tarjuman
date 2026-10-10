@@ -9,7 +9,9 @@ import 'package:tarjuman/core/platform/device/brightness_control.dart';
 import 'package:tarjuman/core/platform/media/player_engine.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
+import 'package:tarjuman/features/player/domain/entities/subtitle_cue.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_style.dart';
+import 'package:tarjuman/features/player/domain/entities/subtitle_timeline.dart';
 import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
 import 'package:tarjuman/features/player/domain/usecases/load_player_data.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
@@ -58,6 +60,18 @@ class _Settings implements SettingsStore {
   bool readOnlineConsent() => false;
   @override
   Future<void> writeOnlineConsent({required bool value}) async {}
+  @override
+  Duration readSubtitleOffset(String videoId) => Duration.zero;
+  @override
+  Future<void> writeSubtitleOffset(String videoId, Duration offset) async {}
+  @override
+  bool readOnboardingDone() => true;
+  @override
+  Future<void> writeOnboardingDone() async {}
+  @override
+  String readSourceLanguage() => 'en';
+  @override
+  Future<void> writeSourceLanguage(String code) async {}
 }
 
 class _Brightness implements BrightnessControl {
@@ -162,5 +176,61 @@ void main() {
     cubit.cycleLoop();
     expect(cubit.state.loopA, isNull);
     expect(cubit.state.loopB, isNull);
+  });
+
+  group('study navigation and timing', () {
+    SubtitleCue cue(int s, int e, String t) => SubtitleCue(
+      start: Duration(seconds: s),
+      end: Duration(seconds: e),
+      text: t,
+      original: t,
+    );
+
+    setUp(() {
+      cubit.emit(
+        cubit.state.copyWith(
+          timeline: SubtitleTimeline([
+            cue(10, 14, 'a'),
+            cue(20, 24, 'b'),
+            cue(30, 34, 'c'),
+          ]),
+          snapshot: snap(23),
+        ),
+      );
+    });
+
+    test('next sentence jumps to the next cue start', () async {
+      await cubit.nextCue();
+      expect(engine.seeks.last, const Duration(seconds: 30));
+    });
+
+    test('previous sentence restarts the current one when >2 s in', () async {
+      await cubit.previousCue();
+      expect(engine.seeks.last, const Duration(seconds: 20));
+    });
+
+    test('previous sentence goes back one cue when just started', () async {
+      cubit.emit(cubit.state.copyWith(snapshot: snap(21)));
+      await cubit.previousCue();
+      expect(engine.seeks.last, const Duration(seconds: 10));
+    });
+
+    test(
+      'repeat sets an A-B loop on the current cue and toggles off',
+      () async {
+        await cubit.repeatCurrentCue();
+        expect(cubit.state.loopA, const Duration(seconds: 20));
+        expect(cubit.state.loopB, const Duration(seconds: 24));
+        await cubit.repeatCurrentCue();
+        expect(cubit.state.loopA, isNull);
+      },
+    );
+
+    test('subtitle offset shifts which cue is considered active', () async {
+      await cubit.adjustSubtitleOffset(const Duration(seconds: 2));
+      expect(cubit.state.subtitleOffset, const Duration(seconds: 2));
+      await cubit.resetSubtitleOffset();
+      expect(cubit.state.subtitleOffset, Duration.zero);
+    });
   });
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tarjuman/core/design_system/tokens/app_theme.dart';
+import 'package:tarjuman/core/platform/background/background_processing.dart';
 import 'package:tarjuman/core/platform/device/brightness_control.dart';
 import 'package:tarjuman/core/platform/media/player_engine.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
@@ -36,12 +37,14 @@ import 'package:tarjuman/features/processing/presentation/cubit/processing_cubit
 import 'package:tarjuman/features/processing/presentation/cubit/setup_cubit.dart';
 import 'package:tarjuman/features/processing/presentation/pages/processing_page.dart';
 import 'package:tarjuman/features/processing/presentation/pages/setup_page.dart';
-import 'package:tarjuman/features/settings/presentation/cubit/app_settings_cubit.dart';
-import 'package:tarjuman/features/settings/presentation/pages/settings_page.dart';
 import 'package:tarjuman/features/subtitle_editor/domain/usecases/edit_cue_text.dart';
 import 'package:tarjuman/features/subtitle_editor/domain/usecases/export_subtitles.dart';
 import 'package:tarjuman/features/subtitle_editor/presentation/cubit/editor_cubit.dart';
 import 'package:tarjuman/features/subtitle_editor/presentation/pages/editor_page.dart';
+import 'package:tarjuman/features/vocabulary/domain/ports/word_translator.dart';
+import 'package:tarjuman/features/vocabulary/domain/repositories/vocabulary_repository.dart';
+import 'package:tarjuman/features/vocabulary/presentation/cubit/study_cubit.dart';
+import 'package:tarjuman/features/vocabulary/presentation/widgets/study_sheet.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 import 'scene.dart';
@@ -60,6 +63,18 @@ class _Settings implements SettingsStore {
   bool readOnlineConsent() => true;
   @override
   Future<void> writeOnlineConsent({required bool value}) async {}
+  @override
+  Duration readSubtitleOffset(String videoId) => Duration.zero;
+  @override
+  Future<void> writeSubtitleOffset(String videoId, Duration offset) async {}
+  @override
+  bool readOnboardingDone() => true;
+  @override
+  Future<void> writeOnboardingDone() async {}
+  @override
+  String readSourceLanguage() => 'en';
+  @override
+  Future<void> writeSourceLanguage(String code) async {}
 }
 
 class _Secrets implements SecretStore {
@@ -97,6 +112,15 @@ class _MExport extends Mock implements ExportSubtitles {}
 
 class _MLive extends Mock implements LiveSubtitleSession {}
 
+class _NoBackground implements BackgroundProcessing {
+  @override
+  Future<void> start({required String title, required String text}) async {}
+  @override
+  Future<void> update(String text) async {}
+  @override
+  Future<void> stop() async {}
+}
+
 class _Brightness implements BrightnessControl {
   @override
   Future<double> current() async => .5;
@@ -125,7 +149,14 @@ class _PlayerC extends PlayerCubit {
 
 class _ProcC extends ProcessingCubit {
   _ProcC(ProcessingState s)
-    : super(videoId: 'v', kind: EngineKind.offline, pipeline: _MPipeline()) {
+    : super(
+        videoId: 'v',
+        kind: EngineKind.offline,
+        pipeline: _MPipeline(),
+        background: _NoBackground(),
+        notificationTitle: '',
+        notificationText: (p) => '$p%',
+      ) {
     emit(s);
   }
 }
@@ -155,11 +186,15 @@ class _EditorC extends EditorCubit {
   }
 }
 
-class _SettingsC extends AppSettingsCubit {
-  _SettingsC() : super(_Settings(), _Secrets()) {
-    emit(const AppSettingsState(onlineConsent: true, hasApiKey: true));
+class _StudyC extends StudyCubit {
+  _StudyC() : super(_MWordTranslator(), _MVocab()) {
+    emit(const StudyState(word: 'learn', translation: 'يتعلّم', saved: true));
   }
 }
+
+class _MWordTranslator extends Mock implements WordTranslator {}
+
+class _MVocab extends Mock implements VocabularyRepository {}
 
 // ---- sample data -----------------------------------------------------------
 final _now = DateTime(2026, 10, 9);
@@ -465,11 +500,33 @@ Map<String, Widget Function(Locale)> storeScreens() => {
       child: const EditorView(videoId: 'v'),
     ),
   ),
-  '08-settings': (l) => _app(
+  '08-study': (l) => _app(
     l,
-    BlocProvider<AppSettingsCubit>.value(
-      value: _SettingsC(),
-      child: const SettingsPage(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider<PlayerCubit>.value(
+          value: _PlayerC(_playerState(controls: false)),
+        ),
+        BlocProvider<StudyCubit>.value(value: _StudyC()),
+      ],
+      child: Builder(
+        builder: (context) => Stack(
+          children: [
+            const PlayerView(),
+            const Positioned.fill(child: ColoredBox(color: Color(0x8C05070B))),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Material(
+                color: Theme.of(context).colorScheme.surface,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: const StudySheet(),
+              ),
+            ),
+          ],
+        ),
+      ),
     ),
   ),
 };

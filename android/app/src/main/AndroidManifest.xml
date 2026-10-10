@@ -1,6 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Keeps a translation job running (with a progress notification) while the app is in the background. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Pulled in by flutter_foreground_task; we never restart jobs on boot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" tools:node="remove"/>
     <!-- Pulled in by the whisper plugin; we never record audio from the mic. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
     <application
@@ -34,6 +40,13 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <service
+            android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false" />
+        <receiver
+            android:name="com.pravera.flutter_foreground_task.service.RebootReceiver"
+            tools:node="remove" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

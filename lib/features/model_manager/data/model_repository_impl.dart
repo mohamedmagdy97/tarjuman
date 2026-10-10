@@ -1,31 +1,40 @@
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
+import 'package:tarjuman/core/platform/device/device_capability.dart';
 import 'package:tarjuman/features/model_manager/domain/entities/model_info.dart';
 import 'package:tarjuman/features/model_manager/domain/repositories/model_repository.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:whisper_cpp_flutter_plus/whisper_cpp_flutter_plus.dart';
 
 /// Speech models come from whisper_cpp_flutter_plus' checksum-pinned catalog;
 /// translation models from the ML Kit on-device model manager.
 class ModelRepositoryImpl implements ModelRepository {
-  ModelRepositoryImpl()
+  ModelRepositoryImpl(this._device)
     : _whisper = WhisperModelManager(),
       _mlkit = OnDeviceTranslatorModelManager();
 
+  final DeviceCapability _device;
   final WhisperModelManager _whisper;
   final OnDeviceTranslatorModelManager _mlkit;
 
-  // English-only models: better accuracy/size for English speech. Preference order.
-  static const _speech = [
+  // Devices with at least this much RAM get the larger model by default.
+  static const _bigModelRamMb = 5500;
+  static const _mlkitBytes = 30 * 1024 * 1024;
+
+  static const _english = [
     WhisperModelCatalog.baseEnglish,
     WhisperModelCatalog.tinyEnglish,
   ];
-  static const _mlkitSizes = 30 * 1024 * 1024;
-  static final _mlkitModels = {
-    'mlkit.en': TranslateLanguage.english.bcpCode,
-    'mlkit.ar': TranslateLanguage.arabic.bcpCode,
-  };
+  static const _multilingual = [
+    WhisperModelCatalog.base,
+    WhisperModelCatalog.tiny,
+  ];
+  static const _all = [..._english, ..._multilingual];
 
   WhisperModelDescriptor? _speechById(String id) =>
-      _speech.where((d) => d.id == id).firstOrNull;
+      _all.where((d) => d.id == id).firstOrNull;
+
+  String? _languageOf(String id) =>
+      id.startsWith('mlkit.') ? id.substring('mlkit.'.length) : null;
 
   Future<bool> _speechInstalled(WhisperModelDescriptor d) async {
     try {
@@ -35,25 +44,58 @@ class ModelRepositoryImpl implements ModelRepository {
     }
   }
 
+  String _speechName(WhisperModelDescriptor d) {
+    final size = d.id.startsWith('base') ? 'Base' : 'Tiny';
+    return d.languageScope == WhisperModelLanguageScope.english
+        ? '$size · English'
+        : '$size · Multilingual';
+  }
+
   @override
-  Future<List<ModelInfo>> list() async => [
-    for (final d in _speech)
+  Future<String> recommendedSpeechModelId(SourceLanguage language) async {
+    final big = (await _device.ramMb() ?? 0) >= _bigModelRamMb;
+    if (language.isEnglish) return big ? 'base.en' : 'tiny.en';
+    return big ? 'base' : 'tiny';
+  }
+
+  @override
+  Future<List<ModelInfo>> list() async {
+    final recEn = await recommendedSpeechModelId(SourceLanguage.en);
+    final recMulti = await recommendedSpeechModelId(SourceLanguage.fr);
+    return [
+      for (final d in _all)
+        ModelInfo(
+          id: d.id,
+          kind: ModelKind.speech,
+          name: _speechName(d),
+          sizeBytes: d.approximateBytes,
+          installed: await _speechInstalled(d),
+          multilingual: d.languageScope != WhisperModelLanguageScope.english,
+          recommended: d.id == recEn || d.id == recMulti,
+        ),
+      for (final l in [
+        ...SourceLanguage.values,
+      ])
+        ModelInfo(
+          id: 'mlkit.${l.code}',
+          kind: ModelKind.translation,
+          name: l.nativeName,
+          sizeBytes: _mlkitBytes,
+          installed: await _mlkit.isModelDownloaded(l.code),
+          languageCode: l.code,
+        ),
       ModelInfo(
-        id: d.id,
-        kind: ModelKind.speech,
-        name: d.id == 'base.en' ? 'Base · English' : 'Tiny · English',
-        sizeBytes: d.approximateBytes,
-        installed: await _speechInstalled(d),
-      ),
-    for (final e in _mlkitModels.entries)
-      ModelInfo(
-        id: e.key,
+        id: 'mlkit.ar',
         kind: ModelKind.translation,
-        name: e.key == 'mlkit.en' ? 'English' : 'Arabic',
-        sizeBytes: _mlkitSizes,
-        installed: await _mlkit.isModelDownloaded(e.value),
+        name: 'العربية',
+        sizeBytes: _mlkitBytes,
+        installed: await _mlkit.isModelDownloaded(
+          TranslateLanguage.arabic.bcpCode,
+        ),
+        languageCode: 'ar',
       ),
-  ];
+    ];
+  }
 
   @override
   Stream<double?> download(String id) async* {
@@ -64,10 +106,10 @@ class ModelRepositoryImpl implements ModelRepository {
       }
       return;
     }
-    final bcp = _mlkitModels[id];
-    if (bcp == null) throw ArgumentError('Unknown model $id');
+    final code = _languageOf(id);
+    if (code == null) throw ArgumentError('Unknown model $id');
     yield null; // ML Kit gives no progress callbacks
-    final ok = await _mlkit.downloadModel(bcp, isWifiRequired: false);
+    final ok = await _mlkit.downloadModel(code, isWifiRequired: false);
     if (!ok) throw StateError('Model download failed');
   }
 
@@ -75,13 +117,19 @@ class ModelRepositoryImpl implements ModelRepository {
   Future<void> remove(String id) async {
     final speech = _speechById(id);
     if (speech != null) return _whisper.delete(speech.fileName);
-    final bcp = _mlkitModels[id];
-    if (bcp != null) await _mlkit.deleteModel(bcp);
+    final code = _languageOf(id);
+    if (code != null) await _mlkit.deleteModel(code);
   }
 
   @override
-  Future<String?> installedSpeechModelPath() async {
-    for (final d in _speech) {
+  Future<String?> installedSpeechModelPath(SourceLanguage language) async {
+    final rec = await recommendedSpeechModelId(language);
+    // Preference: the recommended model first, then any other that can do it.
+    final candidates = [
+      ...(language.isEnglish ? _english : _multilingual),
+      if (language.isEnglish) ..._multilingual,
+    ]..sort((a, b) => (a.id == rec ? 0 : 1).compareTo(b.id == rec ? 0 : 1));
+    for (final d in candidates) {
       try {
         final f = await _whisper.findCatalogModel(d);
         if (f != null) return f.path;
@@ -93,9 +141,9 @@ class ModelRepositoryImpl implements ModelRepository {
   }
 
   @override
-  Future<bool> translationReady() async {
-    for (final bcp in _mlkitModels.values) {
-      if (!await _mlkit.isModelDownloaded(bcp)) return false;
+  Future<bool> translationReady(SourceLanguage language) async {
+    for (final code in {language.code, TranslateLanguage.arabic.bcpCode}) {
+      if (!await _mlkit.isModelDownloaded(code)) return false;
     }
     return true;
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarjuman/app/di/injection.dart';
 import 'package:tarjuman/core/design_system/components/app_progress_bar.dart';
+import 'package:tarjuman/core/design_system/components/status_pill.dart';
 import 'package:tarjuman/core/design_system/tokens/app_radius.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
@@ -141,11 +142,24 @@ class _ModelTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      model.name,
-                      style: AppTypography.label.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            model.name,
+                            style: AppTypography.label.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (model.recommended) ...[
+                          const SizedBox(width: AppSpacing.sm),
+                          StatusPill(
+                            label: l10n.recommendedForDevice,
+                            tone: PillTone.ready,
+                          ),
+                        ],
+                      ],
                     ),
                     Text(
                       downloading ? l10n.downloading : l10n.sizeMb(mb),

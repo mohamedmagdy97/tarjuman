@@ -12,11 +12,19 @@ class SubtitleStyleSheet extends StatelessWidget {
   const SubtitleStyleSheet({
     required this.style,
     required this.onChanged,
+    this.offset = Duration.zero,
+    this.onOffsetChanged,
+    this.onOffsetReset,
     super.key,
   });
 
   final SubtitleStyle style;
   final ValueChanged<SubtitleStyle> onChanged;
+
+  /// Subtitle shift; positive = later. Null callbacks hide the row.
+  final Duration offset;
+  final ValueChanged<Duration>? onOffsetChanged;
+  final VoidCallback? onOffsetReset;
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +130,41 @@ class SubtitleStyleSheet extends StatelessWidget {
               value: style.position,
               onChanged: (v) => onChanged(style.copyWith(position: v)),
             ),
+            if (onOffsetChanged != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              _label(context, l10n.subtitleTiming),
+              Row(
+                children: [
+                  IconButton.filledTonal(
+                    tooltip: l10n.subtitleEarlier,
+                    onPressed: () =>
+                        onOffsetChanged!(const Duration(milliseconds: -500)),
+                    icon: const Icon(Icons.remove_rounded),
+                  ),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: onOffsetReset,
+                      child: Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(
+                          l10n.seconds(
+                            '${offset.isNegative ? '' : '+'}'
+                            '${(offset.inMilliseconds / 1000).toStringAsFixed(1)}',
+                          ),
+                          style: AppTypography.timecode,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton.filledTonal(
+                    tooltip: l10n.subtitleLater,
+                    onPressed: () =>
+                        onOffsetChanged!(const Duration(milliseconds: 500)),
+                    icon: const Icon(Icons.add_rounded),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

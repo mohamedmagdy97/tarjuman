@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.4.1+7, package `com.megtech.tarjuman`)
+## 9. Current status (v1.5.0+8, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -149,12 +149,21 @@ Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a 
 - Play gates: 16 KB-aligned native libs (gradle override in `android/build.gradle.kts`), native symbols, in-app privacy link →
   `AppConfig.privacyPolicyUrl` (GitHub Pages repo `mohamedmagdy97/tarjuman-privacy`, content in `store/privacy-site/`).
 
-v1.4.x (player features, analyzer/tests green; the user confirmed the processing flow works after the FFmpeg fix, v1.4 features not yet device-tested):
-gallery import via the system photo/video picker (`FileType.video`, no permission) and any-file import (`FileType.any`), favorites
-(schema v3), gestures (double-tap ±10 s / play, vertical drag = brightness (left) / volume (right)), A-B repeat, embedded
-audio/subtitle track picker, FFmpeg extraction fix (the async session must be awaited via the complete callback — verified on macOS).
-Deliberately NOT done: an in-app gallery browser (needs `READ_MEDIA_VIDEO` + a Play declaration), sibling-.srt auto-load (needs
-all-files access), background audio/PiP, playlists, background-processing notification, extra source languages, iOS.
+v1.4–1.5 (analyzer + 48 tests green; the user confirmed the processing flow works after the FFmpeg fix; everything below is not yet device-tested):
+- Import: system photo/video picker (`FileType.video`) and any-file picker (`FileType.any`), no storage permission.
+- Library: favorites (schema v3), first-run onboarding (`features/onboarding`, models download for en→ar).
+- Player: gestures (double-tap ±10 s / play, vertical drag brightness|volume), A-B repeat, embedded audio/subtitle track picker,
+  subtitle timing offset (per video), rotate button, secondary actions in a ⋮ menu (fits 360 px width).
+- Study mode (`features/vocabulary`): prev/next/repeat sentence, tap a word → ML Kit translation → saved in `Vocabulary` table (schema v4);
+  “My words” screen.
+- Source languages (`SourceLanguage`: en fr es de it pt tr ru → ar): language chips in setup, Whisper multilingual `tiny`/`base`
+  for non-English, ML Kit per-language models, OpenAI adapters take the language.
+- Model recommendation from device RAM (`DeviceCapability`, ≥ ~5.5 GB → base else tiny), badge in the Models screen.
+- Background processing: `flutter_foreground_task` (dataSync foreground service + progress notification) via `BackgroundProcessing`;
+  boot receivers removed. Needs the Play “Foreground service permissions” declaration (see `store/PLAY_STORE_CHECKLIST.md` §4b).
+- FFmpeg fix: the async session must be awaited through the complete callback (verified on macOS).
+Deliberately NOT done: burned-in subtitle video export (needs an FFmpeg build with libass + a video encoder → much larger APK),
+in-app gallery browser (needs `READ_MEDIA_VIDEO`), sibling-.srt auto-load, PiP/background audio, playlists, iOS.
 
 Known gaps / next:
 - Device spike (RTF, RAM, battery) for tiny.en vs base.en; tune chunk size and `CueSegmenter` on real videos; chunk boundaries can split a sentence.

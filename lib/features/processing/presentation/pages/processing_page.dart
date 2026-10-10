@@ -11,17 +11,33 @@ import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
 import 'package:tarjuman/core/error/failure_message.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/presentation/cubit/processing_cubit.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 class ProcessingPage extends StatelessWidget {
-  const ProcessingPage({required this.videoId, required this.kind, super.key});
+  const ProcessingPage({
+    required this.videoId,
+    required this.kind,
+    this.language = SourceLanguage.en,
+    super.key,
+  });
   final String videoId;
   final EngineKind kind;
+  final SourceLanguage language;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (_) => newProcessingCubit(videoId, kind)..start(),
+    create: (context) {
+      final l10n = AppLocalizations.of(context);
+      return newProcessingCubit(
+        videoId,
+        kind,
+        language,
+        notificationTitle: l10n.processingTitle,
+        notificationText: l10n.notificationProgress,
+      )..start();
+    },
     child: ProcessingView(videoId: videoId),
   );
 }

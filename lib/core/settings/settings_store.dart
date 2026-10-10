@@ -12,6 +12,17 @@ abstract interface class SettingsStore {
 
   bool readOnlineConsent();
   Future<void> writeOnlineConsent({required bool value});
+
+  /// Per-video subtitle shift (positive = later).
+  Duration readSubtitleOffset(String videoId);
+  Future<void> writeSubtitleOffset(String videoId, Duration offset);
+
+  bool readOnboardingDone();
+  Future<void> writeOnboardingDone();
+
+  /// ISO code of the spoken language to recognise, default `en`.
+  String readSourceLanguage();
+  Future<void> writeSourceLanguage(String code);
 }
 
 /// API keys live in the platform keystore, never in shared preferences.
@@ -91,4 +102,25 @@ class SharedPrefsSettingsStore implements SettingsStore {
   @override
   Future<void> writeOnlineConsent({required bool value}) =>
       _prefs.setBool(_consent, value);
+
+  @override
+  Duration readSubtitleOffset(String videoId) =>
+      Duration(milliseconds: _prefs.getInt('subtitle.offset.$videoId') ?? 0);
+
+  @override
+  Future<void> writeSubtitleOffset(String videoId, Duration offset) =>
+      _prefs.setInt('subtitle.offset.$videoId', offset.inMilliseconds);
+
+  @override
+  bool readOnboardingDone() => _prefs.getBool('app.onboarding') ?? false;
+
+  @override
+  Future<void> writeOnboardingDone() => _prefs.setBool('app.onboarding', true);
+
+  @override
+  String readSourceLanguage() => _prefs.getString('asr.language') ?? 'en';
+
+  @override
+  Future<void> writeSourceLanguage(String code) =>
+      _prefs.setString('asr.language', code);
 }

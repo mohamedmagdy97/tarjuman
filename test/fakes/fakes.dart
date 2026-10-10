@@ -2,6 +2,7 @@ import 'package:tarjuman/core/cancel/cancel_token.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/entities/transcript_segment.dart';
 import 'package:tarjuman/features/processing/domain/ports/audio_extractor.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
@@ -76,7 +77,10 @@ class FakeEngineProvider implements EngineProvider {
   final Failure? failure;
 
   @override
-  Future<Result<EngineSet>> acquire(EngineKind kind) async => failure != null
+  Future<Result<EngineSet>> acquire(
+    EngineKind kind, {
+    SourceLanguage language = SourceLanguage.en,
+  }) async => failure != null
       ? Result.failure(failure!)
       : Result.success(
           EngineSet(recognizer: recognizer, translator: FakeTranslator()),

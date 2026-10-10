@@ -414,4 +414,120 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tracks => 'المسارات';
+
+  @override
+  String get studyMode => 'وضع المذاكرة';
+
+  @override
+  String get previousSentence => 'الجملة السابقة';
+
+  @override
+  String get nextSentence => 'الجملة التالية';
+
+  @override
+  String get repeatSentence => 'كرّر الجملة';
+
+  @override
+  String get tapAWord => 'اضغط على أي كلمة لترى معناها';
+
+  @override
+  String get saveWord => 'حفظ الكلمة';
+
+  @override
+  String get wordSaved => 'تم الحفظ';
+
+  @override
+  String get myVocabulary => 'كلماتي';
+
+  @override
+  String get vocabularyEmpty => 'لم تحفظ كلمات بعد';
+
+  @override
+  String get vocabularyEmptyBody =>
+      'أثناء المشاهدة افتح وضع المذاكرة واضغط على أي كلمة لحفظها.';
+
+  @override
+  String get translatingWord => 'جارٍ الترجمة…';
+
+  @override
+  String get wordNeedsModels =>
+      'حمّل نموذج الترجمة للغة أولاً من شاشة النماذج.';
+
+  @override
+  String get deleteWord => 'حذف الكلمة';
+
+  @override
+  String get subtitleTiming => 'توقيت الترجمة';
+
+  @override
+  String get subtitleLater => 'أبطأ';
+
+  @override
+  String get subtitleEarlier => 'أسرع';
+
+  @override
+  String get resetTiming => 'إعادة الضبط';
+
+  @override
+  String seconds(String value) {
+    return '$value ث';
+  }
+
+  @override
+  String get rotateScreen => 'تدوير الشاشة';
+
+  @override
+  String get sourceLanguageTitle => 'لغة كلام الفيديو';
+
+  @override
+  String get recommendedForDevice => 'موصى به لجهازك';
+
+  @override
+  String get multilingualModel => 'متعدد اللغات';
+
+  @override
+  String get skip => 'تخطي';
+
+  @override
+  String get next => 'التالي';
+
+  @override
+  String get start => 'ابدأ';
+
+  @override
+  String get onb1Title => 'ترجمة عربية لأي فيديو إنجليزي';
+
+  @override
+  String get onb1Body =>
+      'أضف فيديو من هاتفك أو من رابط مباشر، ويظهر لك الكلام مترجمًا بالعربية فوق الصورة.';
+
+  @override
+  String get onb2Title => 'على جهازك، بدون إنترنت';
+
+  @override
+  String get onb2Body =>
+      'المعالجة تتم على الهاتف فلا يغادر الصوت جهازك. اختر «جهّز ثم شاهد» لتحفظ الترجمة وتعيد مشاهدتها.';
+
+  @override
+  String get onb3Title => 'جهّز التطبيق مرة واحدة';
+
+  @override
+  String get onb3Body =>
+      'نحمّل نماذج التعرف على الكلام والترجمة (نحو ١٥٠ إلى ٢٥٠ ميجابايت). يفضَّل أن تكون على واي فاي. يمكنك أيضًا تخطيها وتحميلها لاحقًا من شاشة النماذج.';
+
+  @override
+  String get onbDownloadNow => 'حمّل النماذج الآن';
+
+  @override
+  String get onbModelsDone => 'كل شيء جاهز. اضغط ابدأ.';
+
+  @override
+  String onbDownloading(int step, int total) {
+    return 'جارٍ تحميل النموذج $step من $total…';
+  }
+
+  @override
+  String notificationProgress(int percent) {
+    return '$percent٪ مكتمل';
+  }
 }

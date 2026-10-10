@@ -163,5 +163,64 @@
   "embeddedSubtitles": "Embedded subtitles",
   "subtitlesOff": "Off",
   "loopAB": "A-B repeat",
-  "tracks": "Tracks"
+  "tracks": "Tracks",
+  "studyMode": "Study mode",
+  "previousSentence": "Previous sentence",
+  "nextSentence": "Next sentence",
+  "repeatSentence": "Repeat sentence",
+  "tapAWord": "Tap any word to see its meaning",
+  "saveWord": "Save word",
+  "wordSaved": "Saved",
+  "myVocabulary": "My words",
+  "vocabularyEmpty": "No saved words yet",
+  "vocabularyEmptyBody": "While watching, open Study mode and tap any word to save it.",
+  "translatingWord": "Translating…",
+  "wordNeedsModels": "Download the translation model for this language from the Models screen first.",
+  "deleteWord": "Delete word",
+  "subtitleTiming": "Subtitle timing",
+  "subtitleLater": "Later",
+  "subtitleEarlier": "Earlier",
+  "resetTiming": "Reset",
+  "seconds": "{value} s",
+  "@seconds": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "rotateScreen": "Rotate screen",
+  "sourceLanguageTitle": "Spoken language",
+  "recommendedForDevice": "Recommended for your device",
+  "multilingualModel": "Multilingual",
+  "skip": "Skip",
+  "next": "Next",
+  "start": "Get started",
+  "onb1Title": "Arabic subtitles for any English video",
+  "onb1Body": "Add a video from your phone or a direct link and see the speech translated to Arabic over the picture.",
+  "onb2Title": "On your device, offline",
+  "onb2Body": "Processing happens on the phone, so audio never leaves it. Choose Prepare then watch to save subtitles and re-watch them.",
+  "onb3Title": "Set up once",
+  "onb3Body": "We download the speech and translation models (about 150 to 250 MB). Wi-Fi is best. You can also skip and get them later from the Models screen.",
+  "onbDownloadNow": "Download models now",
+  "onbModelsDone": "All set. Tap Get started.",
+  "onbDownloading": "Downloading model {step} of {total}…",
+  "@onbDownloading": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationProgress": "{percent}% complete",
+  "@notificationProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

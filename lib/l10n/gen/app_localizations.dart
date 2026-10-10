@@ -871,6 +871,216 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المسارات'**
   String get tracks;
+
+  /// No description provided for @studyMode.
+  ///
+  /// In ar, this message translates to:
+  /// **'وضع المذاكرة'**
+  String get studyMode;
+
+  /// No description provided for @previousSentence.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجملة السابقة'**
+  String get previousSentence;
+
+  /// No description provided for @nextSentence.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجملة التالية'**
+  String get nextSentence;
+
+  /// No description provided for @repeatSentence.
+  ///
+  /// In ar, this message translates to:
+  /// **'كرّر الجملة'**
+  String get repeatSentence;
+
+  /// No description provided for @tapAWord.
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط على أي كلمة لترى معناها'**
+  String get tapAWord;
+
+  /// No description provided for @saveWord.
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ الكلمة'**
+  String get saveWord;
+
+  /// No description provided for @wordSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الحفظ'**
+  String get wordSaved;
+
+  /// No description provided for @myVocabulary.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلماتي'**
+  String get myVocabulary;
+
+  /// No description provided for @vocabularyEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تحفظ كلمات بعد'**
+  String get vocabularyEmpty;
+
+  /// No description provided for @vocabularyEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'أثناء المشاهدة افتح وضع المذاكرة واضغط على أي كلمة لحفظها.'**
+  String get vocabularyEmptyBody;
+
+  /// No description provided for @translatingWord.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ الترجمة…'**
+  String get translatingWord;
+
+  /// No description provided for @wordNeedsModels.
+  ///
+  /// In ar, this message translates to:
+  /// **'حمّل نموذج الترجمة للغة أولاً من شاشة النماذج.'**
+  String get wordNeedsModels;
+
+  /// No description provided for @deleteWord.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف الكلمة'**
+  String get deleteWord;
+
+  /// No description provided for @subtitleTiming.
+  ///
+  /// In ar, this message translates to:
+  /// **'توقيت الترجمة'**
+  String get subtitleTiming;
+
+  /// No description provided for @subtitleLater.
+  ///
+  /// In ar, this message translates to:
+  /// **'أبطأ'**
+  String get subtitleLater;
+
+  /// No description provided for @subtitleEarlier.
+  ///
+  /// In ar, this message translates to:
+  /// **'أسرع'**
+  String get subtitleEarlier;
+
+  /// No description provided for @resetTiming.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة الضبط'**
+  String get resetTiming;
+
+  /// No description provided for @seconds.
+  ///
+  /// In ar, this message translates to:
+  /// **'{value} ث'**
+  String seconds(String value);
+
+  /// No description provided for @rotateScreen.
+  ///
+  /// In ar, this message translates to:
+  /// **'تدوير الشاشة'**
+  String get rotateScreen;
+
+  /// No description provided for @sourceLanguageTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لغة كلام الفيديو'**
+  String get sourceLanguageTitle;
+
+  /// No description provided for @recommendedForDevice.
+  ///
+  /// In ar, this message translates to:
+  /// **'موصى به لجهازك'**
+  String get recommendedForDevice;
+
+  /// No description provided for @multilingualModel.
+  ///
+  /// In ar, this message translates to:
+  /// **'متعدد اللغات'**
+  String get multilingualModel;
+
+  /// No description provided for @skip.
+  ///
+  /// In ar, this message translates to:
+  /// **'تخطي'**
+  String get skip;
+
+  /// No description provided for @next.
+  ///
+  /// In ar, this message translates to:
+  /// **'التالي'**
+  String get next;
+
+  /// No description provided for @start.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ'**
+  String get start;
+
+  /// No description provided for @onb1Title.
+  ///
+  /// In ar, this message translates to:
+  /// **'ترجمة عربية لأي فيديو إنجليزي'**
+  String get onb1Title;
+
+  /// No description provided for @onb1Body.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف فيديو من هاتفك أو من رابط مباشر، ويظهر لك الكلام مترجمًا بالعربية فوق الصورة.'**
+  String get onb1Body;
+
+  /// No description provided for @onb2Title.
+  ///
+  /// In ar, this message translates to:
+  /// **'على جهازك، بدون إنترنت'**
+  String get onb2Title;
+
+  /// No description provided for @onb2Body.
+  ///
+  /// In ar, this message translates to:
+  /// **'المعالجة تتم على الهاتف فلا يغادر الصوت جهازك. اختر «جهّز ثم شاهد» لتحفظ الترجمة وتعيد مشاهدتها.'**
+  String get onb2Body;
+
+  /// No description provided for @onb3Title.
+  ///
+  /// In ar, this message translates to:
+  /// **'جهّز التطبيق مرة واحدة'**
+  String get onb3Title;
+
+  /// No description provided for @onb3Body.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحمّل نماذج التعرف على الكلام والترجمة (نحو ١٥٠ إلى ٢٥٠ ميجابايت). يفضَّل أن تكون على واي فاي. يمكنك أيضًا تخطيها وتحميلها لاحقًا من شاشة النماذج.'**
+  String get onb3Body;
+
+  /// No description provided for @onbDownloadNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'حمّل النماذج الآن'**
+  String get onbDownloadNow;
+
+  /// No description provided for @onbModelsDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل شيء جاهز. اضغط ابدأ.'**
+  String get onbModelsDone;
+
+  /// No description provided for @onbDownloading.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ تحميل النموذج {step} من {total}…'**
+  String onbDownloading(int step, int total);
+
+  /// No description provided for @notificationProgress.
+  ///
+  /// In ar, this message translates to:
+  /// **'{percent}٪ مكتمل'**
+  String notificationProgress(int percent);
 }
 
 class _AppLocalizationsDelegate

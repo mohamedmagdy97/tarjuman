@@ -9,6 +9,9 @@ class ModelInfo extends Equatable {
     required this.name,
     required this.sizeBytes,
     required this.installed,
+    this.languageCode,
+    this.multilingual = false,
+    this.recommended = false,
   });
 
   final String id;
@@ -17,6 +20,24 @@ class ModelInfo extends Equatable {
   final int sizeBytes;
   final bool installed;
 
+  /// Translation models: the language they cover. Speech: null.
+  final String? languageCode;
+
+  /// Speech models that understand languages other than English.
+  final bool multilingual;
+
+  /// Best fit for this device (decided from its RAM).
+  final bool recommended;
+
   @override
-  List<Object?> get props => [id, kind, name, sizeBytes, installed];
+  List<Object?> get props => [
+    id,
+    kind,
+    name,
+    sizeBytes,
+    installed,
+    languageCode,
+    multilingual,
+    recommended,
+  ];
 }

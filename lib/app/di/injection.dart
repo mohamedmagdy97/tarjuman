@@ -1,11 +1,15 @@
 import 'dart:io';
 
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tarjuman/app/router.dart';
 import 'package:tarjuman/core/database/app_database.dart';
+import 'package:tarjuman/core/platform/background/background_processing.dart';
 import 'package:tarjuman/core/platform/device/brightness_control.dart';
+import 'package:tarjuman/core/platform/device/device_capability.dart';
 import 'package:tarjuman/core/platform/media/media_kit_engine.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/data/file_picker_media_picker.dart';
@@ -24,6 +28,7 @@ import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart'
 import 'package:tarjuman/features/model_manager/data/model_repository_impl.dart';
 import 'package:tarjuman/features/model_manager/domain/repositories/model_repository.dart';
 import 'package:tarjuman/features/model_manager/presentation/cubit/models_cubit.dart';
+import 'package:tarjuman/features/onboarding/presentation/cubit/onboarding_cubit.dart';
 import 'package:tarjuman/features/player/data/subtitle_repository_impl.dart';
 import 'package:tarjuman/features/player/domain/repositories/subtitle_repository.dart';
 import 'package:tarjuman/features/player/domain/services/subtitle_parser.dart';
@@ -34,6 +39,7 @@ import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/processing/data/engine_provider_impl.dart';
 import 'package:tarjuman/features/processing/data/ffmpeg_audio_extractor.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/ports/audio_extractor.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
 import 'package:tarjuman/features/processing/domain/services/cue_segmenter.dart';
@@ -48,6 +54,12 @@ import 'package:tarjuman/features/subtitle_editor/domain/ports/subtitle_exporter
 import 'package:tarjuman/features/subtitle_editor/domain/usecases/edit_cue_text.dart';
 import 'package:tarjuman/features/subtitle_editor/domain/usecases/export_subtitles.dart';
 import 'package:tarjuman/features/subtitle_editor/presentation/cubit/editor_cubit.dart';
+import 'package:tarjuman/features/vocabulary/data/mlkit_word_translator.dart';
+import 'package:tarjuman/features/vocabulary/data/vocabulary_repository_impl.dart';
+import 'package:tarjuman/features/vocabulary/domain/ports/word_translator.dart';
+import 'package:tarjuman/features/vocabulary/domain/repositories/vocabulary_repository.dart';
+import 'package:tarjuman/features/vocabulary/presentation/cubit/study_cubit.dart';
+import 'package:tarjuman/features/vocabulary/presentation/cubit/vocabulary_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -73,6 +85,17 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => LoadPlayerData(sl(), sl()))
     ..registerFactory(() => AttachSubtitles(sl(), sl(), sl()))
     ..registerLazySingleton<BrightnessControl>(ScreenBrightnessControl.new)
+    ..registerLazySingleton<VocabularyRepository>(
+      () => VocabularyRepositoryImpl(sl()),
+    )
+    ..registerLazySingleton<WordTranslator>(() => MlKitWordTranslator(sl()))
+    ..registerLazySingleton<GoRouter>(() => buildRouter(sl()))
+    ..registerLazySingleton<BackgroundProcessing>(
+      ForegroundTaskBackgroundProcessing.new,
+    )
+    ..registerFactory(() => OnboardingCubit(sl(), sl()))
+    ..registerFactory(() => StudyCubit(sl(), sl()))
+    ..registerFactory(() => VocabularyCubit(sl()))
     ..registerLazySingleton<FileDownloader>(HttpFileDownloader.new)
     ..registerFactory(() => ImportFromUrl(sl(), sl(), sl()))
     ..registerFactory(() => ToggleFavorite(sl()))
@@ -82,7 +105,8 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => EditCueText(sl()))
     ..registerFactory(() => ExportSubtitles(sl(), sl(), sl(), sl()))
     ..registerSingleton<SecretStore>(const KeystoreSecretStore())
-    ..registerLazySingleton<ModelRepository>(ModelRepositoryImpl.new)
+    ..registerLazySingleton<DeviceCapability>(DeviceInfoCapability.new)
+    ..registerLazySingleton<ModelRepository>(() => ModelRepositoryImpl(sl()))
     ..registerLazySingleton<AudioExtractor>(FfmpegAudioExtractor.new)
     ..registerLazySingleton<EngineProvider>(
       () => EngineProviderImpl(sl(), sl(), sl()),
@@ -112,17 +136,27 @@ Future<String> _workPath(String name) async {
   return p.join(dir.path, name);
 }
 
-ProcessingCubit newProcessingCubit(String videoId, EngineKind kind) =>
-    ProcessingCubit(
-      videoId: videoId,
-      kind: kind,
-      pipeline: sl(),
-    );
+ProcessingCubit newProcessingCubit(
+  String videoId,
+  EngineKind kind,
+  SourceLanguage language, {
+  required String notificationTitle,
+  required String Function(int percent) notificationText,
+}) => ProcessingCubit(
+  videoId: videoId,
+  kind: kind,
+  language: language,
+  pipeline: sl(),
+  background: sl(),
+  notificationTitle: notificationTitle,
+  notificationText: notificationText,
+);
 
 /// Player cubits are per-video and own a fresh engine.
 PlayerCubit newPlayerCubit(
   String videoId, {
   EngineKind? liveKind,
+  SourceLanguage language = SourceLanguage.en,
   Duration? startAt,
 }) => PlayerCubit(
   videoId: videoId,
@@ -136,6 +170,7 @@ PlayerCubit newPlayerCubit(
   engines: sl(),
   liveFactory: sl.call<LiveSubtitleSession>,
   liveKind: liveKind,
+  liveLanguage: language,
 );
 
 EditorCubit newEditorCubit(String videoId) => EditorCubit(

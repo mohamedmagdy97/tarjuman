@@ -78,6 +78,11 @@ class _LibraryViewState extends State<LibraryView> {
             elevation: 0,
             actions: [
               IconButton(
+                tooltip: l10n.myVocabulary,
+                onPressed: () => unawaited(context.push('/vocabulary')),
+                icon: const Icon(Icons.menu_book_outlined),
+              ),
+              IconButton(
                 tooltip: l10n.modelsTitle,
                 onPressed: () => unawaited(context.push('/models')),
                 icon: const Icon(Icons.download_for_offline_outlined),

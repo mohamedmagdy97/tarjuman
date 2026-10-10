@@ -5,11 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tarjuman/app/di/injection.dart';
 import 'package:tarjuman/core/design_system/components/app_button.dart';
+import 'package:tarjuman/core/design_system/components/app_chip.dart';
 import 'package:tarjuman/core/design_system/components/app_segmented.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/presentation/cubit/setup_cubit.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
@@ -58,6 +60,22 @@ class SetupView extends StatelessWidget {
                         s.video?.title ?? '',
                         textDirection: TextDirection.ltr,
                         style: AppTypography.heading,
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      _label(c.muted, l10n.sourceLanguageTitle),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: [
+                          for (final lang in SourceLanguage.values)
+                            AppChip(
+                              label: l10n.localeName == 'ar'
+                                  ? lang.arabicName
+                                  : lang.nativeName,
+                              selected: s.language == lang,
+                              onTap: () => unawaited(cubit.setLanguage(lang)),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: AppSpacing.xl),
                       _label(c.muted, l10n.modeTitle),
@@ -142,9 +160,13 @@ class SetupView extends StatelessWidget {
   void _start(BuildContext context, SetupState s) {
     final kind = s.engine.name;
     if (s.mode == ProcessingMode.prepare) {
-      context.pushReplacement('/processing/$videoId?engine=$kind');
+      context.pushReplacement(
+        '/processing/$videoId?engine=$kind&lang=${s.language.code}',
+      );
     } else {
-      context.pushReplacement('/player/$videoId?live=$kind');
+      context.pushReplacement(
+        '/player/$videoId?live=$kind&lang=${s.language.code}',
+      );
     }
   }
 

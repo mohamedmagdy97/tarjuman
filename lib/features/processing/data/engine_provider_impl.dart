@@ -6,6 +6,7 @@ import 'package:tarjuman/features/processing/data/mlkit_text_translator.dart';
 import 'package:tarjuman/features/processing/data/openai_online.dart';
 import 'package:tarjuman/features/processing/data/whisper_speech_recognizer.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
 
 class EngineProviderImpl implements EngineProvider {
@@ -16,19 +17,22 @@ class EngineProviderImpl implements EngineProvider {
   final SecretStore _secrets;
 
   @override
-  Future<Result<EngineSet>> acquire(EngineKind kind) async {
+  Future<Result<EngineSet>> acquire(
+    EngineKind kind, {
+    SourceLanguage language = SourceLanguage.en,
+  }) async {
     switch (kind) {
       case EngineKind.offline:
-        if (await _models.installedSpeechModelPath() == null) {
+        if (await _models.installedSpeechModelPath(language) == null) {
           return const Result.failure(ModelMissingFailure('speech'));
         }
-        if (!await _models.translationReady()) {
+        if (!await _models.translationReady(language)) {
           return const Result.failure(ModelMissingFailure('translation'));
         }
         return Result.success(
           EngineSet(
-            recognizer: WhisperSpeechRecognizer(_models),
-            translator: MlKitTextTranslator(),
+            recognizer: WhisperSpeechRecognizer(_models, language),
+            translator: MlKitTextTranslator(language),
           ),
         );
       case EngineKind.online:
@@ -38,8 +42,8 @@ class EngineProviderImpl implements EngineProvider {
         }
         return Result.success(
           EngineSet(
-            recognizer: OnlineSpeechRecognizer(key),
-            translator: OnlineTextTranslator(key),
+            recognizer: OnlineSpeechRecognizer(key, language: language),
+            translator: OnlineTextTranslator(key, language: language),
           ),
         );
     }

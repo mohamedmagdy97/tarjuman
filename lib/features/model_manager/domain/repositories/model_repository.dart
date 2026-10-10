@@ -1,4 +1,5 @@
 import 'package:tarjuman/features/model_manager/domain/entities/model_info.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 
 abstract interface class ModelRepository {
   Future<List<ModelInfo>> list();
@@ -9,8 +10,12 @@ abstract interface class ModelRepository {
 
   Future<void> remove(String id);
 
-  /// Best installed speech model, or null if none.
-  Future<String?> installedSpeechModelPath();
+  /// Best installed speech model able to recognise [language], or null.
+  Future<String?> installedSpeechModelPath(SourceLanguage language);
 
-  Future<bool> translationReady();
+  /// Source-language + Arabic translation models are both installed.
+  Future<bool> translationReady(SourceLanguage language);
+
+  /// Id of the speech model that suits this device for [language].
+  Future<String> recommendedSpeechModelId(SourceLanguage language);
 }

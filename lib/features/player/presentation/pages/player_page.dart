@@ -15,17 +15,22 @@ import 'package:tarjuman/features/player/domain/entities/subtitle_style.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/player/presentation/widgets/subtitle_style_sheet.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
+import 'package:tarjuman/features/vocabulary/presentation/cubit/study_cubit.dart';
+import 'package:tarjuman/features/vocabulary/presentation/widgets/study_sheet.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 class PlayerPage extends StatelessWidget {
   const PlayerPage({
     required this.videoId,
     this.liveKind,
+    this.language = SourceLanguage.en,
     this.startAtMs,
     super.key,
   });
   final String videoId;
   final EngineKind? liveKind;
+  final SourceLanguage language;
   final int? startAtMs;
 
   @override
@@ -34,6 +39,7 @@ class PlayerPage extends StatelessWidget {
       final cubit = newPlayerCubit(
         videoId,
         liveKind: liveKind,
+        language: language,
         startAt: startAtMs == null ? null : Duration(milliseconds: startAtMs!),
       );
       unawaited(cubit.start());
@@ -51,6 +57,22 @@ class PlayerView extends StatefulWidget {
 }
 
 class _PlayerViewState extends State<PlayerView> {
+  var _landscape = false;
+
+  void _rotate() {
+    _landscape = !_landscape;
+    unawaited(
+      SystemChrome.setPreferredOrientations(
+        _landscape
+            ? const [
+                DeviceOrientation.landscapeLeft,
+                DeviceOrientation.landscapeRight,
+              ]
+            : const [DeviceOrientation.portraitUp],
+      ),
+    );
+  }
+
   double _tapX = 0;
   var _dragOnLeft = true;
 
@@ -75,6 +97,7 @@ class _PlayerViewState extends State<PlayerView> {
 
   @override
   void dispose() {
+    unawaited(SystemChrome.setPreferredOrientations(const []));
     unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
     super.dispose();
   }
@@ -131,7 +154,10 @@ class _PlayerViewState extends State<PlayerView> {
                   duration: AppMotion.micro,
                   child: IgnorePointer(
                     ignoring: !state.controlsVisible,
-                    child: _Controls(state: state),
+                    child: _Controls(
+                      state: state,
+                      onRotate: _rotate,
+                    ),
                   ),
                 ),
                 // Above the controls scrim so subtitles are never dimmed.
@@ -181,8 +207,9 @@ class _SubtitleLayer extends StatelessWidget {
 }
 
 class _Controls extends StatelessWidget {
-  const _Controls({required this.state});
+  const _Controls({required this.state, required this.onRotate});
   final PlayerState state;
+  final VoidCallback onRotate;
 
   static const _speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 
@@ -298,50 +325,26 @@ class _Controls extends StatelessWidget {
                         Row(
                           children: [
                             IconButton(
-                              tooltip: AppLocalizations.of(context).loopAB,
-                              onPressed: cubit.cycleLoop,
-                              icon: Icon(
-                                state.loopB != null
-                                    ? Icons.repeat_on_rounded
-                                    : Icons.repeat_rounded,
-                              ),
-                              color: state.loopA != null
-                                  ? const Color(0xFFFFC93C)
-                                  : Colors.white,
-                            ),
-                            if (state.snapshot.audioTracks.length > 1 ||
-                                state.snapshot.subtitleTracks.isNotEmpty)
-                              IconButton(
-                                tooltip: AppLocalizations.of(context).tracks,
-                                onPressed: () =>
-                                    unawaited(_openTracks(context)),
-                                icon: const Icon(Icons.audiotrack_rounded),
-                                color: Colors.white,
-                              ),
-                            IconButton(
-                              onPressed: cubit.attachSubtitles,
-                              icon: const Icon(Icons.closed_caption_outlined),
-                              color: Colors.white,
-                            ),
-                            IconButton(
                               tooltip: AppLocalizations.of(
                                 context,
-                              ).editSubtitles,
-                              onPressed: state.timeline.isEmpty
-                                  ? null
-                                  : () => unawaited(
-                                      context.push(
-                                        '/editor/${state.video?.id}',
-                                      ),
-                                    ),
-                              icon: const Icon(Icons.edit_note_rounded),
+                              ).rotateScreen,
+                              onPressed: onRotate,
+                              icon: const Icon(Icons.screen_rotation_rounded),
                               color: Colors.white,
                             ),
+                            if (state.timeline.cues.isNotEmpty)
+                              IconButton(
+                                tooltip: AppLocalizations.of(context).studyMode,
+                                onPressed: () => unawaited(_openStudy(context)),
+                                icon: const Icon(Icons.school_rounded),
+                                color: Colors.white,
+                              ),
                             IconButton(
                               onPressed: () => unawaited(_openStyle(context)),
                               icon: const Icon(Icons.tune_rounded),
                               color: Colors.white,
                             ),
+                            _MoreMenu(state: state),
                           ],
                         ),
                       ],
@@ -368,7 +371,7 @@ class _Controls extends StatelessWidget {
     return h > 0 ? '$h:$m:$s' : '$m:$s';
   }
 
-  Future<void> _openTracks(BuildContext context) async {
+  static Future<void> openTracks(BuildContext context) async {
     final cubit = context.read<PlayerCubit>();
     final l10n = AppLocalizations.of(context);
     await showModalBottomSheet<void>(
@@ -425,6 +428,23 @@ class _Controls extends StatelessWidget {
     );
   }
 
+  Future<void> _openStudy(BuildContext context) async {
+    final cubit = context.read<PlayerCubit>();
+    if (cubit.state.snapshot.isPlaying) await cubit.togglePlay();
+    if (!context.mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: cubit),
+          BlocProvider(create: (_) => sl<StudyCubit>()),
+        ],
+        child: const StudySheet(),
+      ),
+    );
+  }
+
   Future<void> _openStyle(BuildContext context) async {
     final cubit = context.read<PlayerCubit>();
     await showModalBottomSheet<void>(
@@ -433,10 +453,14 @@ class _Controls extends StatelessWidget {
       builder: (_) => BlocProvider.value(
         value: cubit,
         child: BlocBuilder<PlayerCubit, PlayerState>(
-          buildWhen: (a, b) => a.style != b.style,
+          buildWhen: (a, b) =>
+              a.style != b.style || a.subtitleOffset != b.subtitleOffset,
           builder: (context, s) => SubtitleStyleSheet(
             style: s.style,
             onChanged: cubit.updateStyle,
+            offset: s.subtitleOffset,
+            onOffsetChanged: (d) => unawaited(cubit.adjustSubtitleOffset(d)),
+            onOffsetReset: () => unawaited(cubit.resetSubtitleOffset()),
           ),
         ),
       ),
@@ -561,6 +585,57 @@ class _HudView extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+enum _MoreAction { loop, tracks, attach, edit }
+
+/// Secondary player actions, kept in a menu so the bar fits small screens.
+class _MoreMenu extends StatelessWidget {
+  const _MoreMenu({required this.state});
+  final PlayerState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cubit = context.read<PlayerCubit>();
+    final hasTracks =
+        state.snapshot.audioTracks.length > 1 ||
+        state.snapshot.subtitleTracks.isNotEmpty;
+    return PopupMenuButton<_MoreAction>(
+      icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
+      onSelected: (a) {
+        switch (a) {
+          case _MoreAction.loop:
+            cubit.cycleLoop();
+          case _MoreAction.tracks:
+            unawaited(_Controls.openTracks(context));
+          case _MoreAction.attach:
+            unawaited(cubit.attachSubtitles());
+          case _MoreAction.edit:
+            unawaited(context.push('/editor/${state.video?.id}'));
+        }
+      },
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: _MoreAction.loop,
+          child: Text(
+            state.loopA != null ? '${l10n.loopAB} ✓' : l10n.loopAB,
+          ),
+        ),
+        if (hasTracks)
+          PopupMenuItem(value: _MoreAction.tracks, child: Text(l10n.tracks)),
+        PopupMenuItem(
+          value: _MoreAction.attach,
+          child: Text(l10n.attachSubtitles),
+        ),
+        if (state.timeline.cues.isNotEmpty)
+          PopupMenuItem(
+            value: _MoreAction.edit,
+            child: Text(l10n.editSubtitles),
+          ),
+      ],
     );
   }
 }

@@ -10,11 +10,13 @@ import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
+import 'package:tarjuman/features/player/domain/entities/subtitle_cue.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_style.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_timeline.dart';
 import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
 import 'package:tarjuman/features/player/domain/usecases/load_player_data.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
 import 'package:tarjuman/features/processing/domain/usecases/live_subtitle_session.dart';
 
@@ -52,6 +54,7 @@ class PlayerState extends Equatable {
     this.loopB,
     this.volume = 1,
     this.hud,
+    this.subtitleOffset = Duration.zero,
   });
 
   final PlayerStatus status;
@@ -72,6 +75,9 @@ class PlayerState extends Equatable {
   final Duration? loopB;
   final double volume;
   final PlayerHud? hud;
+
+  /// Subtitle shift for this video (positive = subtitles appear later).
+  final Duration subtitleOffset;
 
   PlayerState copyWith({
     PlayerStatus? status,
@@ -94,6 +100,7 @@ class PlayerState extends Equatable {
     double? volume,
     PlayerHud? hud,
     bool clearHud = false,
+    Duration? subtitleOffset,
   }) => PlayerState(
     status: status ?? this.status,
     video: video ?? this.video,
@@ -111,6 +118,7 @@ class PlayerState extends Equatable {
     loopB: clearLoop ? null : loopB ?? this.loopB,
     volume: volume ?? this.volume,
     hud: clearHud ? null : hud ?? this.hud,
+    subtitleOffset: subtitleOffset ?? this.subtitleOffset,
   );
 
   @override
@@ -130,6 +138,7 @@ class PlayerState extends Equatable {
     loopB,
     volume,
     hud,
+    subtitleOffset,
   ];
 }
 
@@ -146,6 +155,7 @@ class PlayerCubit extends Cubit<PlayerState> {
     required EngineProvider engines,
     required LiveSubtitleSession Function() liveFactory,
     this.liveKind,
+    this.liveLanguage = SourceLanguage.en,
     this.startAt,
   }) : _brightness = brightness,
        _videos = videos,
@@ -178,6 +188,7 @@ class PlayerCubit extends Cubit<PlayerState> {
   final EngineProvider _engines;
   final LiveSubtitleSession Function() _liveFactory;
   final EngineKind? liveKind;
+  final SourceLanguage liveLanguage;
 
   LiveSubtitleSession? _session;
   StreamSubscription<LiveUpdate>? _liveSub;
@@ -192,7 +203,13 @@ class PlayerCubit extends Cubit<PlayerState> {
       return;
     }
     final d = (data as Success<PlayerData>).value;
-    emit(state.copyWith(video: d.video, timeline: d.timeline));
+    emit(
+      state.copyWith(
+        video: d.video,
+        timeline: d.timeline,
+        subtitleOffset: _settings.readSubtitleOffset(videoId),
+      ),
+    );
     _sub = engine.snapshots.listen(_onSnapshot);
     await engine.open(d.video.path);
     _saveTimer = Timer.periodic(
@@ -240,7 +257,7 @@ class PlayerCubit extends Cubit<PlayerState> {
       unawaited(_startLive(s.duration, s.position));
     }
     // Active cue comes from the media position (audio time), never wall-clock.
-    final cue = state.timeline.activeAt(s.position);
+    final cue = state.timeline.activeAt(s.position - state.subtitleOffset);
     emit(
       state.copyWith(
         status: s.isReady ? PlayerStatus.ready : PlayerStatus.loading,
@@ -253,14 +270,16 @@ class PlayerCubit extends Cubit<PlayerState> {
   }
 
   Future<void> _startLive(Duration total, Duration position) async {
-    final acquired = await _engines.acquire(liveKind!);
+    final acquired = await _engines.acquire(liveKind!, language: liveLanguage);
     if (acquired case Err(:final failure)) {
       emit(state.copyWith(failure: failure));
       return;
     }
     final session = _liveFactory();
     _liveSub = session.updates.listen((u) {
-      final cue = u.timeline.activeAt(state.snapshot.position);
+      final cue = u.timeline.activeAt(
+        state.snapshot.position - state.subtitleOffset,
+      );
       emit(
         state.copyWith(
           timeline: u.timeline,
@@ -391,6 +410,65 @@ class PlayerCubit extends Cubit<PlayerState> {
       emit(state.copyWith(clearLoop: true));
       _showHud(const PlayerHud(HudKind.loop, label: '—'));
     }
+  }
+
+  Future<void> adjustSubtitleOffset(Duration delta) async {
+    final next = state.subtitleOffset + delta;
+    emit(state.copyWith(subtitleOffset: next));
+    await _settings.writeSubtitleOffset(videoId, next);
+  }
+
+  Future<void> resetSubtitleOffset() async {
+    emit(state.copyWith(subtitleOffset: Duration.zero));
+    await _settings.writeSubtitleOffset(videoId, Duration.zero);
+  }
+
+  // ---- study mode --------------------------------------------------------
+
+  SubtitleCue? get _currentCue =>
+      state.timeline.activeAt(state.snapshot.position - state.subtitleOffset);
+
+  /// Jump to the previous sentence (or restart the current one if it is
+  /// more than 2 s in).
+  Future<void> previousCue() async {
+    final cues = state.timeline.cues;
+    final pos = state.snapshot.position - state.subtitleOffset;
+    for (var i = cues.length - 1; i >= 0; i--) {
+      final threshold = cues[i].start + const Duration(seconds: 2);
+      if (threshold < pos) {
+        await engine.seekTo(cues[i].start + state.subtitleOffset);
+        return;
+      }
+    }
+    await engine.seekTo(Duration.zero);
+  }
+
+  Future<void> nextCue() async {
+    final pos = state.snapshot.position - state.subtitleOffset;
+    for (final c in state.timeline.cues) {
+      if (c.start > pos) {
+        await engine.seekTo(c.start + state.subtitleOffset);
+        return;
+      }
+    }
+  }
+
+  /// Loops the sentence on screen (A-B markers) until toggled off.
+  Future<void> repeatCurrentCue() async {
+    if (state.loopA != null && state.loopB != null) {
+      emit(state.copyWith(clearLoop: true));
+      return;
+    }
+    final cue = _currentCue;
+    if (cue == null) return;
+    emit(
+      state.copyWith(
+        loopA: cue.start + state.subtitleOffset,
+        loopB: cue.end + state.subtitleOffset,
+      ),
+    );
+    await engine.seekTo(cue.start + state.subtitleOffset);
+    _showHud(const PlayerHud(HudKind.loop, label: '↻'));
   }
 
   Future<void> selectAudio(String id) => engine.setAudioTrack(id);

@@ -4,6 +4,7 @@ import 'package:tarjuman/core/cancel/cancel_token.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/model_manager/domain/repositories/model_repository.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/entities/transcript_segment.dart';
 import 'package:tarjuman/features/processing/domain/ports/speech_recognizer.dart';
 import 'package:whisper_cpp_flutter_plus/whisper_cpp_flutter_plus.dart';
@@ -11,14 +12,15 @@ import 'package:whisper_cpp_flutter_plus/whisper_cpp_flutter_plus.dart';
 /// On-device ASR via whisper.cpp. The model is loaded once and reused for
 /// every range of a job, then released in [dispose].
 class WhisperSpeechRecognizer implements SpeechRecognizer {
-  WhisperSpeechRecognizer(this._models);
+  WhisperSpeechRecognizer(this._models, this._language);
 
   final ModelRepository _models;
+  final SourceLanguage _language;
   WhisperEngine? _engine;
 
   Future<WhisperEngine?> _load() async {
     if (_engine != null) return _engine;
-    final path = await _models.installedSpeechModelPath();
+    final path = await _models.installedSpeechModelPath(_language);
     if (path == null) return null;
     return _engine = await WhisperEngine.load(path);
   }
@@ -36,8 +38,8 @@ class WhisperSpeechRecognizer implements SpeechRecognizer {
       final samples = await WhisperAudio.readWav(File(wavPath));
       final task = engine.transcribe(
         samples,
-        options: const TranscribeOptions(
-          language: 'en',
+        options: TranscribeOptions(
+          language: _language.code,
           tokenTimestamps: false,
         ),
       );

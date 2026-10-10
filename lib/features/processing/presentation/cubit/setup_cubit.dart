@@ -6,12 +6,14 @@ import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
 import 'package:tarjuman/features/model_manager/domain/repositories/model_repository.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 
 class SetupState extends Equatable {
   const SetupState({
     this.video,
     this.mode = ProcessingMode.prepare,
     this.engine = EngineKind.offline,
+    this.language = SourceLanguage.en,
     this.offlineReady = false,
     this.onlineReady = false,
     this.loading = true,
@@ -20,6 +22,7 @@ class SetupState extends Equatable {
   final Video? video;
   final ProcessingMode mode;
   final EngineKind engine;
+  final SourceLanguage language;
   final bool offlineReady;
   final bool onlineReady;
   final bool loading;
@@ -31,6 +34,7 @@ class SetupState extends Equatable {
     Video? video,
     ProcessingMode? mode,
     EngineKind? engine,
+    SourceLanguage? language,
     bool? offlineReady,
     bool? onlineReady,
     bool? loading,
@@ -38,6 +42,7 @@ class SetupState extends Equatable {
     video: video ?? this.video,
     mode: mode ?? this.mode,
     engine: engine ?? this.engine,
+    language: language ?? this.language,
     offlineReady: offlineReady ?? this.offlineReady,
     onlineReady: onlineReady ?? this.onlineReady,
     loading: loading ?? this.loading,
@@ -48,6 +53,7 @@ class SetupState extends Equatable {
     video,
     mode,
     engine,
+    language,
     offlineReady,
     onlineReady,
     loading,
@@ -66,16 +72,30 @@ class SetupCubit extends Cubit<SetupState> {
   /// Re-checks readiness; call again after returning from the models page.
   Future<void> load(String videoId) async {
     final video = await _videos.get(videoId);
-    final speech = await _models.installedSpeechModelPath() != null;
-    final translation = await _models.translationReady();
+    final language = SourceLanguage.fromCode(_settings.readSourceLanguage());
     final key = await _secrets.readApiKey();
     emit(
       state.copyWith(
         video: video is Success<Video> ? video.value : null,
-        offlineReady: speech && translation,
+        language: language,
+        offlineReady: await _offlineReady(language),
         onlineReady:
             _settings.readOnlineConsent() && key != null && key.isNotEmpty,
         loading: false,
+      ),
+    );
+  }
+
+  Future<bool> _offlineReady(SourceLanguage language) async =>
+      await _models.installedSpeechModelPath(language) != null &&
+      await _models.translationReady(language);
+
+  Future<void> setLanguage(SourceLanguage language) async {
+    await _settings.writeSourceLanguage(language.code);
+    emit(
+      state.copyWith(
+        language: language,
+        offlineReady: await _offlineReady(language),
       ),
     );
   }

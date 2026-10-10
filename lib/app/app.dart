@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tarjuman/app/di/injection.dart';
-import 'package:tarjuman/app/router.dart';
 import 'package:tarjuman/core/design_system/tokens/app_theme.dart';
 import 'package:tarjuman/features/settings/presentation/cubit/app_settings_cubit.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
@@ -29,7 +29,7 @@ class TarjumanApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          routerConfig: appRouter,
+          routerConfig: sl<GoRouter>(),
         ),
       ),
     );

@@ -120,10 +120,7 @@ const _ar = <String, _Copy>{
   ),
   '06-style': _Copy('خصّص شكل الترجمة', 'الحجم واللون والخلفية والمكان'),
   '07-editor': _Copy('عدّل الترجمة وصدّرها', 'ابحث وعدّل أي سطر وصدّر ملف SRT'),
-  '08-settings': _Copy(
-    'خصوصية بإيدك',
-    'المعالجة على الجهاز أساسًا، والأونلاين اختياري بموافقتك',
-  ),
+  '08-study': _Copy('ذاكر وأنت تشاهد', 'اضغط أي كلمة لتعرف معناها واحفظها'),
 };
 
 const _en = <String, _Copy>{
@@ -159,9 +156,9 @@ const _en = <String, _Copy>{
     'Edit and export',
     'Search, fix any line and export an SRT file',
   ),
-  '08-settings': _Copy(
-    'Privacy in your hands',
-    'On-device by default, online only with your consent',
+  '08-study': _Copy(
+    'Learn while you watch',
+    'Tap any word to see its meaning and save it',
   ),
 };
 

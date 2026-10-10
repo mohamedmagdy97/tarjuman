@@ -4,7 +4,9 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarjuman/core/cancel/cancel_token.dart';
 import 'package:tarjuman/core/error/failure.dart';
+import 'package:tarjuman/core/platform/background/background_processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/usecases/run_processing_pipeline.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -54,41 +56,61 @@ class ProcessingCubit extends Cubit<ProcessingState> {
     required this.videoId,
     required this.kind,
     required RunProcessingPipeline pipeline,
-  }) : _pipeline = pipeline,
+    required BackgroundProcessing background,
+    required this.notificationTitle,
+    required this.notificationText,
+    this.language = SourceLanguage.en,
+  }) : _background = background,
+       _pipeline = pipeline,
        super(const ProcessingState());
 
   final String videoId;
   final EngineKind kind;
+  final SourceLanguage language;
   final RunProcessingPipeline _pipeline;
+  final BackgroundProcessing _background;
+  final String notificationTitle;
+  final String Function(int percent) notificationText;
+  var _lastPercent = -1;
   CancelToken _cancel = CancelToken();
   StreamSubscription<ProcessingEvent>? _sub;
 
   void start() {
     _cancel = CancelToken();
     unawaited(WakelockPlus.enable()); // keep the screen on during long jobs
-    emit(const ProcessingState());
-    _sub = _pipeline(videoId: videoId, kind: kind, cancel: _cancel).listen(
-      (e) => emit(
-        switch (e) {
-          ProcessingProgress() => state.copyWith(
-            stage: e.stage,
-            fraction: e.fraction,
-            remaining: e.remaining,
-          ),
-          ProcessingDone() => state.copyWith(
-            status: ProcessingStatus.done,
-            fraction: 1,
-          ),
-          ProcessingFailed() => state.copyWith(
-            status: ProcessingStatus.failed,
-            failure: e.failure,
-          ),
-          ProcessingCancelled() => state.copyWith(
-            status: ProcessingStatus.cancelled,
-          ),
-        },
-      ),
+    _lastPercent = -1;
+    unawaited(
+      _background.start(title: notificationTitle, text: notificationText(0)),
     );
+    emit(const ProcessingState());
+    _sub =
+        _pipeline(
+          videoId: videoId,
+          kind: kind,
+          language: language,
+          cancel: _cancel,
+        ).listen(
+          (e) => emit(
+            switch (e) {
+              ProcessingProgress() => state.copyWith(
+                stage: e.stage,
+                fraction: e.fraction,
+                remaining: e.remaining,
+              ),
+              ProcessingDone() => state.copyWith(
+                status: ProcessingStatus.done,
+                fraction: 1,
+              ),
+              ProcessingFailed() => state.copyWith(
+                status: ProcessingStatus.failed,
+                failure: e.failure,
+              ),
+              ProcessingCancelled() => state.copyWith(
+                status: ProcessingStatus.cancelled,
+              ),
+            },
+          ),
+        );
   }
 
   void cancel() => _cancel.cancel();
@@ -96,8 +118,17 @@ class ProcessingCubit extends Cubit<ProcessingState> {
   @override
   void onChange(Change<ProcessingState> change) {
     super.onChange(change);
+    final next = change.nextState;
+    if (next.status == ProcessingStatus.running) {
+      final pct = (next.fraction * 100).floor();
+      if (pct != _lastPercent) {
+        _lastPercent = pct;
+        unawaited(_background.update(notificationText(pct)));
+      }
+    }
     if (change.nextState.status != ProcessingStatus.running) {
       unawaited(WakelockPlus.disable());
+      unawaited(_background.stop());
     }
   }
 
@@ -105,6 +136,7 @@ class ProcessingCubit extends Cubit<ProcessingState> {
   Future<void> close() async {
     _cancel.cancel();
     unawaited(WakelockPlus.disable());
+    unawaited(_background.stop());
     await _sub?.cancel();
     return super.close();
   }

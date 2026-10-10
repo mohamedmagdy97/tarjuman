@@ -421,4 +421,120 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tracks => 'Tracks';
+
+  @override
+  String get studyMode => 'Study mode';
+
+  @override
+  String get previousSentence => 'Previous sentence';
+
+  @override
+  String get nextSentence => 'Next sentence';
+
+  @override
+  String get repeatSentence => 'Repeat sentence';
+
+  @override
+  String get tapAWord => 'Tap any word to see its meaning';
+
+  @override
+  String get saveWord => 'Save word';
+
+  @override
+  String get wordSaved => 'Saved';
+
+  @override
+  String get myVocabulary => 'My words';
+
+  @override
+  String get vocabularyEmpty => 'No saved words yet';
+
+  @override
+  String get vocabularyEmptyBody =>
+      'While watching, open Study mode and tap any word to save it.';
+
+  @override
+  String get translatingWord => 'Translating…';
+
+  @override
+  String get wordNeedsModels =>
+      'Download the translation model for this language from the Models screen first.';
+
+  @override
+  String get deleteWord => 'Delete word';
+
+  @override
+  String get subtitleTiming => 'Subtitle timing';
+
+  @override
+  String get subtitleLater => 'Later';
+
+  @override
+  String get subtitleEarlier => 'Earlier';
+
+  @override
+  String get resetTiming => 'Reset';
+
+  @override
+  String seconds(String value) {
+    return '$value s';
+  }
+
+  @override
+  String get rotateScreen => 'Rotate screen';
+
+  @override
+  String get sourceLanguageTitle => 'Spoken language';
+
+  @override
+  String get recommendedForDevice => 'Recommended for your device';
+
+  @override
+  String get multilingualModel => 'Multilingual';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get start => 'Get started';
+
+  @override
+  String get onb1Title => 'Arabic subtitles for any English video';
+
+  @override
+  String get onb1Body =>
+      'Add a video from your phone or a direct link and see the speech translated to Arabic over the picture.';
+
+  @override
+  String get onb2Title => 'On your device, offline';
+
+  @override
+  String get onb2Body =>
+      'Processing happens on the phone, so audio never leaves it. Choose Prepare then watch to save subtitles and re-watch them.';
+
+  @override
+  String get onb3Title => 'Set up once';
+
+  @override
+  String get onb3Body =>
+      'We download the speech and translation models (about 150 to 250 MB). Wi-Fi is best. You can also skip and get them later from the Models screen.';
+
+  @override
+  String get onbDownloadNow => 'Download models now';
+
+  @override
+  String get onbModelsDone => 'All set. Tap Get started.';
+
+  @override
+  String onbDownloading(int step, int total) {
+    return 'Downloading model $step of $total…';
+  }
+
+  @override
+  String notificationProgress(int percent) {
+    return '$percent% complete';
+  }
 }
