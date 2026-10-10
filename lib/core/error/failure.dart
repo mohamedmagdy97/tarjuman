@@ -37,3 +37,8 @@ final class OnlineNotConfiguredFailure extends Failure {
 final class InvalidSubtitleFailure extends Failure {
   const InvalidSubtitleFailure([super.message]);
 }
+
+/// Language detection worked but the language isn't one we can translate.
+final class UnsupportedLanguageFailure extends Failure {
+  const UnsupportedLanguageFailure([super.message]);
+}

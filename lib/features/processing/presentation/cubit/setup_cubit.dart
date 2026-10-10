@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
@@ -7,6 +8,7 @@ import 'package:tarjuman/features/library/domain/repositories/video_repository.d
 import 'package:tarjuman/features/model_manager/domain/repositories/model_repository.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
+import 'package:tarjuman/features/processing/domain/usecases/detect_language.dart';
 
 class SetupState extends Equatable {
   const SetupState({
@@ -17,6 +19,9 @@ class SetupState extends Equatable {
     this.offlineReady = false,
     this.onlineReady = false,
     this.loading = true,
+    this.detecting = false,
+    this.detectFailure,
+    this.detected = false,
   });
 
   final Video? video;
@@ -26,6 +31,13 @@ class SetupState extends Equatable {
   final bool offlineReady;
   final bool onlineReady;
   final bool loading;
+  final bool detecting;
+
+  /// Why the last language detection failed (null = fine / not tried).
+  final Failure? detectFailure;
+
+  /// The current language was chosen by detection (not by the user).
+  final bool detected;
 
   bool get canStart =>
       !loading && (engine == EngineKind.offline ? offlineReady : onlineReady);
@@ -38,6 +50,10 @@ class SetupState extends Equatable {
     bool? offlineReady,
     bool? onlineReady,
     bool? loading,
+    bool? detecting,
+    Failure? detectFailure,
+    bool clearDetectFailure = false,
+    bool? detected,
   }) => SetupState(
     video: video ?? this.video,
     mode: mode ?? this.mode,
@@ -46,6 +62,11 @@ class SetupState extends Equatable {
     offlineReady: offlineReady ?? this.offlineReady,
     onlineReady: onlineReady ?? this.onlineReady,
     loading: loading ?? this.loading,
+    detecting: detecting ?? this.detecting,
+    detectFailure: clearDetectFailure
+        ? null
+        : detectFailure ?? this.detectFailure,
+    detected: detected ?? this.detected,
   );
 
   @override
@@ -57,17 +78,26 @@ class SetupState extends Equatable {
     offlineReady,
     onlineReady,
     loading,
+    detecting,
+    detectFailure?.runtimeType,
+    detected,
   ];
 }
 
 class SetupCubit extends Cubit<SetupState> {
-  SetupCubit(this._videos, this._models, this._settings, this._secrets)
-    : super(const SetupState());
+  SetupCubit(
+    this._videos,
+    this._models,
+    this._settings,
+    this._secrets,
+    this._detect,
+  ) : super(const SetupState());
 
   final VideoRepository _videos;
   final ModelRepository _models;
   final SettingsStore _settings;
   final SecretStore _secrets;
+  final DetectLanguage _detect;
 
   /// Re-checks readiness; call again after returning from the models page.
   Future<void> load(String videoId) async {
@@ -90,11 +120,34 @@ class SetupCubit extends Cubit<SetupState> {
       await _models.installedSpeechModelPath(language) != null &&
       await _models.translationReady(language);
 
-  Future<void> setLanguage(SourceLanguage language) async {
+  /// Listens to the video and picks the spoken language for the user.
+  Future<void> detectLanguage() async {
+    final video = state.video;
+    if (video == null || state.detecting) return;
+    emit(state.copyWith(detecting: true, clearDetectFailure: true));
+    final res = await _detect(
+      mediaPath: video.path,
+      total: video.duration ?? const Duration(minutes: 1),
+    );
+    switch (res) {
+      case Success(:final value):
+        await setLanguage(value, detected: true);
+        emit(state.copyWith(detecting: false));
+      case Err(:final failure):
+        emit(state.copyWith(detecting: false, detectFailure: failure));
+    }
+  }
+
+  Future<void> setLanguage(
+    SourceLanguage language, {
+    bool detected = false,
+  }) async {
     await _settings.writeSourceLanguage(language.code);
     emit(
       state.copyWith(
         language: language,
+        detected: detected,
+        clearDetectFailure: true,
         offlineReady: await _offlineReady(language),
       ),
     );

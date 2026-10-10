@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -164,6 +166,16 @@ class ProcessingView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
+            if (s.partialReady) ...[
+              AppButton(
+                label: l10n.watchWhileTranslating,
+                icon: Icons.play_arrow_rounded,
+                expand: true,
+                onPressed: () =>
+                    unawaited(context.push('/player/$videoId?follow=1')),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
             AppButton(
               label: l10n.cancel,
               kind: AppButtonKind.secondary,

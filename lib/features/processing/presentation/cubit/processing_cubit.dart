@@ -19,6 +19,7 @@ class ProcessingState extends Equatable {
     this.fraction = 0,
     this.remaining,
     this.failure,
+    this.partialReady = false,
   });
 
   final ProcessingStatus status;
@@ -27,18 +28,23 @@ class ProcessingState extends Equatable {
   final Duration? remaining;
   final Failure? failure;
 
+  /// Some cues are saved, so the video can be played while processing.
+  final bool partialReady;
+
   ProcessingState copyWith({
     ProcessingStatus? status,
     ProcessingStage? stage,
     double? fraction,
     Duration? remaining,
     Failure? failure,
+    bool? partialReady,
   }) => ProcessingState(
     status: status ?? this.status,
     stage: stage ?? this.stage,
     fraction: fraction ?? this.fraction,
     remaining: remaining ?? this.remaining,
     failure: failure ?? this.failure,
+    partialReady: partialReady ?? this.partialReady,
   );
 
   @override
@@ -48,6 +54,7 @@ class ProcessingState extends Equatable {
     fraction,
     remaining,
     failure?.runtimeType,
+    partialReady,
   ];
 }
 
@@ -97,6 +104,7 @@ class ProcessingCubit extends Cubit<ProcessingState> {
                 fraction: e.fraction,
                 remaining: e.remaining,
               ),
+              ProcessingPartial() => state.copyWith(partialReady: true),
               ProcessingDone() => state.copyWith(
                 status: ProcessingStatus.done,
                 fraction: 1,

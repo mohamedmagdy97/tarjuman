@@ -306,5 +306,21 @@
         "type": "int"
       }
     }
-  }
+  },
+  "watchWhileTranslating": "Watch now while it translates",
+  "detectLanguage": "Detect language",
+  "languageDetected": "Detected: {name}",
+  "@languageDetected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errLanguageUnsupported": "The detected language isn't supported for translation yet.",
+  "detectNeedsModel": "Download the multilingual speech model first to detect the language.",
+  "transcriptTitle": "Full text",
+  "copyAll": "Copy all",
+  "shareText": "Share as text",
+  "copied": "Copied"
 }

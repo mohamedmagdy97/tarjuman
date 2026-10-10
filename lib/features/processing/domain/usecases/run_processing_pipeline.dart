@@ -7,9 +7,11 @@ import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
+import 'package:tarjuman/features/player/domain/entities/subtitle_cue.dart';
 import 'package:tarjuman/features/player/domain/repositories/subtitle_repository.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
+import 'package:tarjuman/features/processing/domain/entities/transcript_segment.dart';
 import 'package:tarjuman/features/processing/domain/ports/audio_extractor.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
 import 'package:tarjuman/features/processing/domain/usecases/process_range.dart';
@@ -26,6 +28,7 @@ class RunProcessingPipeline {
     required ProcessRange processRange,
     this.chunk = const Duration(minutes: 3),
     this.overlap = const Duration(seconds: 6),
+    this.firstChunk = const Duration(seconds: 30),
   }) : _videos = videos,
        _subtitles = subtitles,
        _audio = audio,
@@ -39,6 +42,9 @@ class RunProcessingPipeline {
   final ProcessRange _processRange;
   final Duration chunk;
   final Duration overlap;
+
+  /// The very first window is short so the first subtitles appear fast.
+  final Duration firstChunk;
 
   Stream<ProcessingEvent> call({
     required String videoId,
@@ -110,37 +116,75 @@ class RunProcessingPipeline {
       final clock = Stopwatch()..start();
       final baseMs = startMs;
       var cursor = Duration(milliseconds: startMs);
+
+      double fractionAt(Duration d) => total.inMilliseconds == 0
+          ? 0
+          : d.inMilliseconds / total.inMilliseconds;
+
+      // Translation + saving of the previous chunk runs while the recognizer
+      // works on the next one (translation doesn't compete for the same CPU
+      // work), but never more than one chunk behind and always saved in order.
+      Future<Failure?>? pending;
+
+      Future<Failure?> translateAndSave(List<TranscriptSegment> keep) async {
+        final res = await _processRange.translate(
+          segments: keep,
+          engines: engines,
+          cancel: cancel,
+        );
+        if (res case Err(:final failure)) return failure;
+        final cues = (res as Success<List<SubtitleCue>>).value;
+        await _subtitles.append(videoId, cues);
+        if (cues.isNotEmpty) {
+          out.add(ProcessingPartial(fractionAt(cues.last.end)));
+        }
+        return null;
+      }
+
+      Future<Failure?> joinPending() async {
+        final f = pending == null ? null : await pending;
+        pending = null;
+        return f;
+      }
+
+      Future<void> stopWith(Failure f) async {
+        if (f is CancelledFailure) return _cancelled(video, out);
+        return fail(video, f);
+      }
+
       while (cursor < total) {
-        if (cancel.isCancelled) return _cancelled(video, out);
+        if (cancel.isCancelled) {
+          await joinPending();
+          return _cancelled(video, out);
+        }
         // Each window reaches `overlap` past the chunk boundary so a sentence
         // crossing it is transcribed whole; the next window then starts where
         // the last kept sentence ended instead of at a fixed grid line.
-        final boundary = cursor + chunk;
+        final isFirst = cursor == Duration(milliseconds: baseMs) && baseMs == 0;
+        final step = isFirst ? firstChunk : chunk;
+        final boundary = cursor + step;
         final isLast = boundary + overlap >= total;
-        final length = isLast ? total - cursor : chunk + overlap;
+        final length = isLast ? total - cursor : step + overlap;
+        final windowStart = cursor;
 
-        double fractionAt(Duration d) => total.inMilliseconds == 0
-            ? 0
-            : d.inMilliseconds / total.inMilliseconds;
-
-        final result = await _processRange(
+        final transcribed = await _processRange.transcribe(
           mediaPath: video.path,
           engines: engines,
-          start: cursor,
+          start: windowStart,
           length: length,
           cancel: cancel,
           onStage: (stage) {
-            final done = (cursor.inMilliseconds - baseMs).toDouble();
+            final done = (windowStart.inMilliseconds - baseMs).toDouble();
             final remainingMs = done <= 0
                 ? null
-                : ((total.inMilliseconds - cursor.inMilliseconds) *
+                : ((total.inMilliseconds - windowStart.inMilliseconds) *
                           clock.elapsedMilliseconds /
                           done)
                       .round();
             out.add(
               ProcessingProgress(
                 stage: stage,
-                fraction: fractionAt(cursor),
+                fraction: fractionAt(windowStart),
                 remaining: remainingMs == null
                     ? null
                     : Duration(milliseconds: remainingMs),
@@ -148,24 +192,34 @@ class RunProcessingPipeline {
             );
           },
         );
-
-        switch (result) {
-          case Err(:final failure):
-            if (failure is CancelledFailure) return _cancelled(video, out);
-            return fail(video, failure);
-          case Success(:final value):
-            final keep = isLast
-                ? value
-                : value.where((c) => c.start < boundary).toList();
-            await _subtitles.append(videoId, keep);
-            if (isLast) {
-              cursor = total;
-            } else {
-              final lastEnd = keep.isEmpty ? boundary : keep.last.end;
-              cursor = lastEnd > boundary ? lastEnd : boundary;
-            }
+        if (transcribed case Err(:final failure)) {
+          await joinPending(); // keep what was already translated
+          return stopWith(failure);
         }
+        final segments =
+            (transcribed as Success<List<TranscriptSegment>>).value;
+        final keep = isLast
+            ? segments
+            : segments.where((c) => c.start < boundary).toList();
+
+        // Where the next window starts is known from the transcript alone.
+        final lastEnd = keep.isEmpty ? boundary : keep.last.end;
+        final next = isLast ? total : (lastEnd > boundary ? lastEnd : boundary);
+
+        final previous = await joinPending();
+        if (previous != null) return stopWith(previous);
+        pending = translateAndSave(keep);
+        cursor = next;
       }
+
+      out.add(
+        ProcessingProgress(
+          stage: ProcessingStage.translating,
+          fraction: fractionAt(cursor),
+        ),
+      );
+      final last = await joinPending();
+      if (last != null) return stopWith(last);
 
       final origin = kind == EngineKind.online
           ? SubtitleOrigin.online

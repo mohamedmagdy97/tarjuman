@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.6.0+9, package `com.megtech.tarjuman`)
+## 9. Current status (v1.7.0+10, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -173,6 +173,15 @@ v1.6 (analyzer + 64 tests green; Kotlin compiled via `./gradlew :app:compileRele
   sentence, CSV export + JSON backup/restore.
 - Storage screen (videos / models / temp, clear temp, delete video), library-wide subtitle search, Continue watching row (schema v6),
   sleep timer.
+v1.7 speed + reading (analyzer + 71 tests green; NOT device-tested, no measured numbers yet — measure RTF on a real phone before tuning):
+- Perceived speed: first window is 30 s (`firstChunk`), `ProcessingPartial` event after each saved chunk lets the user tap "Watch now while
+  it translates" (`/player/:id?follow=1`, the player polls new cues every 4 s while the video is `processing`).
+- Real speed: Silero VAD (`vadModelPath`, auto-downloaded, <1 MB, fallback to no-VAD on failure), 5-bit quantized Whisper models
+  (`*-q5_1`, hashes pinned from the same HF revision) are now the recommended ones, translation of chunk N overlaps with recognition
+  of chunk N+1 (`ProcessRange.transcribe` / `translate`; next window start comes from the transcript so it is known early),
+  ML Kit translates 4 lines concurrently.
+- Auto language detection (`DetectLanguage`, multilingual Whisper `detectLanguage`, button in setup), transcript reading screen
+  (`/transcript/:id`, copy / share .txt).
 Deliberately NOT done: burned-in subtitle video export (needs an FFmpeg build with libass + a video encoder → much larger APK),
 in-app gallery browser (needs `READ_MEDIA_VIDEO`), sibling-.srt auto-load, PiP/background audio, playlists, iOS.
 

@@ -164,6 +164,7 @@ class PlayerCubit extends Cubit<PlayerState> {
     required LiveSubtitleSession Function() liveFactory,
     this.liveKind,
     this.liveLanguage = SourceLanguage.en,
+    this.followProcessing = false,
     this.startAt,
   }) : _brightness = brightness,
        _videos = videos,
@@ -199,6 +200,10 @@ class PlayerCubit extends Cubit<PlayerState> {
   final EngineKind? liveKind;
   final SourceLanguage liveLanguage;
 
+  /// Opened while the video is still being translated: keep pulling new cues.
+  final bool followProcessing;
+  Timer? _followTimer;
+
   LiveSubtitleSession? _session;
   StreamSubscription<LiveUpdate>? _liveSub;
   var _liveStarting = false;
@@ -220,6 +225,13 @@ class PlayerCubit extends Cubit<PlayerState> {
       ),
     );
     _sub = engine.snapshots.listen(_onSnapshot);
+    if (followProcessing && d.video.status == VideoStatus.processing) {
+      emit(state.copyWith(liveBusy: true));
+      _followTimer = Timer.periodic(
+        const Duration(seconds: 4),
+        (_) => unawaited(_pullNewCues()),
+      );
+    }
     await engine.open(d.video.path);
     _saveTimer = Timer.periodic(
       const Duration(seconds: 5),
@@ -231,6 +243,28 @@ class PlayerCubit extends Cubit<PlayerState> {
       await engine.seekTo(resume);
     }
     await engine.play();
+  }
+
+  /// Reloads cues saved by the background job and stops once it is finished.
+  Future<void> _pullNewCues() async {
+    final data = await _load(videoId);
+    if (isClosed || data is! Success<PlayerData>) return;
+    final d = data.value;
+    final cue = d.timeline.activeAt(
+      state.snapshot.position - state.subtitleOffset,
+    );
+    final stillRunning = d.video.status == VideoStatus.processing;
+    emit(
+      state.copyWith(
+        video: d.video,
+        timeline: d.timeline,
+        liveBusy: stillRunning,
+        activeText: cue?.text,
+        activeOriginal: cue?.original,
+        clearActive: cue == null,
+      ),
+    );
+    if (!stillRunning) _followTimer?.cancel();
   }
 
   Future<void> _awaitReady() async {
@@ -508,6 +542,7 @@ class PlayerCubit extends Cubit<PlayerState> {
     _hideTimer?.cancel();
     _hudTimer?.cancel();
     _sleepTimer?.cancel();
+    _followTimer?.cancel();
     unawaited(_brightness.reset());
     await _sub?.cancel();
     await _liveSub?.cancel();

@@ -306,5 +306,21 @@
         "type": "int"
       }
     }
-  }
+  },
+  "watchWhileTranslating": "شاهد الآن أثناء الترجمة",
+  "detectLanguage": "كشف اللغة تلقائيًا",
+  "languageDetected": "تم كشف اللغة: {name}",
+  "@languageDetected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errLanguageUnsupported": "اللغة المكتشفة غير مدعومة للترجمة حاليًا.",
+  "detectNeedsModel": "حمّل نموذج الكلام متعدد اللغات أولاً لكشف اللغة.",
+  "transcriptTitle": "النص الكامل",
+  "copyAll": "نسخ الكل",
+  "shareText": "مشاركة كنص",
+  "copied": "تم النسخ"
 }

@@ -51,7 +51,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
   Future<void> downloadStarterModels() async {
     final speech = await _models.recommendedSpeechModelId(SourceLanguage.en);
-    final ids = [speech, 'mlkit.en', 'mlkit.ar'];
+    final ids = [speech, 'vad', 'mlkit.en', 'mlkit.ar'];
     final installed = {
       for (final m in await _models.list())
         if (m.installed) m.id,

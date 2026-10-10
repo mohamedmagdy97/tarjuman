@@ -44,4 +44,14 @@ void main() {
     expect(parsed.map((c) => c.text), ['أول سطر', 'مرحبا']);
     expect(parsed.first.end, const Duration(seconds: 2, milliseconds: 500));
   });
+
+  test('transcript text has one paragraph per cue, source line optional', () {
+    final plain = const SubtitleSerializer().toText(timeline);
+    expect(plain, 'أول سطر\n\nمرحبا');
+    final both = const SubtitleSerializer().toText(
+      timeline,
+      includeOriginal: true,
+    );
+    expect(both, 'أول سطر\n\nHello\nمرحبا');
+  });
 }

@@ -47,11 +47,14 @@ import 'package:tarjuman/features/player/domain/usecases/search_subtitles.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/processing/data/engine_provider_impl.dart';
 import 'package:tarjuman/features/processing/data/ffmpeg_audio_extractor.dart';
+import 'package:tarjuman/features/processing/data/whisper_language_detector.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/ports/audio_extractor.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
+import 'package:tarjuman/features/processing/domain/ports/language_detector.dart';
 import 'package:tarjuman/features/processing/domain/services/cue_segmenter.dart';
+import 'package:tarjuman/features/processing/domain/usecases/detect_language.dart';
 import 'package:tarjuman/features/processing/domain/usecases/live_subtitle_session.dart';
 import 'package:tarjuman/features/processing/domain/usecases/process_range.dart';
 import 'package:tarjuman/features/processing/domain/usecases/run_processing_pipeline.dart';
@@ -67,6 +70,8 @@ import 'package:tarjuman/features/subtitle_editor/domain/usecases/edit_cue_text.
 import 'package:tarjuman/features/subtitle_editor/domain/usecases/export_subtitles.dart';
 import 'package:tarjuman/features/subtitle_editor/domain/usecases/retranslate_cue.dart';
 import 'package:tarjuman/features/subtitle_editor/presentation/cubit/editor_cubit.dart';
+import 'package:tarjuman/features/transcript/domain/usecases/export_transcript.dart';
+import 'package:tarjuman/features/transcript/presentation/cubit/transcript_cubit.dart';
 import 'package:tarjuman/features/vocabulary/data/mlkit_word_translator.dart';
 import 'package:tarjuman/features/vocabulary/data/vocabulary_repository_impl.dart';
 import 'package:tarjuman/features/vocabulary/domain/ports/word_translator.dart';
@@ -140,6 +145,7 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => LibraryCubit(sl(), sl(), sl(), sl(), sl(), sl()))
     ..registerLazySingleton(() => const SubtitleSerializer())
     ..registerLazySingleton<SubtitleExporter>(SharePlusSubtitleExporter.new)
+    ..registerFactory(() => ExportTranscript(sl(), sl(), sl()))
     ..registerFactory(() => EditCueText(sl()))
     ..registerFactory(() => RetranslateCue(sl(), sl()))
     ..registerFactory(() => ExportSubtitles(sl(), sl(), sl(), sl()))
@@ -163,7 +169,11 @@ Future<void> configureDependencies() async {
     )
     ..registerFactory(() => LiveSubtitleSession(sl()))
     ..registerFactory(() => ModelsCubit(sl()))
-    ..registerFactory(() => SetupCubit(sl(), sl(), sl(), sl()))
+    ..registerLazySingleton<LanguageDetector>(
+      () => WhisperLanguageDetector(sl()),
+    )
+    ..registerFactory(() => DetectLanguage(sl(), sl(), _workPath))
+    ..registerFactory(() => SetupCubit(sl(), sl(), sl(), sl(), sl()))
     ..registerSingleton<AppSettingsCubit>(
       AppSettingsCubit(sl(), sl()),
     );
@@ -196,6 +206,7 @@ PlayerCubit newPlayerCubit(
   String videoId, {
   EngineKind? liveKind,
   SourceLanguage language = SourceLanguage.en,
+  bool follow = false,
   Duration? startAt,
 }) => PlayerCubit(
   videoId: videoId,
@@ -210,6 +221,14 @@ PlayerCubit newPlayerCubit(
   liveFactory: sl.call<LiveSubtitleSession>,
   liveKind: liveKind,
   liveLanguage: language,
+  followProcessing: follow,
+);
+
+TranscriptCubit newTranscriptCubit(String videoId) => TranscriptCubit(
+  videoId: videoId,
+  subtitles: sl(),
+  serializer: sl(),
+  export: sl(),
 );
 
 EditorCubit newEditorCubit(String videoId) => EditorCubit(

@@ -38,15 +38,28 @@ class WhisperSpeechRecognizer implements SpeechRecognizer {
         return const Result.failure(ModelMissingFailure('speech'));
       }
       final samples = await WhisperAudio.readWav(File(wavPath));
-      final task = engine.transcribe(
-        samples,
-        options: TranscribeOptions(
-          language: _language.code,
-          tokenTimestamps: false,
-        ),
-      );
-      cancel?.onCancel(task.cancel);
-      final result = await task.result;
+      final vad = await _models.vadModelPath();
+      Future<WhisperResult> run(String? vadPath) {
+        final task = engine.transcribe(
+          samples,
+          options: TranscribeOptions(
+            language: _language.code,
+            tokenTimestamps: false,
+            enableVad: vadPath != null,
+            vadModelPath: vadPath,
+          ),
+        );
+        cancel?.onCancel(task.cancel);
+        return task.result;
+      }
+
+      WhisperResult result;
+      try {
+        result = await run(vad);
+      } on WhisperException {
+        if (vad == null || (cancel?.isCancelled ?? false)) rethrow;
+        result = await run(null); // VAD failed: retry the plain way
+      }
       return Result.success([
         // High no-speech probability = music/silence the model hallucinated over.
         for (final s in result.segments)

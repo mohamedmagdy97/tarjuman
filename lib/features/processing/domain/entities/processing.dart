@@ -31,6 +31,15 @@ final class ProcessingProgress extends ProcessingEvent {
   List<Object?> get props => [stage, fraction, remaining];
 }
 
+/// Cues for part of the video are saved: playback can start already.
+final class ProcessingPartial extends ProcessingEvent {
+  const ProcessingPartial(this.fraction);
+  final double fraction;
+
+  @override
+  List<Object?> get props => [fraction];
+}
+
 final class ProcessingDone extends ProcessingEvent {
   const ProcessingDone();
 }

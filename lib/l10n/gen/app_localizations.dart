@@ -1333,6 +1333,60 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{minutes} دقيقة'**
   String sleepMinutes(int minutes);
+
+  /// No description provided for @watchWhileTranslating.
+  ///
+  /// In ar, this message translates to:
+  /// **'شاهد الآن أثناء الترجمة'**
+  String get watchWhileTranslating;
+
+  /// No description provided for @detectLanguage.
+  ///
+  /// In ar, this message translates to:
+  /// **'كشف اللغة تلقائيًا'**
+  String get detectLanguage;
+
+  /// No description provided for @languageDetected.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم كشف اللغة: {name}'**
+  String languageDetected(String name);
+
+  /// No description provided for @errLanguageUnsupported.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللغة المكتشفة غير مدعومة للترجمة حاليًا.'**
+  String get errLanguageUnsupported;
+
+  /// No description provided for @detectNeedsModel.
+  ///
+  /// In ar, this message translates to:
+  /// **'حمّل نموذج الكلام متعدد اللغات أولاً لكشف اللغة.'**
+  String get detectNeedsModel;
+
+  /// No description provided for @transcriptTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'النص الكامل'**
+  String get transcriptTitle;
+
+  /// No description provided for @copyAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'نسخ الكل'**
+  String get copyAll;
+
+  /// No description provided for @shareText.
+  ///
+  /// In ar, this message translates to:
+  /// **'مشاركة كنص'**
+  String get shareText;
+
+  /// No description provided for @copied.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم النسخ'**
+  String get copied;
 }
 
 class _AppLocalizationsDelegate

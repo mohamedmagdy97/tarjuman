@@ -19,6 +19,19 @@ class SubtitleSerializer {
     return b.toString();
   }
 
+  /// Readable transcript: one paragraph per cue, optionally with the source
+  /// line first.
+  String toText(SubtitleTimeline timeline, {bool includeOriginal = false}) {
+    final b = StringBuffer();
+    for (final c in timeline.cues) {
+      if (includeOriginal && c.original != null) b.writeln(c.original);
+      b
+        ..writeln(c.text)
+        ..writeln();
+    }
+    return b.toString().trimRight();
+  }
+
   String _t(Duration d) {
     String p(int n, [int w = 2]) => n.toString().padLeft(w, '0');
     return '${p(d.inHours)}:${p(d.inMinutes.remainder(60))}:'

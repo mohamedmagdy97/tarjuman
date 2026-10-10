@@ -10,6 +10,8 @@ import 'package:tarjuman/core/design_system/components/app_segmented.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
+import 'package:tarjuman/core/error/failure.dart';
+import 'package:tarjuman/core/error/failure_message.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/presentation/cubit/setup_cubit.dart';
@@ -77,6 +79,43 @@ class SetupView extends StatelessWidget {
                             ),
                         ],
                       ),
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: TextButton.icon(
+                          onPressed: s.detecting
+                              ? null
+                              : () => unawaited(cubit.detectLanguage()),
+                          icon: s.detecting
+                              ? const SizedBox.square(
+                                  dimension: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.hearing_rounded, size: 18),
+                          label: Text(l10n.detectLanguage),
+                        ),
+                      ),
+                      if (s.detected)
+                        Text(
+                          l10n.languageDetected(
+                            l10n.localeName == 'ar'
+                                ? s.language.arabicName
+                                : s.language.nativeName,
+                          ),
+                          style: AppTypography.caption.copyWith(
+                            color: c.signal,
+                          ),
+                        ),
+                      if (s.detectFailure != null)
+                        Text(
+                          s.detectFailure is ModelMissingFailure
+                              ? l10n.detectNeedsModel
+                              : failureMessage(s.detectFailure!, l10n),
+                          style: AppTypography.caption.copyWith(
+                            color: c.error,
+                          ),
+                        ),
                       const SizedBox(height: AppSpacing.xl),
                       _label(c.muted, l10n.modeTitle),
                       AppSegmented<ProcessingMode>(

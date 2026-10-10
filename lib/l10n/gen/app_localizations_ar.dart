@@ -670,4 +670,35 @@ class AppLocalizationsAr extends AppLocalizations {
   String sleepMinutes(int minutes) {
     return '$minutes دقيقة';
   }
+
+  @override
+  String get watchWhileTranslating => 'شاهد الآن أثناء الترجمة';
+
+  @override
+  String get detectLanguage => 'كشف اللغة تلقائيًا';
+
+  @override
+  String languageDetected(String name) {
+    return 'تم كشف اللغة: $name';
+  }
+
+  @override
+  String get errLanguageUnsupported =>
+      'اللغة المكتشفة غير مدعومة للترجمة حاليًا.';
+
+  @override
+  String get detectNeedsModel =>
+      'حمّل نموذج الكلام متعدد اللغات أولاً لكشف اللغة.';
+
+  @override
+  String get transcriptTitle => 'النص الكامل';
+
+  @override
+  String get copyAll => 'نسخ الكل';
+
+  @override
+  String get shareText => 'مشاركة كنص';
+
+  @override
+  String get copied => 'تم النسخ';
 }

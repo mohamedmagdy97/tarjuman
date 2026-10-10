@@ -16,6 +16,10 @@ abstract interface class ModelRepository {
   /// Source-language + Arabic translation models are both installed.
   Future<bool> translationReady(SourceLanguage language);
 
+  /// Silero voice-activity model (< 1 MB, lets Whisper skip silence and
+  /// music). Downloads it on first use; null if unavailable offline.
+  Future<String?> vadModelPath();
+
   /// Id of the speech model that suits this device for [language].
   Future<String> recommendedSpeechModelId(SourceLanguage language);
 }

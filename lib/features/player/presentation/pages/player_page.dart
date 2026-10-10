@@ -25,12 +25,14 @@ class PlayerPage extends StatelessWidget {
     required this.videoId,
     this.liveKind,
     this.language = SourceLanguage.en,
+    this.follow = false,
     this.startAtMs,
     super.key,
   });
   final String videoId;
   final EngineKind? liveKind;
   final SourceLanguage language;
+  final bool follow;
   final int? startAtMs;
 
   @override
@@ -40,6 +42,7 @@ class PlayerPage extends StatelessWidget {
         videoId,
         liveKind: liveKind,
         language: language,
+        follow: follow,
         startAt: startAtMs == null ? null : Duration(milliseconds: startAtMs!),
       );
       unawaited(cubit.start());
@@ -621,7 +624,7 @@ Future<void> _openSleep(BuildContext context) {
   );
 }
 
-enum _MoreAction { loop, sleep, tracks, attach, edit }
+enum _MoreAction { loop, sleep, tracks, attach, edit, transcript }
 
 /// Secondary player actions, kept in a menu so the bar fits small screens.
 class _MoreMenu extends StatelessWidget {
@@ -649,6 +652,8 @@ class _MoreMenu extends StatelessWidget {
             unawaited(cubit.attachSubtitles());
           case _MoreAction.edit:
             unawaited(context.push('/editor/${state.video?.id}'));
+          case _MoreAction.transcript:
+            unawaited(context.push('/transcript/${state.video?.id}'));
         }
       },
       itemBuilder: (_) => [
@@ -670,6 +675,11 @@ class _MoreMenu extends StatelessWidget {
           value: _MoreAction.attach,
           child: Text(l10n.attachSubtitles),
         ),
+        if (state.timeline.cues.isNotEmpty)
+          PopupMenuItem(
+            value: _MoreAction.transcript,
+            child: Text(l10n.transcriptTitle),
+          ),
         if (state.timeline.cues.isNotEmpty)
           PopupMenuItem(
             value: _MoreAction.edit,

@@ -22,11 +22,15 @@ class MlKitTextTranslator implements TextTranslator {
   }) async {
     try {
       final out = <String>[];
-      for (final t in texts) {
+      // A few lines at a time: ML Kit handles concurrent requests, which
+      // shortens long chunks without hammering the device.
+      const parallel = 4;
+      for (var i = 0; i < texts.length; i += parallel) {
         if (cancel?.isCancelled ?? false) {
           return const Result.failure(CancelledFailure());
         }
-        out.add(await _translator.translateText(t));
+        final group = texts.sublist(i, (i + parallel).clamp(0, texts.length));
+        out.addAll(await Future.wait(group.map(_translator.translateText)));
       }
       return Result.success(out);
     } on Exception catch (e) {

@@ -23,6 +23,8 @@ What you get:
 • Open any video from WhatsApp, the gallery or a file manager with Open with / Share to Tarjuman.
 • Word review with spaced-repetition cards and audio pronunciation, CSV export and backup.
 • Your own glossary applied to future translations.
+• Watch while it translates: subtitles start appearing within seconds and keep coming in the background.
+• Automatic language detection and a Full text screen to copy and share.
 • Search videos and subtitle text, a Continue watching row, a sleep timer and a storage screen.
 • Full control of the look: font size, colour, background, position, and an option to show English above the Arabic for language learners.
 • Remembers where you stopped in each video.

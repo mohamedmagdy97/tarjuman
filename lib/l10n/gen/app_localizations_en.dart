@@ -677,4 +677,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String sleepMinutes(int minutes) {
     return '$minutes min';
   }
+
+  @override
+  String get watchWhileTranslating => 'Watch now while it translates';
+
+  @override
+  String get detectLanguage => 'Detect language';
+
+  @override
+  String languageDetected(String name) {
+    return 'Detected: $name';
+  }
+
+  @override
+  String get errLanguageUnsupported =>
+      'The detected language isn\'t supported for translation yet.';
+
+  @override
+  String get detectNeedsModel =>
+      'Download the multilingual speech model first to detect the language.';
+
+  @override
+  String get transcriptTitle => 'Full text';
+
+  @override
+  String get copyAll => 'Copy all';
+
+  @override
+  String get shareText => 'Share as text';
+
+  @override
+  String get copied => 'Copied';
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tarjuman/core/cancel/cancel_token.dart';
@@ -9,6 +11,11 @@ import 'package:tarjuman/features/library/data/video_repository_impl.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/player/data/subtitle_repository_impl.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
+import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
+import 'package:tarjuman/features/processing/domain/entities/transcript_segment.dart';
+import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
+import 'package:tarjuman/features/processing/domain/ports/speech_recognizer.dart';
+import 'package:tarjuman/features/processing/domain/ports/text_translator.dart';
 import 'package:tarjuman/features/processing/domain/services/cue_segmenter.dart';
 import 'package:tarjuman/features/processing/domain/usecases/process_range.dart';
 import 'package:tarjuman/features/processing/domain/usecases/run_processing_pipeline.dart';
@@ -31,19 +38,22 @@ void main() {
   late FakeRecognizer recognizer;
   late String videoId;
 
-  RunProcessingPipeline build({Failure? engineFailure}) =>
-      RunProcessingPipeline(
-        videos: videos,
-        subtitles: subtitles,
-        audio: audio,
-        engines: FakeEngineProvider(recognizer, failure: engineFailure),
-        processRange: ProcessRange(
-          audio,
-          const CueSegmenter(),
-          (n) async => '/tmp/$n',
-        ),
-        chunk: const Duration(minutes: 1),
-      );
+  RunProcessingPipeline build({
+    Failure? engineFailure,
+    Duration firstChunk = const Duration(minutes: 1),
+  }) => RunProcessingPipeline(
+    videos: videos,
+    subtitles: subtitles,
+    audio: audio,
+    engines: FakeEngineProvider(recognizer, failure: engineFailure),
+    processRange: ProcessRange(
+      audio,
+      const CueSegmenter(),
+      (n) async => '/tmp/$n',
+    ),
+    chunk: const Duration(minutes: 1),
+    firstChunk: firstChunk,
+  );
 
   setUp(() async {
     db = AppDatabase.forTesting(NativeDatabase.memory());
@@ -134,7 +144,7 @@ void main() {
       final events = <ProcessingEvent>[];
       await for (final e in stream) {
         events.add(e);
-        if (e is ProcessingProgress && e.stage == ProcessingStage.translating) {
+        if (e is ProcessingPartial) {
           cancel.cancel();
         }
       }
@@ -145,4 +155,122 @@ void main() {
       );
     },
   );
+
+  test(
+    'first window is short and each saved chunk emits a partial event',
+    () async {
+      final events = await build(firstChunk: const Duration(seconds: 30))(
+        videoId: videoId,
+        kind: EngineKind.offline,
+        cancel: CancelToken(),
+      ).toList();
+      // 0 (30 s window), then 30, 90, 150 on the 1-minute grid.
+      expect(audio.extracted, [
+        Duration.zero,
+        const Duration(seconds: 30),
+        const Duration(seconds: 90),
+        const Duration(seconds: 150),
+      ]);
+      expect(events.whereType<ProcessingPartial>(), hasLength(4));
+      expect(events.last, isA<ProcessingDone>());
+    },
+  );
+
+  test(
+    'translation of one chunk overlaps with transcription of the next',
+    () async {
+      final order = <String>[];
+      final gate = Completer<void>();
+      final rec = _OrderRecognizer(order, onSecondCall: gate.complete);
+      final translator = _GatedTranslator(order, gate.future);
+      final pipeline = RunProcessingPipeline(
+        videos: videos,
+        subtitles: subtitles,
+        audio: audio,
+        engines: _SetProvider(
+          EngineSet(recognizer: rec, translator: translator),
+        ),
+        processRange: ProcessRange(
+          audio,
+          const CueSegmenter(),
+          (n) async => '/tmp/$n',
+        ),
+        chunk: const Duration(minutes: 1),
+        firstChunk: const Duration(minutes: 1),
+      );
+
+      final events = await pipeline(
+        videoId: videoId,
+        kind: EngineKind.offline,
+        cancel: CancelToken(),
+      ).toList();
+
+      expect(events.last, isA<ProcessingDone>());
+      // Chunk 1's translation could only finish because chunk 2's recognition
+      // had already started (the gate opens on the second recognizer call).
+      expect(
+        order.indexOf('transcribe#2'),
+        lessThan(order.indexOf('translated#1')),
+      );
+    },
+  );
+}
+
+class _OrderRecognizer implements SpeechRecognizer {
+  _OrderRecognizer(this.order, {required this.onSecondCall});
+  final List<String> order;
+  final void Function() onSecondCall;
+  int calls = 0;
+
+  @override
+  Future<Result<List<TranscriptSegment>>> transcribe(
+    String wavPath, {
+    CancelToken? cancel,
+  }) async {
+    calls++;
+    order.add('transcribe#$calls');
+    if (calls == 2) onSecondCall();
+    return const Result.success([
+      TranscriptSegment(
+        start: Duration.zero,
+        end: Duration(seconds: 2),
+        text: 'Hello.',
+      ),
+    ]);
+  }
+
+  @override
+  Future<void> dispose() async {}
+}
+
+class _GatedTranslator implements TextTranslator {
+  _GatedTranslator(this.order, this.gate);
+  final List<String> order;
+  final Future<void> gate;
+  int calls = 0;
+
+  @override
+  Future<Result<List<String>>> translateBatch(
+    List<String> texts, {
+    CancelToken? cancel,
+  }) async {
+    final n = ++calls;
+    if (n == 1) await gate;
+    order.add('translated#$n');
+    return Result.success([for (final t in texts) 'ar:$t']);
+  }
+
+  @override
+  Future<void> dispose() async {}
+}
+
+class _SetProvider implements EngineProvider {
+  _SetProvider(this.set);
+  final EngineSet set;
+
+  @override
+  Future<Result<EngineSet>> acquire(
+    EngineKind kind, {
+    SourceLanguage language = SourceLanguage.en,
+  }) async => Result.success(set);
 }

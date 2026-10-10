@@ -32,6 +32,7 @@ import 'package:tarjuman/features/player/presentation/pages/player_page.dart';
 import 'package:tarjuman/features/player/presentation/widgets/subtitle_style_sheet.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
+import 'package:tarjuman/features/processing/domain/usecases/detect_language.dart';
 import 'package:tarjuman/features/processing/domain/usecases/live_subtitle_session.dart';
 import 'package:tarjuman/features/processing/domain/usecases/run_processing_pipeline.dart';
 import 'package:tarjuman/features/processing/presentation/cubit/processing_cubit.dart';
@@ -94,6 +95,8 @@ class _MImportUrl extends Mock implements ImportFromUrl {}
 class _MDelete extends Mock implements DeleteVideo {}
 
 class _MFavorite extends Mock implements ToggleFavorite {}
+
+class _MDetect extends Mock implements DetectLanguage {}
 
 class _MSearch extends Mock implements SearchSubtitles {}
 
@@ -166,7 +169,7 @@ class _ProcC extends ProcessingCubit {
 
 class _SetupC extends SetupCubit {
   _SetupC(SetupState s)
-    : super(_MVideos(), _MModels(), _Settings(), _Secrets()) {
+    : super(_MVideos(), _MModels(), _Settings(), _Secrets(), _MDetect()) {
     emit(s);
   }
 }

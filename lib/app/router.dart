@@ -12,6 +12,7 @@ import 'package:tarjuman/features/processing/presentation/pages/setup_page.dart'
 import 'package:tarjuman/features/settings/presentation/pages/settings_page.dart';
 import 'package:tarjuman/features/storage/presentation/pages/storage_page.dart';
 import 'package:tarjuman/features/subtitle_editor/presentation/pages/editor_page.dart';
+import 'package:tarjuman/features/transcript/presentation/pages/transcript_page.dart';
 import 'package:tarjuman/features/vocabulary/presentation/pages/review_page.dart';
 import 'package:tarjuman/features/vocabulary/presentation/pages/vocabulary_page.dart';
 
@@ -47,6 +48,7 @@ GoRouter buildRouter(SettingsStore settings) => GoRouter(
         liveKind: _kind(s.uri.queryParameters['live']),
         language: SourceLanguage.fromCode(s.uri.queryParameters['lang']),
         startAtMs: int.tryParse(s.uri.queryParameters['t'] ?? ''),
+        follow: s.uri.queryParameters['follow'] == '1',
       ),
     ),
     GoRoute(
@@ -55,6 +57,10 @@ GoRouter buildRouter(SettingsStore settings) => GoRouter(
     ),
     GoRoute(path: '/vocabulary', builder: (_, _) => const VocabularyPage()),
     GoRoute(path: '/review', builder: (_, _) => const ReviewPage()),
+    GoRoute(
+      path: '/transcript/:id',
+      builder: (_, s) => TranscriptPage(videoId: s.pathParameters['id']!),
+    ),
     GoRoute(path: '/storage', builder: (_, _) => const StoragePage()),
     GoRoute(path: '/glossary', builder: (_, _) => const GlossaryPage()),
     GoRoute(path: '/models', builder: (_, _) => const ModelsPage()),
