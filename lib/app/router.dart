@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
+import 'package:tarjuman/features/browser/presentation/pages/browser_page.dart';
+import 'package:tarjuman/features/downloads/presentation/pages/downloads_page.dart';
 import 'package:tarjuman/features/glossary/presentation/pages/glossary_page.dart';
 import 'package:tarjuman/features/library/presentation/pages/library_page.dart';
 import 'package:tarjuman/features/model_manager/presentation/pages/models_page.dart';
@@ -61,6 +63,11 @@ GoRouter buildRouter(SettingsStore settings) => GoRouter(
       path: '/transcript/:id',
       builder: (_, s) => TranscriptPage(videoId: s.pathParameters['id']!),
     ),
+    GoRoute(
+      path: '/browser',
+      builder: (_, s) => BrowserPage(initialUrl: s.uri.queryParameters['url']),
+    ),
+    GoRoute(path: '/downloads', builder: (_, _) => const DownloadsPage()),
     GoRoute(path: '/storage', builder: (_, _) => const StoragePage()),
     GoRoute(path: '/glossary', builder: (_, _) => const GlossaryPage()),
     GoRoute(path: '/models', builder: (_, _) => const ModelsPage()),

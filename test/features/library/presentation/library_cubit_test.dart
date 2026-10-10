@@ -7,7 +7,6 @@ import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
-import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/toggle_favorite.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
@@ -19,8 +18,6 @@ class _MockWatch extends Mock implements WatchLibrary {}
 class _MockImport extends Mock implements ImportVideo {}
 
 class _MockDelete extends Mock implements DeleteVideo {}
-
-class _MockImportUrl extends Mock implements ImportFromUrl {}
 
 class _MockFavorite extends Mock implements ToggleFavorite {}
 
@@ -50,7 +47,6 @@ void main() {
   LibraryCubit build() => LibraryCubit(
     watch,
     import,
-    _MockImportUrl(),
     _MockDelete(),
     _MockFavorite(),
     _MockSearch(),

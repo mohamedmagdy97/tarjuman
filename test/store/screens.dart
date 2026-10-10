@@ -10,7 +10,6 @@ import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
-import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/toggle_favorite.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
@@ -115,8 +114,6 @@ class _Online implements OnlineConfig {
 class _MWatch extends Mock implements WatchLibrary {}
 
 class _MImport extends Mock implements ImportVideo {}
-
-class _MImportUrl extends Mock implements ImportFromUrl {}
 
 class _MDelete extends Mock implements DeleteVideo {}
 
@@ -413,7 +410,6 @@ Map<String, Widget Function(Locale)> storeScreens() => {
     final cubit = LibraryCubit(
       watch,
       _MImport(),
-      _MImportUrl(),
       _MDelete(),
       _MFavorite(),
       _MSearch(),

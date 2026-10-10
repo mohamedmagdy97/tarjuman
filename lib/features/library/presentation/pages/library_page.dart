@@ -36,7 +36,6 @@ class LibraryView extends StatefulWidget {
 }
 
 class _LibraryViewState extends State<LibraryView> {
-  var _progressOpen = false;
   var _searching = false;
   final _search = TextEditingController();
 
@@ -59,18 +58,10 @@ class _LibraryViewState extends State<LibraryView> {
     final l10n = AppLocalizations.of(context);
     return BlocConsumer<LibraryCubit, LibraryState>(
       listenWhen: (a, b) =>
-          a.downloading != b.downloading ||
           (b.failure != null && a.failure != b.failure) ||
           (b.importedId != null && a.importedId != b.importedId),
       listener: (context, state) {
         final cubit = context.read<LibraryCubit>();
-        if (state.downloading && !_progressOpen) {
-          _progressOpen = true;
-          unawaited(_showProgress(context, cubit));
-        } else if (!state.downloading && _progressOpen) {
-          _progressOpen = false;
-          Navigator.of(context, rootNavigator: true).pop();
-        }
         if (state.failure != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(failureMessage(state.failure!, l10n))),
@@ -178,74 +169,8 @@ class _LibraryViewState extends State<LibraryView> {
       case 'file':
         await cubit.importVideo();
       case 'link':
-        await _askLink(context, cubit);
+        unawaited(context.push('/browser'));
     }
-  }
-
-  Future<void> _askLink(BuildContext context, LibraryCubit cubit) async {
-    final l10n = AppLocalizations.of(context);
-    final controller = TextEditingController();
-    final url = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.linkTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType: TextInputType.url,
-              textDirection: TextDirection.ltr,
-              decoration: InputDecoration(hintText: l10n.linkHint),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              l10n.linkNote,
-              style: AppTypography.caption.copyWith(color: ctx.colors.muted),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, controller.text),
-            child: Text(l10n.linkDownload),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-    if (url != null && url.trim().isNotEmpty) {
-      unawaited(cubit.importFromUrl(url));
-    }
-  }
-
-  Future<void> _showProgress(BuildContext context, LibraryCubit cubit) {
-    final l10n = AppLocalizations.of(context);
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => BlocProvider.value(
-        value: cubit,
-        child: BlocBuilder<LibraryCubit, LibraryState>(
-          builder: (context, s) => AlertDialog(
-            title: Text(l10n.downloadingVideo),
-            content: AppProgressBar(value: s.downloadProgress),
-            actions: [
-              TextButton(
-                onPressed: cubit.cancelDownload,
-                child: Text(l10n.cancel),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _body(

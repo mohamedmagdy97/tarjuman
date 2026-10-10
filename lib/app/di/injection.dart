@@ -16,14 +16,17 @@ import 'package:tarjuman/core/platform/media/media_kit_engine.dart';
 import 'package:tarjuman/core/platform/share/incoming_media.dart';
 import 'package:tarjuman/core/platform/speech/pronouncer.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
+import 'package:tarjuman/features/downloads/presentation/cubit/downloads_cubit.dart';
 import 'package:tarjuman/features/glossary/data/glossary_repository_impl.dart';
 import 'package:tarjuman/features/glossary/domain/repositories/glossary_repository.dart';
 import 'package:tarjuman/features/glossary/presentation/cubit/glossary_cubit.dart';
 import 'package:tarjuman/features/library/data/file_picker_media_picker.dart';
 import 'package:tarjuman/features/library/data/http_file_downloader.dart';
+import 'package:tarjuman/features/library/data/links/composite_link_resolver.dart';
 import 'package:tarjuman/features/library/data/media_storage.dart';
 import 'package:tarjuman/features/library/data/video_repository_impl.dart';
 import 'package:tarjuman/features/library/domain/ports/file_downloader.dart';
+import 'package:tarjuman/features/library/domain/ports/link_source.dart';
 import 'package:tarjuman/features/library/domain/ports/media_picker.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
@@ -142,10 +145,12 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => StudyCubit(sl(), sl()))
     ..registerFactory(() => VocabularyCubit(sl()))
     ..registerLazySingleton<FileDownloader>(HttpFileDownloader.new)
-    ..registerFactory(() => ImportFromUrl(sl(), sl(), sl()))
+    ..registerLazySingleton<LinkResolver>(CompositeLinkResolver.new)
+    ..registerLazySingleton(() => DownloadsCubit(sl()))
+    ..registerFactory(() => ImportFromUrl(sl(), sl(), sl(), sl()))
     ..registerFactory(() => ToggleFavorite(sl()))
     ..registerFactory(() => SearchSubtitles(sl()))
-    ..registerFactory(() => LibraryCubit(sl(), sl(), sl(), sl(), sl(), sl()))
+    ..registerFactory(() => LibraryCubit(sl(), sl(), sl(), sl(), sl()))
     ..registerLazySingleton(() => const SubtitleSerializer())
     ..registerLazySingleton<SubtitleExporter>(SharePlusSubtitleExporter.new)
     ..registerFactory(() => ExportTranscript(sl(), sl(), sl()))

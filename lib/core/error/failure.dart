@@ -38,6 +38,21 @@ final class RateLimitedFailure extends Failure {
   const RateLimitedFailure([super.message]);
 }
 
+/// The pasted text is not a usable web address.
+final class InvalidLinkFailure extends Failure {
+  const InvalidLinkFailure([super.message]);
+}
+
+/// The page loaded but no downloadable video was found in it.
+final class NoVideoFoundFailure extends Failure {
+  const NoVideoFoundFailure([super.message]);
+}
+
+/// The site answered but refused (login needed, blocked, rate-limited).
+final class SiteRefusedFailure extends Failure {
+  const SiteRefusedFailure([super.message]);
+}
+
 /// The picked subtitle file is not valid SRT/WebVTT (or not UTF-8).
 final class InvalidSubtitleFailure extends Failure {
   const InvalidSubtitleFailure([super.message]);

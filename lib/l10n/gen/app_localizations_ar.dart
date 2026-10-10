@@ -365,26 +365,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addFromDevice => 'من الجهاز';
 
   @override
-  String get addFromLink => 'من رابط مباشر';
+  String get addFromLink => 'من رابط';
 
   @override
   String get linkTitle => 'رابط الفيديو';
 
   @override
-  String get linkHint => 'رابط مباشر لملف فيديو أو صوت';
+  String get linkHint => 'الصق رابط فيديو: يوتيوب، فيسبوك، موقع، أو ملف مباشر';
 
   @override
   String get linkDownload => 'تنزيل وإضافة';
 
   @override
   String get linkNote =>
-      'روابط الملفات المباشرة فقط. روابط يوتيوب وأمثالها غير مدعومة.';
+      'يعمل مع الفيديوهات العامة. بعض المواقع تمنع التحميل، والفيديوهات الخاصة أو المحمية لن تعمل، وجودة يوتيوب محدودة.';
 
   @override
   String get downloadingVideo => 'جارٍ تنزيل الفيديو';
-
-  @override
-  String get errLink => 'تعذّر تنزيل الرابط. تأكد أنه رابط مباشر لملف.';
 
   @override
   String get saveEdit => 'حفظ';
@@ -729,4 +726,72 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get copied => 'تم النسخ';
+
+  @override
+  String get errInvalidLink =>
+      'هذا لا يبدو عنوان ويب. الصق الرابط كاملًا، مثل https://…';
+
+  @override
+  String get errNoVideo =>
+      'لم نجد فيديو قابلًا للتحميل في هذه الصفحة. افتح الصفحة وشغّل الفيديو ثم اختره من قائمة المكتشَف.';
+
+  @override
+  String get errSiteRefused =>
+      'رفض الموقع التحميل (قد يحتاج تسجيل دخول أو يمنع التحميل).';
+
+  @override
+  String get errLink => 'تعذّر تحميل هذا الرابط.';
+
+  @override
+  String get browserHint => 'اكتب أو الصق رابطًا';
+
+  @override
+  String get browserStart =>
+      'افتح موقعًا وشغّل الفيديو، وسيكتشفه التطبيق لتحمّل واحدًا أو أكثر.';
+
+  @override
+  String get browserDetected => 'الفيديوهات المكتشفة';
+
+  @override
+  String get browserNone =>
+      'لم يُكتشف فيديو بعد. شغّل الفيديو في الصفحة ثم افتح هذه القائمة مرة أخرى.';
+
+  @override
+  String get browserDownloadPage => 'تحميل فيديو هذه الصفحة';
+
+  @override
+  String browserDownloadSelected(int count) {
+    return 'تحميل المحدد ($count)';
+  }
+
+  @override
+  String browserAdded(int count) {
+    return 'أُضيف $count إلى التحميلات';
+  }
+
+  @override
+  String get downloadsTitle => 'التحميلات';
+
+  @override
+  String get downloadsEmpty => 'لا توجد تحميلات بعد';
+
+  @override
+  String get downloadWaiting => 'في الانتظار';
+
+  @override
+  String get downloadOpen => 'فتح';
+
+  @override
+  String get downloadRetry => 'إعادة المحاولة';
+
+  @override
+  String get downloadClearDone => 'مسح المنتهية';
+
+  @override
+  String get downloadDone => 'أُضيف إلى مكتبتك';
+
+  @override
+  String downloadFailedReason(String reason) {
+    return 'السبب: $reason';
+  }
 }

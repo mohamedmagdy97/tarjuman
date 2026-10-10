@@ -371,27 +371,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addFromDevice => 'From device';
 
   @override
-  String get addFromLink => 'From direct link';
+  String get addFromLink => 'From a link';
 
   @override
   String get linkTitle => 'Video link';
 
   @override
-  String get linkHint => 'Direct link to a video or audio file';
+  String get linkHint =>
+      'Paste a video link: YouTube, Facebook, a website or a direct file';
 
   @override
   String get linkDownload => 'Download and add';
 
   @override
   String get linkNote =>
-      'Direct file links only. YouTube-style page links aren\'t supported.';
+      'Works for public videos. Some sites block downloads, protected (DRM) or private videos won\'t work, and YouTube quality is limited.';
 
   @override
   String get downloadingVideo => 'Downloading video';
-
-  @override
-  String get errLink =>
-      'Couldn\'t download this link. Make sure it\'s a direct file link.';
 
   @override
   String get saveEdit => 'Save';
@@ -736,4 +733,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copied => 'Copied';
+
+  @override
+  String get errInvalidLink =>
+      'This doesn\'t look like a web address. Paste the full link, e.g. https://…';
+
+  @override
+  String get errNoVideo =>
+      'No downloadable video was found on this page. Open the page, play the video, then pick it from the detected list.';
+
+  @override
+  String get errSiteRefused =>
+      'The site refused the download (it may need a login, or blocks downloads).';
+
+  @override
+  String get errLink => 'Couldn\'t download this link.';
+
+  @override
+  String get browserHint => 'Type or paste a link';
+
+  @override
+  String get browserStart =>
+      'Open a site, play the video, and the app detects it so you can download one or many.';
+
+  @override
+  String get browserDetected => 'Detected videos';
+
+  @override
+  String get browserNone =>
+      'No video detected yet. Play the video on the page, then open this list again.';
+
+  @override
+  String get browserDownloadPage => 'Download this page\'s video';
+
+  @override
+  String browserDownloadSelected(int count) {
+    return 'Download selected ($count)';
+  }
+
+  @override
+  String browserAdded(int count) {
+    return '$count added to downloads';
+  }
+
+  @override
+  String get downloadsTitle => 'Downloads';
+
+  @override
+  String get downloadsEmpty => 'No downloads yet';
+
+  @override
+  String get downloadWaiting => 'Waiting';
+
+  @override
+  String get downloadOpen => 'Open';
+
+  @override
+  String get downloadRetry => 'Retry';
+
+  @override
+  String get downloadClearDone => 'Clear finished';
+
+  @override
+  String get downloadDone => 'Added to your library';
+
+  @override
+  String downloadFailedReason(String reason) {
+    return 'Reason: $reason';
+  }
 }

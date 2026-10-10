@@ -773,7 +773,7 @@ abstract class AppLocalizations {
   /// No description provided for @addFromLink.
   ///
   /// In ar, this message translates to:
-  /// **'من رابط مباشر'**
+  /// **'من رابط'**
   String get addFromLink;
 
   /// No description provided for @linkTitle.
@@ -785,7 +785,7 @@ abstract class AppLocalizations {
   /// No description provided for @linkHint.
   ///
   /// In ar, this message translates to:
-  /// **'رابط مباشر لملف فيديو أو صوت'**
+  /// **'الصق رابط فيديو: يوتيوب، فيسبوك، موقع، أو ملف مباشر'**
   String get linkHint;
 
   /// No description provided for @linkDownload.
@@ -797,7 +797,7 @@ abstract class AppLocalizations {
   /// No description provided for @linkNote.
   ///
   /// In ar, this message translates to:
-  /// **'روابط الملفات المباشرة فقط. روابط يوتيوب وأمثالها غير مدعومة.'**
+  /// **'يعمل مع الفيديوهات العامة. بعض المواقع تمنع التحميل، والفيديوهات الخاصة أو المحمية لن تعمل، وجودة يوتيوب محدودة.'**
   String get linkNote;
 
   /// No description provided for @downloadingVideo.
@@ -805,12 +805,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'جارٍ تنزيل الفيديو'**
   String get downloadingVideo;
-
-  /// No description provided for @errLink.
-  ///
-  /// In ar, this message translates to:
-  /// **'تعذّر تنزيل الرابط. تأكد أنه رابط مباشر لملف.'**
-  String get errLink;
 
   /// No description provided for @saveEdit.
   ///
@@ -1435,6 +1429,120 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تم النسخ'**
   String get copied;
+
+  /// No description provided for @errInvalidLink.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا لا يبدو عنوان ويب. الصق الرابط كاملًا، مثل https://…'**
+  String get errInvalidLink;
+
+  /// No description provided for @errNoVideo.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم نجد فيديو قابلًا للتحميل في هذه الصفحة. افتح الصفحة وشغّل الفيديو ثم اختره من قائمة المكتشَف.'**
+  String get errNoVideo;
+
+  /// No description provided for @errSiteRefused.
+  ///
+  /// In ar, this message translates to:
+  /// **'رفض الموقع التحميل (قد يحتاج تسجيل دخول أو يمنع التحميل).'**
+  String get errSiteRefused;
+
+  /// No description provided for @errLink.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل هذا الرابط.'**
+  String get errLink;
+
+  /// No description provided for @browserHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب أو الصق رابطًا'**
+  String get browserHint;
+
+  /// No description provided for @browserStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح موقعًا وشغّل الفيديو، وسيكتشفه التطبيق لتحمّل واحدًا أو أكثر.'**
+  String get browserStart;
+
+  /// No description provided for @browserDetected.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفيديوهات المكتشفة'**
+  String get browserDetected;
+
+  /// No description provided for @browserNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يُكتشف فيديو بعد. شغّل الفيديو في الصفحة ثم افتح هذه القائمة مرة أخرى.'**
+  String get browserNone;
+
+  /// No description provided for @browserDownloadPage.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحميل فيديو هذه الصفحة'**
+  String get browserDownloadPage;
+
+  /// No description provided for @browserDownloadSelected.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحميل المحدد ({count})'**
+  String browserDownloadSelected(int count);
+
+  /// No description provided for @browserAdded.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُضيف {count} إلى التحميلات'**
+  String browserAdded(int count);
+
+  /// No description provided for @downloadsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'التحميلات'**
+  String get downloadsTitle;
+
+  /// No description provided for @downloadsEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد تحميلات بعد'**
+  String get downloadsEmpty;
+
+  /// No description provided for @downloadWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'في الانتظار'**
+  String get downloadWaiting;
+
+  /// No description provided for @downloadOpen.
+  ///
+  /// In ar, this message translates to:
+  /// **'فتح'**
+  String get downloadOpen;
+
+  /// No description provided for @downloadRetry.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة المحاولة'**
+  String get downloadRetry;
+
+  /// No description provided for @downloadClearDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسح المنتهية'**
+  String get downloadClearDone;
+
+  /// No description provided for @downloadDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُضيف إلى مكتبتك'**
+  String get downloadDone;
+
+  /// No description provided for @downloadFailedReason.
+  ///
+  /// In ar, this message translates to:
+  /// **'السبب: {reason}'**
+  String downloadFailedReason(String reason);
 }
 
 class _AppLocalizationsDelegate

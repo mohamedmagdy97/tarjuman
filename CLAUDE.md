@@ -30,8 +30,8 @@ Two processing modes, built in this order:
 | **Online** | Cloud ASR/translation adapters, same UI + data model | 5 |
 
 Decisions already made by the owner: **both modes**, **Android + iPhone**, **local files + direct links**.
-Not supported (do not build): page URLs of video platforms (YouTube etc.), DRM content, mic capture as
-audio source.
+Owner REVERSED the page-URL decision on 2026-10-10: links to YouTube/Facebook/any web page are now supported (see §9 v1.9).
+Still not supported: DRM/encrypted streams, mic capture as audio source.
 
 ## 2. Roadmap (MVP = phases 1–3)
 
@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.8.0+11, package `com.megtech.tarjuman`)
+## 9. Current status (v1.10.0+13, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -183,6 +183,17 @@ v1.7 speed + reading (analyzer + 71 tests green; NOT device-tested, no measured 
 - Auto language detection (`DetectLanguage`, multilingual Whisper `detectLanguage`, button in setup), transcript reading screen
   (`/transcript/:id`, copy / share .txt).
 v1.8 online providers (analyzer clean, 83 tests; real-API behaviour unverified — Gemini OpenAI-compat endpoint, Deepgram response shape, DeepL AR, OpenRouter free model id).
+v1.9 links from any site (analyzer clean, 91 tests; NOT tested against real sites): `LinkResolver` (CompositeLinkResolver) -> `LinkSource` -> `HttpFileDownloader`.
+YouTube via `youtube_explode_dart` (muxed streams only, <=360p-720p), other pages scraped for og:video / <video> / JSON-LD / Facebook playable_url / embedded m3u8, direct files,
+unencrypted HLS (segments concatenated to .ts/.mp4). Encrypted HLS, private/login-only videos, blob: players are NOT supported. Extractors break when sites change.
+**Play Store risk:** downloading from YouTube/Facebook violates their ToS and Play policy; this build is likely rejected/removed on Play. Plan: gate behind a build flavor before publishing.
+v1.10 in-app browser + download queue (analyzer clean, 98 tests, Android Kotlin compile OK; NOT device-tested): "From a link" opens `/browser`
+(`flutter_inappwebview`, Apache-2.0): address bar, back/forward/reload, start screen with popular sites. Videos are detected from network requests
+(`onLoadResource` + `shouldInterceptRequest`, filtered by `MediaUrlFilter`), `<video>`/og:video via JS and the page HTML. The sheet lists "this page"
+(auto-detect, e.g. YouTube) + each detected file with checkboxes -> `DownloadsCubit` (app-lifetime singleton, 2 concurrent, retry/cancel/clear,
+`/downloads` page, badge on the browser app bar). Errors are specific: `InvalidLinkFailure`, `NoVideoFoundFailure`, `SiteRefusedFailure` (+ technical
+reason line, e.g. HTTP 403); `NetworkFailure` is now only for real connectivity/TLS/5xx. `normalizeUrl` accepts bare domains and pasted sentences.
+Limits: blob:/DASH-only players, login-only videos, encrypted HLS; cookies are not forwarded to the downloader.
 Deliberately NOT done: burned-in subtitle video export (needs an FFmpeg build with libass + a video encoder → much larger APK),
 in-app gallery browser (needs `READ_MEDIA_VIDEO`), sibling-.srt auto-load, PiP/background audio, playlists, iOS.
 
