@@ -8,10 +8,6 @@ import 'package:tarjuman/core/database/app_database.dart';
 import 'package:tarjuman/core/platform/device/brightness_control.dart';
 import 'package:tarjuman/core/platform/media/media_kit_engine.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
-import 'package:tarjuman/features/device_videos/data/photo_manager_device_video_source.dart';
-import 'package:tarjuman/features/device_videos/domain/ports/device_video_source.dart';
-import 'package:tarjuman/features/device_videos/domain/usecases/add_device_video.dart';
-import 'package:tarjuman/features/device_videos/presentation/cubit/device_videos_cubit.dart';
 import 'package:tarjuman/features/library/data/file_picker_media_picker.dart';
 import 'package:tarjuman/features/library/data/http_file_downloader.dart';
 import 'package:tarjuman/features/library/data/media_storage.dart';
@@ -77,11 +73,6 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => LoadPlayerData(sl(), sl()))
     ..registerFactory(() => AttachSubtitles(sl(), sl(), sl()))
     ..registerLazySingleton<BrightnessControl>(ScreenBrightnessControl.new)
-    ..registerLazySingleton<DeviceVideoSource>(
-      PhotoManagerDeviceVideoSource.new,
-    )
-    ..registerFactory(() => AddDeviceVideo(sl(), sl()))
-    ..registerFactory(() => DeviceVideosCubit(sl(), sl()))
     ..registerLazySingleton<FileDownloader>(HttpFileDownloader.new)
     ..registerFactory(() => ImportFromUrl(sl(), sl(), sl()))
     ..registerFactory(() => ToggleFavorite(sl()))

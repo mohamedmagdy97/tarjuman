@@ -1,3 +1,5 @@
+// Reason: mocktail only matches named args that were passed explicitly.
+// ignore_for_file: avoid_redundant_argument_values
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tarjuman/core/error/failure.dart';
@@ -31,7 +33,7 @@ void main() {
       Video(id: '1', title: 'x.avi', path: '/x.avi', createdAt: DateTime(2026));
 
   test('accepts any extension when FFmpeg can read the file', () async {
-    when(() => picker.pickVideo()).thenAnswer(
+    when(() => picker.pickVideo(galleryOnly: false)).thenAnswer(
       (_) async =>
           const Result.success(PickedFile(path: '/c/x.avi', name: 'x.avi')),
     );
@@ -52,7 +54,7 @@ void main() {
   });
 
   test('rejects unreadable files without adding them', () async {
-    when(() => picker.pickVideo()).thenAnswer(
+    when(() => picker.pickVideo(galleryOnly: false)).thenAnswer(
       (_) async =>
           const Result.success(PickedFile(path: '/c/a.pdf', name: 'a.pdf')),
     );
@@ -73,7 +75,7 @@ void main() {
 
   test('cancelling the picker returns null and does not probe', () async {
     when(
-      () => picker.pickVideo(),
+      () => picker.pickVideo(galleryOnly: false),
     ).thenAnswer((_) async => const Result.success(null));
     final res = await import();
     expect((res as Success<Video?>).value, isNull);

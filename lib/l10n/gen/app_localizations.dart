@@ -824,36 +824,6 @@ abstract class AppLocalizations {
   /// **'من معرض الفيديو'**
   String get addFromGallery;
 
-  /// No description provided for @deviceVideosTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'فيديوهات الجهاز'**
-  String get deviceVideosTitle;
-
-  /// No description provided for @galleryPermissionTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'نحتاج إذن عرض الفيديوهات'**
-  String get galleryPermissionTitle;
-
-  /// No description provided for @galleryPermissionBody.
-  ///
-  /// In ar, this message translates to:
-  /// **'نعرض فيديوهات هاتفك داخل التطبيق لتختار منها. لا نرفع شيئًا ولا ننسخ الملفات.'**
-  String get galleryPermissionBody;
-
-  /// No description provided for @openSettings.
-  ///
-  /// In ar, this message translates to:
-  /// **'فتح الإعدادات'**
-  String get openSettings;
-
-  /// No description provided for @noDeviceVideos.
-  ///
-  /// In ar, this message translates to:
-  /// **'لا توجد فيديوهات على الجهاز'**
-  String get noDeviceVideos;
-
   /// No description provided for @filterFavorites.
   ///
   /// In ar, this message translates to:

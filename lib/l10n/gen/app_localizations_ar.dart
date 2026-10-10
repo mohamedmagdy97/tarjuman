@@ -392,22 +392,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addFromGallery => 'من معرض الفيديو';
 
   @override
-  String get deviceVideosTitle => 'فيديوهات الجهاز';
-
-  @override
-  String get galleryPermissionTitle => 'نحتاج إذن عرض الفيديوهات';
-
-  @override
-  String get galleryPermissionBody =>
-      'نعرض فيديوهات هاتفك داخل التطبيق لتختار منها. لا نرفع شيئًا ولا ننسخ الملفات.';
-
-  @override
-  String get openSettings => 'فتح الإعدادات';
-
-  @override
-  String get noDeviceVideos => 'لا توجد فيديوهات على الجهاز';
-
-  @override
   String get filterFavorites => 'المفضلة';
 
   @override

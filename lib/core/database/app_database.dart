@@ -14,9 +14,6 @@ class Videos extends Table {
   IntColumn get lastPositionMs => integer().withDefault(const Constant(0))();
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
 
-  /// True when [path] points at a file we don't own (device gallery).
-  BoolColumn get isExternal => boolean().withDefault(const Constant(false))();
-
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -45,10 +42,7 @@ class AppDatabase extends _$AppDatabase {
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
     onUpgrade: (m, from, to) async {
       if (from < 2) await m.addColumn(videos, videos.lastPositionMs);
-      if (from < 3) {
-        await m.addColumn(videos, videos.isFavorite);
-        await m.addColumn(videos, videos.isExternal);
-      }
+      if (from < 3) await m.addColumn(videos, videos.isFavorite);
     },
     onCreate: (m) async {
       await m.createAll();

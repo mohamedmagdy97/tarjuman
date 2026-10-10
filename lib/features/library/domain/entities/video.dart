@@ -16,7 +16,6 @@ class Video extends Equatable {
     this.origin = SubtitleOrigin.none,
     this.lastPosition = Duration.zero,
     this.isFavorite = false,
-    this.isExternal = false,
   });
 
   final String id;
@@ -28,9 +27,6 @@ class Video extends Equatable {
   final SubtitleOrigin origin;
   final Duration lastPosition;
   final bool isFavorite;
-
-  /// The file lives outside the app (gallery); never delete it from disk.
-  final bool isExternal;
 
   bool get hasSubtitles => origin != SubtitleOrigin.none;
 
@@ -50,7 +46,6 @@ class Video extends Equatable {
     origin: origin ?? this.origin,
     lastPosition: lastPosition ?? this.lastPosition,
     isFavorite: isFavorite ?? this.isFavorite,
-    isExternal: isExternal,
   );
 
   @override
@@ -64,6 +59,5 @@ class Video extends Equatable {
     origin,
     lastPosition,
     isFavorite,
-    isExternal,
   ];
 }

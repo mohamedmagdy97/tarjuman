@@ -108,7 +108,7 @@ class _LibraryViewState extends State<LibraryView> {
 
   Future<void> _showAddSheet(BuildContext context, LibraryCubit cubit) async {
     final l10n = AppLocalizations.of(context);
-    final choice = await showModalBottomSheet<bool>(
+    final choice = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(
@@ -117,30 +117,30 @@ class _LibraryViewState extends State<LibraryView> {
             ListTile(
               leading: const Icon(Icons.video_library_outlined),
               title: Text(l10n.addFromGallery),
-              onTap: () {
-                Navigator.pop(ctx);
-                unawaited(context.push('/device-videos'));
-              },
+              onTap: () => Navigator.pop(ctx, 'gallery'),
             ),
             ListTile(
               leading: const Icon(Icons.video_file_outlined),
               title: Text(l10n.addFromDevice),
-              onTap: () => Navigator.pop(ctx, true),
+              onTap: () => Navigator.pop(ctx, 'file'),
             ),
             ListTile(
               leading: const Icon(Icons.link_rounded),
               title: Text(l10n.addFromLink),
-              onTap: () => Navigator.pop(ctx, false),
+              onTap: () => Navigator.pop(ctx, 'link'),
             ),
           ],
         ),
       ),
     );
     if (choice == null || !context.mounted) return;
-    if (choice) {
-      await cubit.importVideo();
-    } else {
-      await _askLink(context, cubit);
+    switch (choice) {
+      case 'gallery':
+        await cubit.importVideo(gallery: true);
+      case 'file':
+        await cubit.importVideo();
+      case 'link':
+        await _askLink(context, cubit);
     }
   }
 

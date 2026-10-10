@@ -8,6 +8,8 @@ class PickedFile {
 
 /// Platform file picking. Returns success(null) when the user cancels.
 abstract interface class MediaPicker {
-  Future<Result<PickedFile?>> pickVideo();
+  /// [galleryOnly] = the system photo/video picker (no permission needed);
+  /// otherwise any file from the system file browser.
+  Future<Result<PickedFile?>> pickVideo({bool galleryOnly = false});
   Future<Result<PickedFile?>> pickSubtitle();
 }

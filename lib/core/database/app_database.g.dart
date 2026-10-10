@@ -104,21 +104,6 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
     ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _isExternalMeta = const VerificationMeta(
-    'isExternal',
-  );
-  @override
-  late final GeneratedColumn<bool> isExternal = GeneratedColumn<bool>(
-    'is_external',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_external" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -130,7 +115,6 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
     createdAt,
     lastPositionMs,
     isFavorite,
-    isExternal,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -206,12 +190,6 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
         isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
       );
     }
-    if (data.containsKey('is_external')) {
-      context.handle(
-        _isExternalMeta,
-        isExternal.isAcceptableOrUnknown(data['is_external']!, _isExternalMeta),
-      );
-    }
     return context;
   }
 
@@ -257,10 +235,6 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_favorite'],
       )!,
-      isExternal: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_external'],
-      )!,
     );
   }
 
@@ -280,9 +254,6 @@ class Video extends DataClass implements Insertable<Video> {
   final DateTime createdAt;
   final int lastPositionMs;
   final bool isFavorite;
-
-  /// True when [path] points at a file we don't own (device gallery).
-  final bool isExternal;
   const Video({
     required this.id,
     required this.title,
@@ -293,7 +264,6 @@ class Video extends DataClass implements Insertable<Video> {
     required this.createdAt,
     required this.lastPositionMs,
     required this.isFavorite,
-    required this.isExternal,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -309,7 +279,6 @@ class Video extends DataClass implements Insertable<Video> {
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_position_ms'] = Variable<int>(lastPositionMs);
     map['is_favorite'] = Variable<bool>(isFavorite);
-    map['is_external'] = Variable<bool>(isExternal);
     return map;
   }
 
@@ -326,7 +295,6 @@ class Video extends DataClass implements Insertable<Video> {
       createdAt: Value(createdAt),
       lastPositionMs: Value(lastPositionMs),
       isFavorite: Value(isFavorite),
-      isExternal: Value(isExternal),
     );
   }
 
@@ -345,7 +313,6 @@ class Video extends DataClass implements Insertable<Video> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastPositionMs: serializer.fromJson<int>(json['lastPositionMs']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
-      isExternal: serializer.fromJson<bool>(json['isExternal']),
     );
   }
   @override
@@ -361,7 +328,6 @@ class Video extends DataClass implements Insertable<Video> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastPositionMs': serializer.toJson<int>(lastPositionMs),
       'isFavorite': serializer.toJson<bool>(isFavorite),
-      'isExternal': serializer.toJson<bool>(isExternal),
     };
   }
 
@@ -375,7 +341,6 @@ class Video extends DataClass implements Insertable<Video> {
     DateTime? createdAt,
     int? lastPositionMs,
     bool? isFavorite,
-    bool? isExternal,
   }) => Video(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -386,7 +351,6 @@ class Video extends DataClass implements Insertable<Video> {
     createdAt: createdAt ?? this.createdAt,
     lastPositionMs: lastPositionMs ?? this.lastPositionMs,
     isFavorite: isFavorite ?? this.isFavorite,
-    isExternal: isExternal ?? this.isExternal,
   );
   Video copyWithCompanion(VideosCompanion data) {
     return Video(
@@ -405,9 +369,6 @@ class Video extends DataClass implements Insertable<Video> {
       isFavorite: data.isFavorite.present
           ? data.isFavorite.value
           : this.isFavorite,
-      isExternal: data.isExternal.present
-          ? data.isExternal.value
-          : this.isExternal,
     );
   }
 
@@ -422,8 +383,7 @@ class Video extends DataClass implements Insertable<Video> {
           ..write('origin: $origin, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastPositionMs: $lastPositionMs, ')
-          ..write('isFavorite: $isFavorite, ')
-          ..write('isExternal: $isExternal')
+          ..write('isFavorite: $isFavorite')
           ..write(')'))
         .toString();
   }
@@ -439,7 +399,6 @@ class Video extends DataClass implements Insertable<Video> {
     createdAt,
     lastPositionMs,
     isFavorite,
-    isExternal,
   );
   @override
   bool operator ==(Object other) =>
@@ -453,8 +412,7 @@ class Video extends DataClass implements Insertable<Video> {
           other.origin == this.origin &&
           other.createdAt == this.createdAt &&
           other.lastPositionMs == this.lastPositionMs &&
-          other.isFavorite == this.isFavorite &&
-          other.isExternal == this.isExternal);
+          other.isFavorite == this.isFavorite);
 }
 
 class VideosCompanion extends UpdateCompanion<Video> {
@@ -467,7 +425,6 @@ class VideosCompanion extends UpdateCompanion<Video> {
   final Value<DateTime> createdAt;
   final Value<int> lastPositionMs;
   final Value<bool> isFavorite;
-  final Value<bool> isExternal;
   final Value<int> rowid;
   const VideosCompanion({
     this.id = const Value.absent(),
@@ -479,7 +436,6 @@ class VideosCompanion extends UpdateCompanion<Video> {
     this.createdAt = const Value.absent(),
     this.lastPositionMs = const Value.absent(),
     this.isFavorite = const Value.absent(),
-    this.isExternal = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   VideosCompanion.insert({
@@ -492,7 +448,6 @@ class VideosCompanion extends UpdateCompanion<Video> {
     required DateTime createdAt,
     this.lastPositionMs = const Value.absent(),
     this.isFavorite = const Value.absent(),
-    this.isExternal = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -508,7 +463,6 @@ class VideosCompanion extends UpdateCompanion<Video> {
     Expression<DateTime>? createdAt,
     Expression<int>? lastPositionMs,
     Expression<bool>? isFavorite,
-    Expression<bool>? isExternal,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -521,7 +475,6 @@ class VideosCompanion extends UpdateCompanion<Video> {
       if (createdAt != null) 'created_at': createdAt,
       if (lastPositionMs != null) 'last_position_ms': lastPositionMs,
       if (isFavorite != null) 'is_favorite': isFavorite,
-      if (isExternal != null) 'is_external': isExternal,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -536,7 +489,6 @@ class VideosCompanion extends UpdateCompanion<Video> {
     Value<DateTime>? createdAt,
     Value<int>? lastPositionMs,
     Value<bool>? isFavorite,
-    Value<bool>? isExternal,
     Value<int>? rowid,
   }) {
     return VideosCompanion(
@@ -549,7 +501,6 @@ class VideosCompanion extends UpdateCompanion<Video> {
       createdAt: createdAt ?? this.createdAt,
       lastPositionMs: lastPositionMs ?? this.lastPositionMs,
       isFavorite: isFavorite ?? this.isFavorite,
-      isExternal: isExternal ?? this.isExternal,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -584,9 +535,6 @@ class VideosCompanion extends UpdateCompanion<Video> {
     if (isFavorite.present) {
       map['is_favorite'] = Variable<bool>(isFavorite.value);
     }
-    if (isExternal.present) {
-      map['is_external'] = Variable<bool>(isExternal.value);
-    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -605,7 +553,6 @@ class VideosCompanion extends UpdateCompanion<Video> {
           ..write('createdAt: $createdAt, ')
           ..write('lastPositionMs: $lastPositionMs, ')
           ..write('isFavorite: $isFavorite, ')
-          ..write('isExternal: $isExternal, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1090,7 +1037,6 @@ typedef $$VideosTableCreateCompanionBuilder =
       required DateTime createdAt,
       Value<int> lastPositionMs,
       Value<bool> isFavorite,
-      Value<bool> isExternal,
       Value<int> rowid,
     });
 typedef $$VideosTableUpdateCompanionBuilder =
@@ -1104,7 +1050,6 @@ typedef $$VideosTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<int> lastPositionMs,
       Value<bool> isFavorite,
-      Value<bool> isExternal,
       Value<int> rowid,
     });
 
@@ -1183,11 +1128,6 @@ class $$VideosTableFilterComposer
 
   ColumnFilters<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isExternal => $composableBuilder(
-    column: $table.isExternal,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1270,11 +1210,6 @@ class $$VideosTableOrderingComposer
     column: $table.isFavorite,
     builder: (column) => ColumnOrderings(column),
   );
-
-  ColumnOrderings<bool> get isExternal => $composableBuilder(
-    column: $table.isExternal,
-    builder: (column) => ColumnOrderings(column),
-  );
 }
 
 class $$VideosTableAnnotationComposer
@@ -1316,11 +1251,6 @@ class $$VideosTableAnnotationComposer
 
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get isExternal => $composableBuilder(
-    column: $table.isExternal,
     builder: (column) => column,
   );
 
@@ -1387,7 +1317,6 @@ class $$VideosTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> lastPositionMs = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
-                Value<bool> isExternal = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VideosCompanion(
                 id: id,
@@ -1399,7 +1328,6 @@ class $$VideosTableTableManager
                 createdAt: createdAt,
                 lastPositionMs: lastPositionMs,
                 isFavorite: isFavorite,
-                isExternal: isExternal,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1413,7 +1341,6 @@ class $$VideosTableTableManager
                 required DateTime createdAt,
                 Value<int> lastPositionMs = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
-                Value<bool> isExternal = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VideosCompanion.insert(
                 id: id,
@@ -1425,7 +1352,6 @@ class $$VideosTableTableManager
                 createdAt: createdAt,
                 lastPositionMs: lastPositionMs,
                 isFavorite: isFavorite,
-                isExternal: isExternal,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

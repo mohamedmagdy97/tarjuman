@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:tarjuman/features/device_videos/presentation/pages/device_videos_page.dart';
 import 'package:tarjuman/features/library/presentation/pages/library_page.dart';
 import 'package:tarjuman/features/model_manager/presentation/pages/models_page.dart';
 import 'package:tarjuman/features/player/presentation/pages/player_page.dart';
@@ -36,10 +35,6 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/editor/:id',
       builder: (_, s) => EditorPage(videoId: s.pathParameters['id']!),
-    ),
-    GoRoute(
-      path: '/device-videos',
-      builder: (_, _) => const DeviceVideosPage(),
     ),
     GoRoute(path: '/models', builder: (_, _) => const ModelsPage()),
     GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),

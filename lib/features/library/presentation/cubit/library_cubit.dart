@@ -112,9 +112,9 @@ class LibraryCubit extends Cubit<LibraryState> {
 
   void setFilter(LibraryFilter f) => emit(state.copyWith(filter: f));
 
-  Future<void> importVideo() async {
+  Future<void> importVideo({bool gallery = false}) async {
     emit(state.copyWith(importing: true));
-    final result = await _import();
+    final result = await _import(gallery: gallery);
     emit(
       switch (result) {
         Err(:final failure) => state.copyWith(

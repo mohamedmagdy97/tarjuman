@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.4.0+6, package `com.megtech.tarjuman`)
+## 9. Current status (v1.4.1+7, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -149,12 +149,12 @@ Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a 
 - Play gates: 16 KB-aligned native libs (gradle override in `android/build.gradle.kts`), native symbols, in-app privacy link →
   `AppConfig.privacyPolicyUrl` (GitHub Pages repo `mohamedmagdy97/tarjuman-privacy`, content in `store/privacy-site/`).
 
-v1.4.0 (player features, analyzer/tests green, **not yet run on a device**): device video gallery browser (`features/device_videos`,
-photo_manager, `READ_MEDIA_VIDEO` only; videos are referenced in place, `Video.isExternal`, never deleted from disk), favorites
+v1.4.x (player features, analyzer/tests green; the user confirmed the processing flow works after the FFmpeg fix, v1.4 features not yet device-tested):
+gallery import via the system photo/video picker (`FileType.video`, no permission) and any-file import (`FileType.any`), favorites
 (schema v3), gestures (double-tap ±10 s / play, vertical drag = brightness (left) / volume (right)), A-B repeat, embedded
 audio/subtitle track picker, FFmpeg extraction fix (the async session must be awaited via the complete callback — verified on macOS).
-Deferred on purpose: background audio + PiP (needs a foreground service / Activity changes), playlists, auto-loading a sibling
-.srt (needs all-files access, not allowed by Play), background processing notification, extra source languages, iOS.
+Deliberately NOT done: an in-app gallery browser (needs `READ_MEDIA_VIDEO` + a Play declaration), sibling-.srt auto-load (needs
+all-files access), background audio/PiP, playlists, background-processing notification, extra source languages, iOS.
 
 Known gaps / next:
 - Device spike (RTF, RAM, battery) for tiny.en vs base.en; tune chunk size and `CueSegmenter` on real videos; chunk boundaries can split a sentence.

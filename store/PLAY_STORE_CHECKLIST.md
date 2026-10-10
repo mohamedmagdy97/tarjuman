@@ -62,11 +62,10 @@ https://mohamedmagdy97.github.io/tarjuman-privacy/ and confirm it loads **before
 4. Production rollout, ideally staged (10 % → 50 % → 100 %).
 5. Read the **Pre-launch report** Play generates (crashes, accessibility).
 
-## 4b. Photo & video permissions (new in 1.4.0)
-The app declares `READ_MEDIA_VIDEO` to list the phone's videos in-app. Play restricts this permission: in Play Console →
-App content → **Photo and video permissions** you must declare it and justify "core functionality = video player /
-browsing the device's videos". If you prefer to avoid the declaration, remove the permission and the "From video gallery"
-entry (`features/device_videos`) and keep only the system file picker.
+## 4b. Permissions
+The app asks for **no sensitive permissions**: only `INTERNET` (and normal-level `ACCESS_NETWORK_STATE`/`WAKE_LOCK`).
+Videos are picked with the system photo/video picker or file browser, which need no permission and no Play declaration.
+Do not add `READ_MEDIA_VIDEO`/`READ_EXTERNAL_STORAGE`/`MANAGE_EXTERNAL_STORAGE`: they trigger extra policy forms.
 
 ## 5b. Technical gates already satisfied by this build (verify again after any dependency change)
 - `targetSdk 36`, `minSdk 24`, AAB, signed with the upload key.

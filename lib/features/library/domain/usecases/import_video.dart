@@ -14,8 +14,8 @@ class ImportVideo {
   final AudioExtractor _probe;
 
   /// success(null) = user cancelled.
-  Future<Result<Video?>> call() async {
-    final picked = await _picker.pickVideo();
+  Future<Result<Video?>> call({bool gallery = false}) async {
+    final picked = await _picker.pickVideo(galleryOnly: gallery);
     if (picked case Err(:final failure)) return Result.failure(failure);
     final file = (picked as Success<PickedFile?>).value;
     if (file == null) return const Result.success(null);

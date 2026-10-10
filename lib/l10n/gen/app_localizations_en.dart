@@ -399,22 +399,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addFromGallery => 'From video gallery';
 
   @override
-  String get deviceVideosTitle => 'Device videos';
-
-  @override
-  String get galleryPermissionTitle => 'Permission needed to show videos';
-
-  @override
-  String get galleryPermissionBody =>
-      'We list your phone\'s videos inside the app so you can pick one. Nothing is uploaded and files aren\'t copied.';
-
-  @override
-  String get openSettings => 'Open settings';
-
-  @override
-  String get noDeviceVideos => 'No videos on this device';
-
-  @override
   String get filterFavorites => 'Favorites';
 
   @override
