@@ -33,6 +33,11 @@ final class OnlineNotConfiguredFailure extends Failure {
   const OnlineNotConfiguredFailure([super.message]);
 }
 
+/// Provider quota or rate limit hit (HTTP 402/429).
+final class RateLimitedFailure extends Failure {
+  const RateLimitedFailure([super.message]);
+}
+
 /// The picked subtitle file is not valid SRT/WebVTT (or not UTF-8).
 final class InvalidSubtitleFailure extends Failure {
   const InvalidSubtitleFailure([super.message]);

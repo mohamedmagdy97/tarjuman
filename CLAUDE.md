@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.7.0+10, package `com.megtech.tarjuman`)
+## 9. Current status (v1.8.0+11, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -140,7 +140,7 @@ Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a 
 - Processing: 3-minute chunks, cues persisted per chunk, resume after kill, cancel; Whisper (whisper.cpp) + ML Kit; wakelock during jobs.
 - Live mode: translates the 30 s window under the playhead + next; not persisted.
 - Subtitle editor: search, edit a line, tap-to-jump, export SRT (optionally with English) via share sheet.
-- Online (OpenAI-compatible ASR + chat translation): consent + key in keystore. Unverified without a key.
+- Online: consent + per-provider keys in keystore. Providers (`OnlineProvider` enum, one place to fix model names/URLs): speech = OpenAI, Groq (free tier), Deepgram; translation = OpenAI, Groq, Gemini, OpenRouter (`:free` models), DeepL (`:fx` keys → free host), MyMemory (no key, tiny quota). Adapters in `features/processing/data/online/`; `OnlineEngines` builds them from `OnlineConfig`; HTTP 401/403 → `OnlineNotConfiguredFailure`, 402/429/456 → `RateLimitedFailure`. Model names are user-overridable in Settings. Adapter logic is unit-tested with MockClient; NOT tested against the real services (no keys yet).
 - Model manager (Whisper base.en/tiny.en + ML Kit en/ar), settings (theme, online consent, key, open-source licenses page).
 - Store kit in `store/`: Play listing AR/EN, privacy policy HTML, checklist, icon, feature graphics, 8 screenshots per language.
   Regenerate with `STORE_ASSETS=1 flutter test --tags store test/store/store_assets_test.dart --plain-name generate`
@@ -182,6 +182,7 @@ v1.7 speed + reading (analyzer + 71 tests green; NOT device-tested, no measured 
   ML Kit translates 4 lines concurrently.
 - Auto language detection (`DetectLanguage`, multilingual Whisper `detectLanguage`, button in setup), transcript reading screen
   (`/transcript/:id`, copy / share .txt).
+v1.8 online providers (analyzer clean, 83 tests; real-API behaviour unverified — Gemini OpenAI-compat endpoint, Deepgram response shape, DeepL AR, OpenRouter free model id).
 Deliberately NOT done: burned-in subtitle video export (needs an FFmpeg build with libass + a video encoder → much larger APK),
 in-app gallery browser (needs `READ_MEDIA_VIDEO`), sibling-.srt auto-load, PiP/background audio, playlists, iOS.
 

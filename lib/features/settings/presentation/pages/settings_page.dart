@@ -5,13 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tarjuman/core/config/app_config.dart';
-import 'package:tarjuman/core/design_system/components/app_button.dart';
 import 'package:tarjuman/core/design_system/components/app_segmented.dart';
 import 'package:tarjuman/core/design_system/components/switch_tile.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
 import 'package:tarjuman/features/settings/presentation/cubit/app_settings_cubit.dart';
+import 'package:tarjuman/features/settings/presentation/widgets/online_providers_section.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -23,14 +23,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final _key = TextEditingController();
-
-  @override
-  void dispose() {
-    _key.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -76,29 +68,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   value: s.onlineConsent,
                   onChanged: (v) => cubit.setConsent(value: v),
                 ),
-                if (s.onlineConsent) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  TextField(
-                    controller: _key,
-                    obscureText: true,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    textDirection: TextDirection.ltr,
-                    decoration: InputDecoration(
-                      labelText: l10n.apiKeyLabel,
-                      helperText: s.hasApiKey ? l10n.apiKeySaved : null,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  AppButton(
-                    label: l10n.save,
-                    kind: AppButtonKind.secondary,
-                    onPressed: () async {
-                      await cubit.saveApiKey(_key.text);
-                      _key.clear();
-                    },
-                  ),
-                ],
+                if (s.onlineConsent) OnlineProvidersSection(state: s),
                 label(l10n.glossaryTitle),
                 ListTile(
                   contentPadding: EdgeInsets.zero,

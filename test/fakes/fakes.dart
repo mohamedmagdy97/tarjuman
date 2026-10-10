@@ -85,4 +85,11 @@ class FakeEngineProvider implements EngineProvider {
       : Result.success(
           EngineSet(recognizer: recognizer, translator: FakeTranslator()),
         );
+
+  @override
+  Future<Result<TextTranslator>> acquireTranslator(
+    SourceLanguage language,
+  ) async => failure != null
+      ? Result.failure(failure!)
+      : Result.success(FakeTranslator());
 }

@@ -23,4 +23,8 @@ abstract interface class EngineProvider {
     EngineKind kind, {
     SourceLanguage language = SourceLanguage.en,
   });
+
+  /// Online translator only (no speech key needed) — used to re-translate
+  /// a single line.
+  Future<Result<TextTranslator>> acquireTranslator(SourceLanguage language);
 }

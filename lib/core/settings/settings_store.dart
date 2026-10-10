@@ -17,6 +17,20 @@ abstract interface class SettingsStore {
   Duration readSubtitleOffset(String videoId);
   Future<void> writeSubtitleOffset(String videoId, Duration offset);
 
+  /// Online providers (ids from `OnlineProvider`).
+  String readSpeechProvider();
+  Future<void> writeSpeechProvider(String id);
+  String readTranslationProvider();
+  Future<void> writeTranslationProvider(String id);
+
+  /// Optional model-name override for a provider ('' = default).
+  String readOnlineModel(String providerId, {required bool speech});
+  Future<void> writeOnlineModel(
+    String providerId, {
+    required bool speech,
+    required String model,
+  });
+
   bool readOnboardingDone();
   Future<void> writeOnboardingDone();
 
@@ -27,8 +41,8 @@ abstract interface class SettingsStore {
 
 /// API keys live in the platform keystore, never in shared preferences.
 abstract interface class SecretStore {
-  Future<String?> readApiKey();
-  Future<void> writeApiKey(String? key);
+  Future<String?> readApiKey(String provider);
+  Future<void> writeApiKey(String provider, String? key);
 }
 
 class KeystoreSecretStore implements SecretStore {
@@ -36,15 +50,20 @@ class KeystoreSecretStore implements SecretStore {
     this._storage = const FlutterSecureStorage(),
   ]);
   final FlutterSecureStorage _storage;
-  static const _key = 'online.api_key';
+
+  // The first release stored the OpenAI key under this name; keep it.
+  String _name(String provider) =>
+      provider == 'openai' ? 'online.api_key' : 'online.api_key.$provider';
 
   @override
-  Future<String?> readApiKey() => _storage.read(key: _key);
+  Future<String?> readApiKey(String provider) =>
+      _storage.read(key: _name(provider));
 
   @override
-  Future<void> writeApiKey(String? key) => key == null || key.isEmpty
-      ? _storage.delete(key: _key)
-      : _storage.write(key: _key, value: key);
+  Future<void> writeApiKey(String provider, String? key) =>
+      key == null || key.isEmpty
+      ? _storage.delete(key: _name(provider))
+      : _storage.write(key: _name(provider), value: key);
 }
 
 class SharedPrefsSettingsStore implements SettingsStore {
@@ -110,6 +129,35 @@ class SharedPrefsSettingsStore implements SettingsStore {
   @override
   Future<void> writeSubtitleOffset(String videoId, Duration offset) =>
       _prefs.setInt('subtitle.offset.$videoId', offset.inMilliseconds);
+
+  @override
+  String readSpeechProvider() => _prefs.getString('online.speech') ?? 'groq';
+
+  @override
+  Future<void> writeSpeechProvider(String id) =>
+      _prefs.setString('online.speech', id);
+
+  @override
+  String readTranslationProvider() =>
+      _prefs.getString('online.translation') ?? 'groq';
+
+  @override
+  Future<void> writeTranslationProvider(String id) =>
+      _prefs.setString('online.translation', id);
+
+  @override
+  String readOnlineModel(String providerId, {required bool speech}) =>
+      _prefs.getString('online.model.$providerId.${speech ? 's' : 't'}') ?? '';
+
+  @override
+  Future<void> writeOnlineModel(
+    String providerId, {
+    required bool speech,
+    required String model,
+  }) => _prefs.setString(
+    'online.model.$providerId.${speech ? 's' : 't'}',
+    model.trim(),
+  );
 
   @override
   bool readOnboardingDone() => _prefs.getBool('app.onboarding') ?? false;

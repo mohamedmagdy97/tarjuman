@@ -1,28 +1,36 @@
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
-import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/glossary/domain/repositories/glossary_repository.dart';
 import 'package:tarjuman/features/model_manager/domain/repositories/model_repository.dart';
 import 'package:tarjuman/features/processing/data/glossary_text_translator.dart';
 import 'package:tarjuman/features/processing/data/mlkit_text_translator.dart';
-import 'package:tarjuman/features/processing/data/openai_online.dart';
+import 'package:tarjuman/features/processing/data/online/online_engines.dart';
 import 'package:tarjuman/features/processing/data/whisper_speech_recognizer.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
+import 'package:tarjuman/features/processing/domain/ports/speech_recognizer.dart';
+import 'package:tarjuman/features/processing/domain/ports/text_translator.dart';
 
 class EngineProviderImpl implements EngineProvider {
-  EngineProviderImpl(
-    this._models,
-    this._settings,
-    this._secrets,
-    this._glossary,
-  );
+  EngineProviderImpl(this._models, this._online, this._glossary);
 
   final ModelRepository _models;
-  final SettingsStore _settings;
-  final SecretStore _secrets;
+  final OnlineEngines _online;
   final GlossaryRepository _glossary;
+
+  @override
+  Future<Result<TextTranslator>> acquireTranslator(
+    SourceLanguage language,
+  ) async {
+    final res = await _online.translator(language);
+    return switch (res) {
+      Success(:final value) => Result.success(
+        GlossaryTextTranslator(value, await _glossary.all()),
+      ),
+      Err(:final failure) => Result.failure(failure),
+    };
+  }
 
   @override
   Future<Result<EngineSet>> acquire(
@@ -47,17 +55,19 @@ class EngineProviderImpl implements EngineProvider {
           ),
         );
       case EngineKind.online:
-        final key = await _secrets.readApiKey();
-        if (!_settings.readOnlineConsent() || key == null || key.isEmpty) {
-          return const Result.failure(OnlineNotConfiguredFailure());
+        final recognizer = await _online.recognizer(language);
+        if (recognizer case Err(:final failure)) {
+          return Result.failure(failure);
+        }
+        final translator = await acquireTranslator(language);
+        if (translator case Err(:final failure)) {
+          await (recognizer as Success<SpeechRecognizer>).value.dispose();
+          return Result.failure(failure);
         }
         return Result.success(
           EngineSet(
-            recognizer: OnlineSpeechRecognizer(key, language: language),
-            translator: GlossaryTextTranslator(
-              OnlineTextTranslator(key, language: language),
-              await _glossary.all(),
-            ),
+            recognizer: (recognizer as Success<SpeechRecognizer>).value,
+            translator: (translator as Success<TextTranslator>).value,
           ),
         );
     }

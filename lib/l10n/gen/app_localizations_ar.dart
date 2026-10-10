@@ -276,10 +276,38 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onlineConsentBody =>
-      'يُرسل صوت الفيديو إلى خدمة OpenAI بعد موافقتك. المعالجة على الجهاز تبقى الأساس.';
+      'يُرسل صوت الفيديو إلى المزوّد الذي تختاره أدناه بعد موافقتك. المعالجة على الجهاز تبقى الأساس.';
 
   @override
   String get apiKeyLabel => 'مفتاح OpenAI API';
+
+  @override
+  String get speechProviderTitle => 'مزوّد تحويل الكلام إلى نص';
+
+  @override
+  String get translationProviderTitle => 'مزوّد الترجمة';
+
+  @override
+  String apiKeyOf(String provider) {
+    return 'مفتاح $provider API';
+  }
+
+  @override
+  String get getApiKey => 'احصل على مفتاح';
+
+  @override
+  String get modelOverride => 'اسم النموذج (اختياري)';
+
+  @override
+  String get modelOverrideHint =>
+      'اتركه فارغًا للافتراضي. غيّره إذا بدّل المزوّد أسماء نماذجه.';
+
+  @override
+  String get noKeyNeeded => 'لا يحتاج مفتاحًا';
+
+  @override
+  String get errRateLimited =>
+      'تم الوصول إلى حد المزوّد أو الحصة. انتظر قليلًا أو اختر مزوّدًا آخر من الإعدادات.';
 
   @override
   String get apiKeySaved => 'تم حفظ المفتاح';

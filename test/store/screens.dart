@@ -30,8 +30,10 @@ import 'package:tarjuman/features/player/domain/usecases/search_subtitles.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/player/presentation/pages/player_page.dart';
 import 'package:tarjuman/features/player/presentation/widgets/subtitle_style_sheet.dart';
+import 'package:tarjuman/features/processing/domain/entities/online_provider.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
+import 'package:tarjuman/features/processing/domain/ports/online_config.dart';
 import 'package:tarjuman/features/processing/domain/usecases/detect_language.dart';
 import 'package:tarjuman/features/processing/domain/usecases/live_subtitle_session.dart';
 import 'package:tarjuman/features/processing/domain/usecases/run_processing_pipeline.dart';
@@ -74,16 +76,40 @@ class _Settings implements SettingsStore {
   @override
   Future<void> writeOnboardingDone() async {}
   @override
+  String readSpeechProvider() => 'groq';
+  @override
+  Future<void> writeSpeechProvider(String id) async {}
+  @override
+  String readTranslationProvider() => 'groq';
+  @override
+  Future<void> writeTranslationProvider(String id) async {}
+  @override
+  String readOnlineModel(String providerId, {required bool speech}) => '';
+  @override
+  Future<void> writeOnlineModel(
+    String providerId, {
+    required bool speech,
+    required String model,
+  }) async {}
+  @override
   String readSourceLanguage() => 'en';
   @override
   Future<void> writeSourceLanguage(String code) async {}
 }
 
-class _Secrets implements SecretStore {
+class _Online implements OnlineConfig {
   @override
-  Future<String?> readApiKey() async => 'sk-demo';
+  OnlineProvider get speechProvider => OnlineProvider.groq;
   @override
-  Future<void> writeApiKey(String? key) async {}
+  OnlineProvider get translationProvider => OnlineProvider.groq;
+  @override
+  bool get consent => true;
+  @override
+  Future<String?> key(OnlineProvider provider) async => 'demo';
+  @override
+  String model(OnlineProvider provider, {required bool speech}) => '';
+  @override
+  Future<bool> isReady() async => true;
 }
 
 class _MWatch extends Mock implements WatchLibrary {}
@@ -169,7 +195,7 @@ class _ProcC extends ProcessingCubit {
 
 class _SetupC extends SetupCubit {
   _SetupC(SetupState s)
-    : super(_MVideos(), _MModels(), _Settings(), _Secrets(), _MDetect()) {
+    : super(_MVideos(), _MModels(), _Settings(), _Online(), _MDetect()) {
     emit(s);
   }
 }

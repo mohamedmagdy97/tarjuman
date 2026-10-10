@@ -282,10 +282,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onlineConsentBody =>
-      'Video audio is sent to OpenAI after your consent. On-device stays the default.';
+      'Video audio is sent to the provider you choose below, after your consent. On-device stays the default.';
 
   @override
   String get apiKeyLabel => 'OpenAI API key';
+
+  @override
+  String get speechProviderTitle => 'Speech recognition provider';
+
+  @override
+  String get translationProviderTitle => 'Translation provider';
+
+  @override
+  String apiKeyOf(String provider) {
+    return '$provider API key';
+  }
+
+  @override
+  String get getApiKey => 'Get a key';
+
+  @override
+  String get modelOverride => 'Model name (optional)';
+
+  @override
+  String get modelOverrideHint =>
+      'Leave empty for the default. Change it if the provider renames its models.';
+
+  @override
+  String get noKeyNeeded => 'No key needed';
+
+  @override
+  String get errRateLimited =>
+      'The provider\'s limit or quota was reached. Wait a bit or pick another provider in Settings.';
 
   @override
   String get apiKeySaved => 'Key saved';

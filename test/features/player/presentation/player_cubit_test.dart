@@ -71,6 +71,22 @@ class _Settings implements SettingsStore {
   @override
   Future<void> writeOnboardingDone() async {}
   @override
+  String readSpeechProvider() => 'groq';
+  @override
+  Future<void> writeSpeechProvider(String id) async {}
+  @override
+  String readTranslationProvider() => 'groq';
+  @override
+  Future<void> writeTranslationProvider(String id) async {}
+  @override
+  String readOnlineModel(String providerId, {required bool speech}) => '';
+  @override
+  Future<void> writeOnlineModel(
+    String providerId, {
+    required bool speech,
+    required String model,
+  }) async {}
+  @override
   String readSourceLanguage() => 'en';
   @override
   Future<void> writeSourceLanguage(String code) async {}

@@ -273,4 +273,9 @@ class _SetProvider implements EngineProvider {
     EngineKind kind, {
     SourceLanguage language = SourceLanguage.en,
   }) async => Result.success(set);
+
+  @override
+  Future<Result<TextTranslator>> acquireTranslator(
+    SourceLanguage language,
+  ) async => Result.success(set.translator);
 }

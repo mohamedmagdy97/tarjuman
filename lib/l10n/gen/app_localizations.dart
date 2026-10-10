@@ -611,7 +611,7 @@ abstract class AppLocalizations {
   /// No description provided for @onlineConsentBody.
   ///
   /// In ar, this message translates to:
-  /// **'يُرسل صوت الفيديو إلى خدمة OpenAI بعد موافقتك. المعالجة على الجهاز تبقى الأساس.'**
+  /// **'يُرسل صوت الفيديو إلى المزوّد الذي تختاره أدناه بعد موافقتك. المعالجة على الجهاز تبقى الأساس.'**
   String get onlineConsentBody;
 
   /// No description provided for @apiKeyLabel.
@@ -619,6 +619,54 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مفتاح OpenAI API'**
   String get apiKeyLabel;
+
+  /// No description provided for @speechProviderTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مزوّد تحويل الكلام إلى نص'**
+  String get speechProviderTitle;
+
+  /// No description provided for @translationProviderTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مزوّد الترجمة'**
+  String get translationProviderTitle;
+
+  /// No description provided for @apiKeyOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفتاح {provider} API'**
+  String apiKeyOf(String provider);
+
+  /// No description provided for @getApiKey.
+  ///
+  /// In ar, this message translates to:
+  /// **'احصل على مفتاح'**
+  String get getApiKey;
+
+  /// No description provided for @modelOverride.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم النموذج (اختياري)'**
+  String get modelOverride;
+
+  /// No description provided for @modelOverrideHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتركه فارغًا للافتراضي. غيّره إذا بدّل المزوّد أسماء نماذجه.'**
+  String get modelOverrideHint;
+
+  /// No description provided for @noKeyNeeded.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يحتاج مفتاحًا'**
+  String get noKeyNeeded;
+
+  /// No description provided for @errRateLimited.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الوصول إلى حد المزوّد أو الحصة. انتظر قليلًا أو اختر مزوّدًا آخر من الإعدادات.'**
+  String get errRateLimited;
 
   /// No description provided for @apiKeySaved.
   ///

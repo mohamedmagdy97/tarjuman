@@ -8,6 +8,7 @@ import 'package:tarjuman/features/library/domain/repositories/video_repository.d
 import 'package:tarjuman/features/model_manager/domain/repositories/model_repository.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
+import 'package:tarjuman/features/processing/domain/ports/online_config.dart';
 import 'package:tarjuman/features/processing/domain/usecases/detect_language.dart';
 
 class SetupState extends Equatable {
@@ -89,28 +90,26 @@ class SetupCubit extends Cubit<SetupState> {
     this._videos,
     this._models,
     this._settings,
-    this._secrets,
+    this._online,
     this._detect,
   ) : super(const SetupState());
 
   final VideoRepository _videos;
   final ModelRepository _models;
   final SettingsStore _settings;
-  final SecretStore _secrets;
+  final OnlineConfig _online;
   final DetectLanguage _detect;
 
   /// Re-checks readiness; call again after returning from the models page.
   Future<void> load(String videoId) async {
     final video = await _videos.get(videoId);
     final language = SourceLanguage.fromCode(_settings.readSourceLanguage());
-    final key = await _secrets.readApiKey();
     emit(
       state.copyWith(
         video: video is Success<Video> ? video.value : null,
         language: language,
         offlineReady: await _offlineReady(language),
-        onlineReady:
-            _settings.readOnlineConsent() && key != null && key.isNotEmpty,
+        onlineReady: await _online.isReady(),
         loading: false,
       ),
     );

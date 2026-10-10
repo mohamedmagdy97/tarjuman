@@ -47,12 +47,15 @@ import 'package:tarjuman/features/player/domain/usecases/search_subtitles.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/processing/data/engine_provider_impl.dart';
 import 'package:tarjuman/features/processing/data/ffmpeg_audio_extractor.dart';
+import 'package:tarjuman/features/processing/data/online/online_engines.dart';
+import 'package:tarjuman/features/processing/data/online/settings_online_config.dart';
 import 'package:tarjuman/features/processing/data/whisper_language_detector.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/ports/audio_extractor.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
 import 'package:tarjuman/features/processing/domain/ports/language_detector.dart';
+import 'package:tarjuman/features/processing/domain/ports/online_config.dart';
 import 'package:tarjuman/features/processing/domain/services/cue_segmenter.dart';
 import 'package:tarjuman/features/processing/domain/usecases/detect_language.dart';
 import 'package:tarjuman/features/processing/domain/usecases/live_subtitle_session.dart';
@@ -150,11 +153,15 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => RetranslateCue(sl(), sl()))
     ..registerFactory(() => ExportSubtitles(sl(), sl(), sl(), sl()))
     ..registerSingleton<SecretStore>(const KeystoreSecretStore())
+    ..registerLazySingleton<OnlineConfig>(
+      () => SettingsOnlineConfig(sl(), sl()),
+    )
+    ..registerLazySingleton(() => OnlineEngines(sl()))
     ..registerLazySingleton<DeviceCapability>(DeviceInfoCapability.new)
     ..registerLazySingleton<ModelRepository>(() => ModelRepositoryImpl(sl()))
     ..registerLazySingleton<AudioExtractor>(FfmpegAudioExtractor.new)
     ..registerLazySingleton<EngineProvider>(
-      () => EngineProviderImpl(sl(), sl(), sl(), sl()),
+      () => EngineProviderImpl(sl(), sl(), sl()),
     )
     ..registerLazySingleton(() => const CueSegmenter())
     ..registerLazySingleton(() => ProcessRange(sl(), sl(), _workPath))
