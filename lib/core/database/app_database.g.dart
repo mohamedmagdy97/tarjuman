@@ -104,6 +104,18 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _lastPlayedMsMeta = const VerificationMeta(
+    'lastPlayedMs',
+  );
+  @override
+  late final GeneratedColumn<int> lastPlayedMs = GeneratedColumn<int>(
+    'last_played_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -115,6 +127,7 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
     createdAt,
     lastPositionMs,
     isFavorite,
+    lastPlayedMs,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -190,6 +203,15 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
         isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
       );
     }
+    if (data.containsKey('last_played_ms')) {
+      context.handle(
+        _lastPlayedMsMeta,
+        lastPlayedMs.isAcceptableOrUnknown(
+          data['last_played_ms']!,
+          _lastPlayedMsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -235,6 +257,10 @@ class $VideosTable extends Videos with TableInfo<$VideosTable, Video> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_favorite'],
       )!,
+      lastPlayedMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_played_ms'],
+      )!,
     );
   }
 
@@ -254,6 +280,9 @@ class Video extends DataClass implements Insertable<Video> {
   final DateTime createdAt;
   final int lastPositionMs;
   final bool isFavorite;
+
+  /// Epoch ms of the last playback (0 = never); drives "continue watching".
+  final int lastPlayedMs;
   const Video({
     required this.id,
     required this.title,
@@ -264,6 +293,7 @@ class Video extends DataClass implements Insertable<Video> {
     required this.createdAt,
     required this.lastPositionMs,
     required this.isFavorite,
+    required this.lastPlayedMs,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -279,6 +309,7 @@ class Video extends DataClass implements Insertable<Video> {
     map['created_at'] = Variable<DateTime>(createdAt);
     map['last_position_ms'] = Variable<int>(lastPositionMs);
     map['is_favorite'] = Variable<bool>(isFavorite);
+    map['last_played_ms'] = Variable<int>(lastPlayedMs);
     return map;
   }
 
@@ -295,6 +326,7 @@ class Video extends DataClass implements Insertable<Video> {
       createdAt: Value(createdAt),
       lastPositionMs: Value(lastPositionMs),
       isFavorite: Value(isFavorite),
+      lastPlayedMs: Value(lastPlayedMs),
     );
   }
 
@@ -313,6 +345,7 @@ class Video extends DataClass implements Insertable<Video> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastPositionMs: serializer.fromJson<int>(json['lastPositionMs']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      lastPlayedMs: serializer.fromJson<int>(json['lastPlayedMs']),
     );
   }
   @override
@@ -328,6 +361,7 @@ class Video extends DataClass implements Insertable<Video> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastPositionMs': serializer.toJson<int>(lastPositionMs),
       'isFavorite': serializer.toJson<bool>(isFavorite),
+      'lastPlayedMs': serializer.toJson<int>(lastPlayedMs),
     };
   }
 
@@ -341,6 +375,7 @@ class Video extends DataClass implements Insertable<Video> {
     DateTime? createdAt,
     int? lastPositionMs,
     bool? isFavorite,
+    int? lastPlayedMs,
   }) => Video(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -351,6 +386,7 @@ class Video extends DataClass implements Insertable<Video> {
     createdAt: createdAt ?? this.createdAt,
     lastPositionMs: lastPositionMs ?? this.lastPositionMs,
     isFavorite: isFavorite ?? this.isFavorite,
+    lastPlayedMs: lastPlayedMs ?? this.lastPlayedMs,
   );
   Video copyWithCompanion(VideosCompanion data) {
     return Video(
@@ -369,6 +405,9 @@ class Video extends DataClass implements Insertable<Video> {
       isFavorite: data.isFavorite.present
           ? data.isFavorite.value
           : this.isFavorite,
+      lastPlayedMs: data.lastPlayedMs.present
+          ? data.lastPlayedMs.value
+          : this.lastPlayedMs,
     );
   }
 
@@ -383,7 +422,8 @@ class Video extends DataClass implements Insertable<Video> {
           ..write('origin: $origin, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastPositionMs: $lastPositionMs, ')
-          ..write('isFavorite: $isFavorite')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('lastPlayedMs: $lastPlayedMs')
           ..write(')'))
         .toString();
   }
@@ -399,6 +439,7 @@ class Video extends DataClass implements Insertable<Video> {
     createdAt,
     lastPositionMs,
     isFavorite,
+    lastPlayedMs,
   );
   @override
   bool operator ==(Object other) =>
@@ -412,7 +453,8 @@ class Video extends DataClass implements Insertable<Video> {
           other.origin == this.origin &&
           other.createdAt == this.createdAt &&
           other.lastPositionMs == this.lastPositionMs &&
-          other.isFavorite == this.isFavorite);
+          other.isFavorite == this.isFavorite &&
+          other.lastPlayedMs == this.lastPlayedMs);
 }
 
 class VideosCompanion extends UpdateCompanion<Video> {
@@ -425,6 +467,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
   final Value<DateTime> createdAt;
   final Value<int> lastPositionMs;
   final Value<bool> isFavorite;
+  final Value<int> lastPlayedMs;
   final Value<int> rowid;
   const VideosCompanion({
     this.id = const Value.absent(),
@@ -436,6 +479,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
     this.createdAt = const Value.absent(),
     this.lastPositionMs = const Value.absent(),
     this.isFavorite = const Value.absent(),
+    this.lastPlayedMs = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   VideosCompanion.insert({
@@ -448,6 +492,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
     required DateTime createdAt,
     this.lastPositionMs = const Value.absent(),
     this.isFavorite = const Value.absent(),
+    this.lastPlayedMs = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -463,6 +508,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
     Expression<DateTime>? createdAt,
     Expression<int>? lastPositionMs,
     Expression<bool>? isFavorite,
+    Expression<int>? lastPlayedMs,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -475,6 +521,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
       if (createdAt != null) 'created_at': createdAt,
       if (lastPositionMs != null) 'last_position_ms': lastPositionMs,
       if (isFavorite != null) 'is_favorite': isFavorite,
+      if (lastPlayedMs != null) 'last_played_ms': lastPlayedMs,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -489,6 +536,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
     Value<DateTime>? createdAt,
     Value<int>? lastPositionMs,
     Value<bool>? isFavorite,
+    Value<int>? lastPlayedMs,
     Value<int>? rowid,
   }) {
     return VideosCompanion(
@@ -501,6 +549,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
       createdAt: createdAt ?? this.createdAt,
       lastPositionMs: lastPositionMs ?? this.lastPositionMs,
       isFavorite: isFavorite ?? this.isFavorite,
+      lastPlayedMs: lastPlayedMs ?? this.lastPlayedMs,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -535,6 +584,9 @@ class VideosCompanion extends UpdateCompanion<Video> {
     if (isFavorite.present) {
       map['is_favorite'] = Variable<bool>(isFavorite.value);
     }
+    if (lastPlayedMs.present) {
+      map['last_played_ms'] = Variable<int>(lastPlayedMs.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -553,6 +605,7 @@ class VideosCompanion extends UpdateCompanion<Video> {
           ..write('createdAt: $createdAt, ')
           ..write('lastPositionMs: $lastPositionMs, ')
           ..write('isFavorite: $isFavorite, ')
+          ..write('lastPlayedMs: $lastPlayedMs, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1065,6 +1118,50 @@ class $VocabularyTable extends Vocabulary
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _dueAtMsMeta = const VerificationMeta(
+    'dueAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> dueAtMs = GeneratedColumn<int>(
+    'due_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _intervalDaysMeta = const VerificationMeta(
+    'intervalDays',
+  );
+  @override
+  late final GeneratedColumn<int> intervalDays = GeneratedColumn<int>(
+    'interval_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _easeMeta = const VerificationMeta('ease');
+  @override
+  late final GeneratedColumn<double> ease = GeneratedColumn<double>(
+    'ease',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2.5),
+  );
+  static const VerificationMeta _repsMeta = const VerificationMeta('reps');
+  @override
+  late final GeneratedColumn<int> reps = GeneratedColumn<int>(
+    'reps',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1072,6 +1169,10 @@ class $VocabularyTable extends Vocabulary
     translation,
     sentence,
     createdAt,
+    dueAtMs,
+    intervalDays,
+    ease,
+    reps,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1121,6 +1222,33 @@ class $VocabularyTable extends Vocabulary
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('due_at_ms')) {
+      context.handle(
+        _dueAtMsMeta,
+        dueAtMs.isAcceptableOrUnknown(data['due_at_ms']!, _dueAtMsMeta),
+      );
+    }
+    if (data.containsKey('interval_days')) {
+      context.handle(
+        _intervalDaysMeta,
+        intervalDays.isAcceptableOrUnknown(
+          data['interval_days']!,
+          _intervalDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('ease')) {
+      context.handle(
+        _easeMeta,
+        ease.isAcceptableOrUnknown(data['ease']!, _easeMeta),
+      );
+    }
+    if (data.containsKey('reps')) {
+      context.handle(
+        _repsMeta,
+        reps.isAcceptableOrUnknown(data['reps']!, _repsMeta),
+      );
+    }
     return context;
   }
 
@@ -1150,6 +1278,22 @@ class $VocabularyTable extends Vocabulary
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      dueAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}due_at_ms'],
+      )!,
+      intervalDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}interval_days'],
+      )!,
+      ease: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}ease'],
+      )!,
+      reps: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reps'],
+      )!,
     );
   }
 
@@ -1165,12 +1309,23 @@ class VocabularyData extends DataClass implements Insertable<VocabularyData> {
   final String translation;
   final String? sentence;
   final DateTime createdAt;
+
+  /// Spaced repetition: next review (epoch ms, 0 = due now), interval in
+  /// days, ease factor and successful repetitions.
+  final int dueAtMs;
+  final int intervalDays;
+  final double ease;
+  final int reps;
   const VocabularyData({
     required this.id,
     required this.word,
     required this.translation,
     this.sentence,
     required this.createdAt,
+    required this.dueAtMs,
+    required this.intervalDays,
+    required this.ease,
+    required this.reps,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1182,6 +1337,10 @@ class VocabularyData extends DataClass implements Insertable<VocabularyData> {
       map['sentence'] = Variable<String>(sentence);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['due_at_ms'] = Variable<int>(dueAtMs);
+    map['interval_days'] = Variable<int>(intervalDays);
+    map['ease'] = Variable<double>(ease);
+    map['reps'] = Variable<int>(reps);
     return map;
   }
 
@@ -1194,6 +1353,10 @@ class VocabularyData extends DataClass implements Insertable<VocabularyData> {
           ? const Value.absent()
           : Value(sentence),
       createdAt: Value(createdAt),
+      dueAtMs: Value(dueAtMs),
+      intervalDays: Value(intervalDays),
+      ease: Value(ease),
+      reps: Value(reps),
     );
   }
 
@@ -1208,6 +1371,10 @@ class VocabularyData extends DataClass implements Insertable<VocabularyData> {
       translation: serializer.fromJson<String>(json['translation']),
       sentence: serializer.fromJson<String?>(json['sentence']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      dueAtMs: serializer.fromJson<int>(json['dueAtMs']),
+      intervalDays: serializer.fromJson<int>(json['intervalDays']),
+      ease: serializer.fromJson<double>(json['ease']),
+      reps: serializer.fromJson<int>(json['reps']),
     );
   }
   @override
@@ -1219,6 +1386,10 @@ class VocabularyData extends DataClass implements Insertable<VocabularyData> {
       'translation': serializer.toJson<String>(translation),
       'sentence': serializer.toJson<String?>(sentence),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'dueAtMs': serializer.toJson<int>(dueAtMs),
+      'intervalDays': serializer.toJson<int>(intervalDays),
+      'ease': serializer.toJson<double>(ease),
+      'reps': serializer.toJson<int>(reps),
     };
   }
 
@@ -1228,12 +1399,20 @@ class VocabularyData extends DataClass implements Insertable<VocabularyData> {
     String? translation,
     Value<String?> sentence = const Value.absent(),
     DateTime? createdAt,
+    int? dueAtMs,
+    int? intervalDays,
+    double? ease,
+    int? reps,
   }) => VocabularyData(
     id: id ?? this.id,
     word: word ?? this.word,
     translation: translation ?? this.translation,
     sentence: sentence.present ? sentence.value : this.sentence,
     createdAt: createdAt ?? this.createdAt,
+    dueAtMs: dueAtMs ?? this.dueAtMs,
+    intervalDays: intervalDays ?? this.intervalDays,
+    ease: ease ?? this.ease,
+    reps: reps ?? this.reps,
   );
   VocabularyData copyWithCompanion(VocabularyCompanion data) {
     return VocabularyData(
@@ -1244,6 +1423,12 @@ class VocabularyData extends DataClass implements Insertable<VocabularyData> {
           : this.translation,
       sentence: data.sentence.present ? data.sentence.value : this.sentence,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      dueAtMs: data.dueAtMs.present ? data.dueAtMs.value : this.dueAtMs,
+      intervalDays: data.intervalDays.present
+          ? data.intervalDays.value
+          : this.intervalDays,
+      ease: data.ease.present ? data.ease.value : this.ease,
+      reps: data.reps.present ? data.reps.value : this.reps,
     );
   }
 
@@ -1254,13 +1439,27 @@ class VocabularyData extends DataClass implements Insertable<VocabularyData> {
           ..write('word: $word, ')
           ..write('translation: $translation, ')
           ..write('sentence: $sentence, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('dueAtMs: $dueAtMs, ')
+          ..write('intervalDays: $intervalDays, ')
+          ..write('ease: $ease, ')
+          ..write('reps: $reps')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, word, translation, sentence, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    word,
+    translation,
+    sentence,
+    createdAt,
+    dueAtMs,
+    intervalDays,
+    ease,
+    reps,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1269,7 +1468,11 @@ class VocabularyData extends DataClass implements Insertable<VocabularyData> {
           other.word == this.word &&
           other.translation == this.translation &&
           other.sentence == this.sentence &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.dueAtMs == this.dueAtMs &&
+          other.intervalDays == this.intervalDays &&
+          other.ease == this.ease &&
+          other.reps == this.reps);
 }
 
 class VocabularyCompanion extends UpdateCompanion<VocabularyData> {
@@ -1278,12 +1481,20 @@ class VocabularyCompanion extends UpdateCompanion<VocabularyData> {
   final Value<String> translation;
   final Value<String?> sentence;
   final Value<DateTime> createdAt;
+  final Value<int> dueAtMs;
+  final Value<int> intervalDays;
+  final Value<double> ease;
+  final Value<int> reps;
   const VocabularyCompanion({
     this.id = const Value.absent(),
     this.word = const Value.absent(),
     this.translation = const Value.absent(),
     this.sentence = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.dueAtMs = const Value.absent(),
+    this.intervalDays = const Value.absent(),
+    this.ease = const Value.absent(),
+    this.reps = const Value.absent(),
   });
   VocabularyCompanion.insert({
     this.id = const Value.absent(),
@@ -1291,6 +1502,10 @@ class VocabularyCompanion extends UpdateCompanion<VocabularyData> {
     required String translation,
     this.sentence = const Value.absent(),
     required DateTime createdAt,
+    this.dueAtMs = const Value.absent(),
+    this.intervalDays = const Value.absent(),
+    this.ease = const Value.absent(),
+    this.reps = const Value.absent(),
   }) : word = Value(word),
        translation = Value(translation),
        createdAt = Value(createdAt);
@@ -1300,6 +1515,10 @@ class VocabularyCompanion extends UpdateCompanion<VocabularyData> {
     Expression<String>? translation,
     Expression<String>? sentence,
     Expression<DateTime>? createdAt,
+    Expression<int>? dueAtMs,
+    Expression<int>? intervalDays,
+    Expression<double>? ease,
+    Expression<int>? reps,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1307,6 +1526,10 @@ class VocabularyCompanion extends UpdateCompanion<VocabularyData> {
       if (translation != null) 'translation': translation,
       if (sentence != null) 'sentence': sentence,
       if (createdAt != null) 'created_at': createdAt,
+      if (dueAtMs != null) 'due_at_ms': dueAtMs,
+      if (intervalDays != null) 'interval_days': intervalDays,
+      if (ease != null) 'ease': ease,
+      if (reps != null) 'reps': reps,
     });
   }
 
@@ -1316,6 +1539,10 @@ class VocabularyCompanion extends UpdateCompanion<VocabularyData> {
     Value<String>? translation,
     Value<String?>? sentence,
     Value<DateTime>? createdAt,
+    Value<int>? dueAtMs,
+    Value<int>? intervalDays,
+    Value<double>? ease,
+    Value<int>? reps,
   }) {
     return VocabularyCompanion(
       id: id ?? this.id,
@@ -1323,6 +1550,10 @@ class VocabularyCompanion extends UpdateCompanion<VocabularyData> {
       translation: translation ?? this.translation,
       sentence: sentence ?? this.sentence,
       createdAt: createdAt ?? this.createdAt,
+      dueAtMs: dueAtMs ?? this.dueAtMs,
+      intervalDays: intervalDays ?? this.intervalDays,
+      ease: ease ?? this.ease,
+      reps: reps ?? this.reps,
     );
   }
 
@@ -1344,6 +1575,18 @@ class VocabularyCompanion extends UpdateCompanion<VocabularyData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (dueAtMs.present) {
+      map['due_at_ms'] = Variable<int>(dueAtMs.value);
+    }
+    if (intervalDays.present) {
+      map['interval_days'] = Variable<int>(intervalDays.value);
+    }
+    if (ease.present) {
+      map['ease'] = Variable<double>(ease.value);
+    }
+    if (reps.present) {
+      map['reps'] = Variable<int>(reps.value);
+    }
     return map;
   }
 
@@ -1354,7 +1597,258 @@ class VocabularyCompanion extends UpdateCompanion<VocabularyData> {
           ..write('word: $word, ')
           ..write('translation: $translation, ')
           ..write('sentence: $sentence, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('dueAtMs: $dueAtMs, ')
+          ..write('intervalDays: $intervalDays, ')
+          ..write('ease: $ease, ')
+          ..write('reps: $reps')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $GlossaryTable extends Glossary
+    with TableInfo<$GlossaryTable, GlossaryData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GlossaryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _termMeta = const VerificationMeta('term');
+  @override
+  late final GeneratedColumn<String> term = GeneratedColumn<String>(
+    'term',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _arabicMeta = const VerificationMeta('arabic');
+  @override
+  late final GeneratedColumn<String> arabic = GeneratedColumn<String>(
+    'arabic',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, term, arabic];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'glossary';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<GlossaryData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('term')) {
+      context.handle(
+        _termMeta,
+        term.isAcceptableOrUnknown(data['term']!, _termMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_termMeta);
+    }
+    if (data.containsKey('arabic')) {
+      context.handle(
+        _arabicMeta,
+        arabic.isAcceptableOrUnknown(data['arabic']!, _arabicMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_arabicMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  GlossaryData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GlossaryData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      term: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}term'],
+      )!,
+      arabic: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}arabic'],
+      )!,
+    );
+  }
+
+  @override
+  $GlossaryTable createAlias(String alias) {
+    return $GlossaryTable(attachedDatabase, alias);
+  }
+}
+
+class GlossaryData extends DataClass implements Insertable<GlossaryData> {
+  final int id;
+  final String term;
+  final String arabic;
+  const GlossaryData({
+    required this.id,
+    required this.term,
+    required this.arabic,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['term'] = Variable<String>(term);
+    map['arabic'] = Variable<String>(arabic);
+    return map;
+  }
+
+  GlossaryCompanion toCompanion(bool nullToAbsent) {
+    return GlossaryCompanion(
+      id: Value(id),
+      term: Value(term),
+      arabic: Value(arabic),
+    );
+  }
+
+  factory GlossaryData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GlossaryData(
+      id: serializer.fromJson<int>(json['id']),
+      term: serializer.fromJson<String>(json['term']),
+      arabic: serializer.fromJson<String>(json['arabic']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'term': serializer.toJson<String>(term),
+      'arabic': serializer.toJson<String>(arabic),
+    };
+  }
+
+  GlossaryData copyWith({int? id, String? term, String? arabic}) =>
+      GlossaryData(
+        id: id ?? this.id,
+        term: term ?? this.term,
+        arabic: arabic ?? this.arabic,
+      );
+  GlossaryData copyWithCompanion(GlossaryCompanion data) {
+    return GlossaryData(
+      id: data.id.present ? data.id.value : this.id,
+      term: data.term.present ? data.term.value : this.term,
+      arabic: data.arabic.present ? data.arabic.value : this.arabic,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GlossaryData(')
+          ..write('id: $id, ')
+          ..write('term: $term, ')
+          ..write('arabic: $arabic')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, term, arabic);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GlossaryData &&
+          other.id == this.id &&
+          other.term == this.term &&
+          other.arabic == this.arabic);
+}
+
+class GlossaryCompanion extends UpdateCompanion<GlossaryData> {
+  final Value<int> id;
+  final Value<String> term;
+  final Value<String> arabic;
+  const GlossaryCompanion({
+    this.id = const Value.absent(),
+    this.term = const Value.absent(),
+    this.arabic = const Value.absent(),
+  });
+  GlossaryCompanion.insert({
+    this.id = const Value.absent(),
+    required String term,
+    required String arabic,
+  }) : term = Value(term),
+       arabic = Value(arabic);
+  static Insertable<GlossaryData> custom({
+    Expression<int>? id,
+    Expression<String>? term,
+    Expression<String>? arabic,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (term != null) 'term': term,
+      if (arabic != null) 'arabic': arabic,
+    });
+  }
+
+  GlossaryCompanion copyWith({
+    Value<int>? id,
+    Value<String>? term,
+    Value<String>? arabic,
+  }) {
+    return GlossaryCompanion(
+      id: id ?? this.id,
+      term: term ?? this.term,
+      arabic: arabic ?? this.arabic,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (term.present) {
+      map['term'] = Variable<String>(term.value);
+    }
+    if (arabic.present) {
+      map['arabic'] = Variable<String>(arabic.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GlossaryCompanion(')
+          ..write('id: $id, ')
+          ..write('term: $term, ')
+          ..write('arabic: $arabic')
           ..write(')'))
         .toString();
   }
@@ -1366,6 +1860,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $VideosTable videos = $VideosTable(this);
   late final $CuesTable cues = $CuesTable(this);
   late final $VocabularyTable vocabulary = $VocabularyTable(this);
+  late final $GlossaryTable glossary = $GlossaryTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1374,6 +1869,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     videos,
     cues,
     vocabulary,
+    glossary,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -1398,6 +1894,7 @@ typedef $$VideosTableCreateCompanionBuilder =
       required DateTime createdAt,
       Value<int> lastPositionMs,
       Value<bool> isFavorite,
+      Value<int> lastPlayedMs,
       Value<int> rowid,
     });
 typedef $$VideosTableUpdateCompanionBuilder =
@@ -1411,6 +1908,7 @@ typedef $$VideosTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<int> lastPositionMs,
       Value<bool> isFavorite,
+      Value<int> lastPlayedMs,
       Value<int> rowid,
     });
 
@@ -1489,6 +1987,11 @@ class $$VideosTableFilterComposer
 
   ColumnFilters<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastPlayedMs => $composableBuilder(
+    column: $table.lastPlayedMs,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1571,6 +2074,11 @@ class $$VideosTableOrderingComposer
     column: $table.isFavorite,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get lastPlayedMs => $composableBuilder(
+    column: $table.lastPlayedMs,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$VideosTableAnnotationComposer
@@ -1612,6 +2120,11 @@ class $$VideosTableAnnotationComposer
 
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastPlayedMs => $composableBuilder(
+    column: $table.lastPlayedMs,
     builder: (column) => column,
   );
 
@@ -1678,6 +2191,7 @@ class $$VideosTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> lastPositionMs = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
+                Value<int> lastPlayedMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VideosCompanion(
                 id: id,
@@ -1689,6 +2203,7 @@ class $$VideosTableTableManager
                 createdAt: createdAt,
                 lastPositionMs: lastPositionMs,
                 isFavorite: isFavorite,
+                lastPlayedMs: lastPlayedMs,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1702,6 +2217,7 @@ class $$VideosTableTableManager
                 required DateTime createdAt,
                 Value<int> lastPositionMs = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
+                Value<int> lastPlayedMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VideosCompanion.insert(
                 id: id,
@@ -1713,6 +2229,7 @@ class $$VideosTableTableManager
                 createdAt: createdAt,
                 lastPositionMs: lastPositionMs,
                 isFavorite: isFavorite,
+                lastPlayedMs: lastPlayedMs,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2115,6 +2632,10 @@ typedef $$VocabularyTableCreateCompanionBuilder =
       required String translation,
       Value<String?> sentence,
       required DateTime createdAt,
+      Value<int> dueAtMs,
+      Value<int> intervalDays,
+      Value<double> ease,
+      Value<int> reps,
     });
 typedef $$VocabularyTableUpdateCompanionBuilder =
     VocabularyCompanion Function({
@@ -2123,6 +2644,10 @@ typedef $$VocabularyTableUpdateCompanionBuilder =
       Value<String> translation,
       Value<String?> sentence,
       Value<DateTime> createdAt,
+      Value<int> dueAtMs,
+      Value<int> intervalDays,
+      Value<double> ease,
+      Value<int> reps,
     });
 
 class $$VocabularyTableFilterComposer
@@ -2156,6 +2681,26 @@ class $$VocabularyTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dueAtMs => $composableBuilder(
+    column: $table.dueAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get intervalDays => $composableBuilder(
+    column: $table.intervalDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get ease => $composableBuilder(
+    column: $table.ease,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reps => $composableBuilder(
+    column: $table.reps,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2193,6 +2738,26 @@ class $$VocabularyTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get dueAtMs => $composableBuilder(
+    column: $table.dueAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get intervalDays => $composableBuilder(
+    column: $table.intervalDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get ease => $composableBuilder(
+    column: $table.ease,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get reps => $composableBuilder(
+    column: $table.reps,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$VocabularyTableAnnotationComposer
@@ -2220,6 +2785,20 @@ class $$VocabularyTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get dueAtMs =>
+      $composableBuilder(column: $table.dueAtMs, builder: (column) => column);
+
+  GeneratedColumn<int> get intervalDays => $composableBuilder(
+    column: $table.intervalDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get ease =>
+      $composableBuilder(column: $table.ease, builder: (column) => column);
+
+  GeneratedColumn<int> get reps =>
+      $composableBuilder(column: $table.reps, builder: (column) => column);
 }
 
 class $$VocabularyTableTableManager
@@ -2258,12 +2837,20 @@ class $$VocabularyTableTableManager
                 Value<String> translation = const Value.absent(),
                 Value<String?> sentence = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<int> dueAtMs = const Value.absent(),
+                Value<int> intervalDays = const Value.absent(),
+                Value<double> ease = const Value.absent(),
+                Value<int> reps = const Value.absent(),
               }) => VocabularyCompanion(
                 id: id,
                 word: word,
                 translation: translation,
                 sentence: sentence,
                 createdAt: createdAt,
+                dueAtMs: dueAtMs,
+                intervalDays: intervalDays,
+                ease: ease,
+                reps: reps,
               ),
           createCompanionCallback:
               ({
@@ -2272,12 +2859,20 @@ class $$VocabularyTableTableManager
                 required String translation,
                 Value<String?> sentence = const Value.absent(),
                 required DateTime createdAt,
+                Value<int> dueAtMs = const Value.absent(),
+                Value<int> intervalDays = const Value.absent(),
+                Value<double> ease = const Value.absent(),
+                Value<int> reps = const Value.absent(),
               }) => VocabularyCompanion.insert(
                 id: id,
                 word: word,
                 translation: translation,
                 sentence: sentence,
                 createdAt: createdAt,
+                dueAtMs: dueAtMs,
+                intervalDays: intervalDays,
+                ease: ease,
+                reps: reps,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -2304,6 +2899,155 @@ typedef $$VocabularyTableProcessedTableManager =
       VocabularyData,
       PrefetchHooks Function()
     >;
+typedef $$GlossaryTableCreateCompanionBuilder =
+    GlossaryCompanion Function({
+      Value<int> id,
+      required String term,
+      required String arabic,
+    });
+typedef $$GlossaryTableUpdateCompanionBuilder =
+    GlossaryCompanion Function({
+      Value<int> id,
+      Value<String> term,
+      Value<String> arabic,
+    });
+
+class $$GlossaryTableFilterComposer
+    extends Composer<_$AppDatabase, $GlossaryTable> {
+  $$GlossaryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get term => $composableBuilder(
+    column: $table.term,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get arabic => $composableBuilder(
+    column: $table.arabic,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GlossaryTableOrderingComposer
+    extends Composer<_$AppDatabase, $GlossaryTable> {
+  $$GlossaryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get term => $composableBuilder(
+    column: $table.term,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get arabic => $composableBuilder(
+    column: $table.arabic,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GlossaryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GlossaryTable> {
+  $$GlossaryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get term =>
+      $composableBuilder(column: $table.term, builder: (column) => column);
+
+  GeneratedColumn<String> get arabic =>
+      $composableBuilder(column: $table.arabic, builder: (column) => column);
+}
+
+class $$GlossaryTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GlossaryTable,
+          GlossaryData,
+          $$GlossaryTableFilterComposer,
+          $$GlossaryTableOrderingComposer,
+          $$GlossaryTableAnnotationComposer,
+          $$GlossaryTableCreateCompanionBuilder,
+          $$GlossaryTableUpdateCompanionBuilder,
+          (
+            GlossaryData,
+            BaseReferences<_$AppDatabase, $GlossaryTable, GlossaryData>,
+          ),
+          GlossaryData,
+          PrefetchHooks Function()
+        > {
+  $$GlossaryTableTableManager(_$AppDatabase db, $GlossaryTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GlossaryTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GlossaryTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GlossaryTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> term = const Value.absent(),
+                Value<String> arabic = const Value.absent(),
+              }) => GlossaryCompanion(id: id, term: term, arabic: arabic),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String term,
+                required String arabic,
+              }) =>
+                  GlossaryCompanion.insert(id: id, term: term, arabic: arabic),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GlossaryTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GlossaryTable,
+      GlossaryData,
+      $$GlossaryTableFilterComposer,
+      $$GlossaryTableOrderingComposer,
+      $$GlossaryTableAnnotationComposer,
+      $$GlossaryTableCreateCompanionBuilder,
+      $$GlossaryTableUpdateCompanionBuilder,
+      (
+        GlossaryData,
+        BaseReferences<_$AppDatabase, $GlossaryTable, GlossaryData>,
+      ),
+      GlossaryData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2313,4 +3057,6 @@ class $AppDatabaseManager {
   $$CuesTableTableManager get cues => $$CuesTableTableManager(_db, _db.cues);
   $$VocabularyTableTableManager get vocabulary =>
       $$VocabularyTableTableManager(_db, _db.vocabulary);
+  $$GlossaryTableTableManager get glossary =>
+      $$GlossaryTableTableManager(_db, _db.glossary);
 }

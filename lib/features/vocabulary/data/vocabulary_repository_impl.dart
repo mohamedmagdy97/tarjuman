@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:tarjuman/core/database/app_database.dart' as db;
 import 'package:tarjuman/features/vocabulary/domain/entities/vocab_word.dart';
 import 'package:tarjuman/features/vocabulary/domain/repositories/vocabulary_repository.dart';
+import 'package:tarjuman/features/vocabulary/domain/services/spaced_repetition.dart';
 
 class VocabularyRepositoryImpl implements VocabularyRepository {
   VocabularyRepositoryImpl(this._db);
@@ -13,17 +14,39 @@ class VocabularyRepositoryImpl implements VocabularyRepository {
       ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
     return q.watch().map(
       (rows) => [
-        for (final r in rows)
-          VocabWord(
-            id: r.id,
-            word: r.word,
-            translation: r.translation,
-            sentence: r.sentence,
-            createdAt: r.createdAt,
-          ),
+        for (final r in rows) _map(r),
       ],
     );
   }
+
+  VocabWord _map(db.VocabularyData r) => VocabWord(
+    id: r.id,
+    word: r.word,
+    translation: r.translation,
+    sentence: r.sentence,
+    createdAt: r.createdAt,
+    dueAt: r.dueAtMs == 0
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(r.dueAtMs),
+    intervalDays: r.intervalDays,
+    ease: r.ease,
+    reps: r.reps,
+  );
+
+  @override
+  Future<List<VocabWord>> all() async =>
+      (await _db.select(_db.vocabulary).get()).map(_map).toList();
+
+  @override
+  Future<void> saveSchedule(int id, CardSchedule schedule) =>
+      (_db.update(_db.vocabulary)..where((t) => t.id.equals(id))).write(
+        db.VocabularyCompanion(
+          dueAtMs: Value(schedule.dueAt.millisecondsSinceEpoch),
+          intervalDays: Value(schedule.intervalDays),
+          ease: Value(schedule.ease),
+          reps: Value(schedule.reps),
+        ),
+      );
 
   @override
   Future<void> add({

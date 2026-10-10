@@ -2,6 +2,7 @@
 // ignore_for_file: cascade_invocations
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -21,6 +22,7 @@ import 'package:tarjuman/features/processing/domain/usecases/live_subtitle_sessi
 class _Engine implements PlayerEngine {
   final snapshotsCtl = StreamController<PlaybackSnapshot>.broadcast();
   final seeks = <Duration>[];
+  bool paused = false;
   double? volume;
 
   @override
@@ -30,7 +32,7 @@ class _Engine implements PlayerEngine {
   @override
   Future<void> play() async {}
   @override
-  Future<void> pause() async {}
+  Future<void> pause() async => paused = true;
   @override
   Future<void> seekTo(Duration position) async => seeks.add(position);
   @override
@@ -231,6 +233,27 @@ void main() {
       expect(cubit.state.subtitleOffset, const Duration(seconds: 2));
       await cubit.resetSubtitleOffset();
       expect(cubit.state.subtitleOffset, Duration.zero);
+    });
+  });
+
+  test('sleep timer pauses playback once and clears itself', () {
+    fakeAsync((async) {
+      cubit.setSleepTimer(const Duration(minutes: 15));
+      expect(cubit.state.sleepAt, isNotNull);
+      async.elapse(const Duration(minutes: 14));
+      expect(engine.paused, isFalse);
+      async.elapse(const Duration(minutes: 2));
+      expect(engine.paused, isTrue);
+      expect(cubit.state.sleepAt, isNull);
+    });
+  });
+
+  test('cancelling the sleep timer keeps playback going', () {
+    fakeAsync((async) {
+      cubit.setSleepTimer(const Duration(minutes: 5));
+      cubit.setSleepTimer(null);
+      async.elapse(const Duration(minutes: 10));
+      expect(engine.paused, isFalse);
     });
   });
 }

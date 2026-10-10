@@ -1081,6 +1081,258 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{percent}٪ مكتمل'**
   String notificationProgress(int percent);
+
+  /// No description provided for @glossaryTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'قاموس المصطلحات'**
+  String get glossaryTitle;
+
+  /// No description provided for @glossaryEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد مصطلحات'**
+  String get glossaryEmpty;
+
+  /// No description provided for @glossaryHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف مصطلحات إنجليزية وما تريدها أن تُترجم به، فتُطبَّق على الترجمات القادمة (ميزة تجريبية).'**
+  String get glossaryHint;
+
+  /// No description provided for @addTerm.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة مصطلح'**
+  String get addTerm;
+
+  /// No description provided for @sourceTerm.
+  ///
+  /// In ar, this message translates to:
+  /// **'المصطلح بلغة الفيديو'**
+  String get sourceTerm;
+
+  /// No description provided for @arabicTerm.
+  ///
+  /// In ar, this message translates to:
+  /// **'الترجمة المطلوبة'**
+  String get arabicTerm;
+
+  /// No description provided for @retranslateOnline.
+  ///
+  /// In ar, this message translates to:
+  /// **'أعد ترجمة السطر أونلاين'**
+  String get retranslateOnline;
+
+  /// No description provided for @retranslateNeedsOnline.
+  ///
+  /// In ar, this message translates to:
+  /// **'فعّل الترجمة عبر الإنترنت وأضف المفتاح من الإعدادات.'**
+  String get retranslateNeedsOnline;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مراجعة الكلمات'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّصت مراجعة اليوم'**
+  String get reviewDone;
+
+  /// No description provided for @reviewDoneBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'راجعت {count} كلمة. ارجع لاحقًا لمراجعات جديدة.'**
+  String reviewDoneBody(int count);
+
+  /// No description provided for @reviewRemaining.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتبقي: {count}'**
+  String reviewRemaining(int count);
+
+  /// No description provided for @showAnswer.
+  ///
+  /// In ar, this message translates to:
+  /// **'أظهر المعنى'**
+  String get showAnswer;
+
+  /// No description provided for @gradeAgain.
+  ///
+  /// In ar, this message translates to:
+  /// **'نسيت'**
+  String get gradeAgain;
+
+  /// No description provided for @gradeHard.
+  ///
+  /// In ar, this message translates to:
+  /// **'صعب'**
+  String get gradeHard;
+
+  /// No description provided for @gradeGood.
+  ///
+  /// In ar, this message translates to:
+  /// **'جيد'**
+  String get gradeGood;
+
+  /// No description provided for @gradeEasy.
+  ///
+  /// In ar, this message translates to:
+  /// **'سهل'**
+  String get gradeEasy;
+
+  /// No description provided for @pronounce.
+  ///
+  /// In ar, this message translates to:
+  /// **'نطق الكلمة'**
+  String get pronounce;
+
+  /// No description provided for @startReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ المراجعة'**
+  String get startReview;
+
+  /// No description provided for @dueToday.
+  ///
+  /// In ar, this message translates to:
+  /// **'للمراجعة الآن: {count}'**
+  String dueToday(int count);
+
+  /// No description provided for @exportWords.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصدير الكلمات (CSV)'**
+  String get exportWords;
+
+  /// No description provided for @saveSentence.
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ الجملة'**
+  String get saveSentence;
+
+  /// No description provided for @sentenceSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حفظ الجملة'**
+  String get sentenceSaved;
+
+  /// No description provided for @storageTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'المساحة'**
+  String get storageTitle;
+
+  /// No description provided for @storageVideos.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفيديوهات'**
+  String get storageVideos;
+
+  /// No description provided for @storageModels.
+  ///
+  /// In ar, this message translates to:
+  /// **'النماذج'**
+  String get storageModels;
+
+  /// No description provided for @storageTemp.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملفات مؤقتة'**
+  String get storageTemp;
+
+  /// No description provided for @storageTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجمالي'**
+  String get storageTotal;
+
+  /// No description provided for @clearTemp.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسح الملفات المؤقتة'**
+  String get clearTemp;
+
+  /// No description provided for @storageVideosList.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفيديوهات حسب الحجم'**
+  String get storageVideosList;
+
+  /// No description provided for @freedSpace.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تحرير {size}'**
+  String freedSpace(String size);
+
+  /// No description provided for @storageEntry.
+  ///
+  /// In ar, this message translates to:
+  /// **'المساحة والتخزين'**
+  String get storageEntry;
+
+  /// No description provided for @backupWords.
+  ///
+  /// In ar, this message translates to:
+  /// **'نسخة احتياطية للكلمات (JSON)'**
+  String get backupWords;
+
+  /// No description provided for @restoreWords.
+  ///
+  /// In ar, this message translates to:
+  /// **'استعادة الكلمات من نسخة'**
+  String get restoreWords;
+
+  /// No description provided for @wordsRestored.
+  ///
+  /// In ar, this message translates to:
+  /// **'تمت إضافة {count} كلمة'**
+  String wordsRestored(int count);
+
+  /// No description provided for @invalidBackup.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملف النسخة الاحتياطية غير صالح.'**
+  String get invalidBackup;
+
+  /// No description provided for @searchLibrary.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابحث في الفيديوهات والترجمات'**
+  String get searchLibrary;
+
+  /// No description provided for @continueWatching.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكمل المشاهدة'**
+  String get continueWatching;
+
+  /// No description provided for @inSubtitles.
+  ///
+  /// In ar, this message translates to:
+  /// **'في الترجمات'**
+  String get inSubtitles;
+
+  /// No description provided for @sleepTimer.
+  ///
+  /// In ar, this message translates to:
+  /// **'مؤقت النوم'**
+  String get sleepTimer;
+
+  /// No description provided for @sleepOff.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيقاف المؤقت'**
+  String get sleepOff;
+
+  /// No description provided for @sleepMinutes.
+  ///
+  /// In ar, this message translates to:
+  /// **'{minutes} دقيقة'**
+  String sleepMinutes(int minutes);
 }
 
 class _AppLocalizationsDelegate

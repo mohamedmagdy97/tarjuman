@@ -20,6 +20,10 @@ What you get:
 • Multiple languages: English, French, Spanish, German, Italian, Portuguese, Turkish and Russian to Arabic.
 • Playback controls: double-tap to skip 10 s, drag for volume and brightness, A-B repeat, subtitle timing, audio track picker.
 • Processing continues in the background with a progress notification.
+• Open any video from WhatsApp, the gallery or a file manager with Open with / Share to Tarjuman.
+• Word review with spaced-repetition cards and audio pronunciation, CSV export and backup.
+• Your own glossary applied to future translations.
+• Search videos and subtitle text, a Continue watching row, a sleep timer and a storage screen.
 • Full control of the look: font size, colour, background, position, and an option to show English above the Arabic for language learners.
 • Remembers where you stopped in each video.
 • Optional online processing with your own OpenAI key. It is off by default and only runs with your consent.
@@ -33,12 +37,12 @@ Good to know:
 • Only direct file links are supported. YouTube-style page links and DRM-protected content are not.
 • Processing uses CPU and battery. For long videos keep the screen on and the phone charging.
 
-## What's new (max 500) — 1.5.0
-• Study mode and the My words dictionary
-• Eight source languages to Arabic
-• Background processing with a notification
-• Player gestures, A-B repeat and subtitle timing
-• Welcome flow and a model recommended for your device
+## What's new (max 500) — 1.6.0
+• Open with / Share from other apps
+• Better translation quality: sentence-aware chunking, long lines split, music ignored
+• Spaced-repetition word review with pronunciation
+• Subtitle search, Continue watching and a sleep timer
+• Glossary and a storage screen
 
 ## Category
 Video Players & Editors

@@ -1,17 +1,24 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tarjuman/app/incoming_media_handler.dart';
 import 'package:tarjuman/app/router.dart';
 import 'package:tarjuman/core/database/app_database.dart';
 import 'package:tarjuman/core/platform/background/background_processing.dart';
 import 'package:tarjuman/core/platform/device/brightness_control.dart';
 import 'package:tarjuman/core/platform/device/device_capability.dart';
 import 'package:tarjuman/core/platform/media/media_kit_engine.dart';
+import 'package:tarjuman/core/platform/share/incoming_media.dart';
+import 'package:tarjuman/core/platform/speech/pronouncer.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
+import 'package:tarjuman/features/glossary/data/glossary_repository_impl.dart';
+import 'package:tarjuman/features/glossary/domain/repositories/glossary_repository.dart';
+import 'package:tarjuman/features/glossary/presentation/cubit/glossary_cubit.dart';
 import 'package:tarjuman/features/library/data/file_picker_media_picker.dart';
 import 'package:tarjuman/features/library/data/http_file_downloader.dart';
 import 'package:tarjuman/features/library/data/media_storage.dart';
@@ -21,6 +28,7 @@ import 'package:tarjuman/features/library/domain/ports/media_picker.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
+import 'package:tarjuman/features/library/domain/usecases/import_shared_media.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/toggle_favorite.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
@@ -35,6 +43,7 @@ import 'package:tarjuman/features/player/domain/services/subtitle_parser.dart';
 import 'package:tarjuman/features/player/domain/services/subtitle_serializer.dart';
 import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
 import 'package:tarjuman/features/player/domain/usecases/load_player_data.dart';
+import 'package:tarjuman/features/player/domain/usecases/search_subtitles.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/processing/data/engine_provider_impl.dart';
 import 'package:tarjuman/features/processing/data/ffmpeg_audio_extractor.dart';
@@ -49,15 +58,23 @@ import 'package:tarjuman/features/processing/domain/usecases/run_processing_pipe
 import 'package:tarjuman/features/processing/presentation/cubit/processing_cubit.dart';
 import 'package:tarjuman/features/processing/presentation/cubit/setup_cubit.dart';
 import 'package:tarjuman/features/settings/presentation/cubit/app_settings_cubit.dart';
+import 'package:tarjuman/features/storage/data/file_storage_inspector.dart';
+import 'package:tarjuman/features/storage/domain/ports/storage_inspector.dart';
+import 'package:tarjuman/features/storage/presentation/cubit/storage_cubit.dart';
 import 'package:tarjuman/features/subtitle_editor/data/share_plus_subtitle_exporter.dart';
 import 'package:tarjuman/features/subtitle_editor/domain/ports/subtitle_exporter.dart';
 import 'package:tarjuman/features/subtitle_editor/domain/usecases/edit_cue_text.dart';
 import 'package:tarjuman/features/subtitle_editor/domain/usecases/export_subtitles.dart';
+import 'package:tarjuman/features/subtitle_editor/domain/usecases/retranslate_cue.dart';
 import 'package:tarjuman/features/subtitle_editor/presentation/cubit/editor_cubit.dart';
 import 'package:tarjuman/features/vocabulary/data/mlkit_word_translator.dart';
 import 'package:tarjuman/features/vocabulary/data/vocabulary_repository_impl.dart';
 import 'package:tarjuman/features/vocabulary/domain/ports/word_translator.dart';
 import 'package:tarjuman/features/vocabulary/domain/repositories/vocabulary_repository.dart';
+import 'package:tarjuman/features/vocabulary/domain/services/spaced_repetition.dart';
+import 'package:tarjuman/features/vocabulary/domain/usecases/backup_vocabulary.dart';
+import 'package:tarjuman/features/vocabulary/domain/usecases/export_vocabulary.dart';
+import 'package:tarjuman/features/vocabulary/presentation/cubit/review_cubit.dart';
 import 'package:tarjuman/features/vocabulary/presentation/cubit/study_cubit.dart';
 import 'package:tarjuman/features/vocabulary/presentation/cubit/vocabulary_cubit.dart';
 
@@ -89,27 +106,49 @@ Future<void> configureDependencies() async {
       () => VocabularyRepositoryImpl(sl()),
     )
     ..registerLazySingleton<WordTranslator>(() => MlKitWordTranslator(sl()))
+    ..registerLazySingleton<GlossaryRepository>(
+      () => GlossaryRepositoryImpl(sl()),
+    )
+    ..registerFactory(() => GlossaryCubit(sl()))
     ..registerLazySingleton<GoRouter>(() => buildRouter(sl()))
+    ..registerSingleton<GlobalKey<ScaffoldMessengerState>>(
+      GlobalKey<ScaffoldMessengerState>(),
+    )
+    ..registerSingleton<IncomingMediaSource>(
+      MethodChannelIncomingMediaSource(),
+    )
+    ..registerFactory(() => ImportSharedMedia(sl(), sl()))
+    ..registerLazySingleton(() => IncomingMediaHandler(sl(), sl()))
     ..registerLazySingleton<BackgroundProcessing>(
       ForegroundTaskBackgroundProcessing.new,
     )
     ..registerFactory(() => OnboardingCubit(sl(), sl()))
+    ..registerLazySingleton<StorageInspector>(FileStorageInspector.new)
+    ..registerFactory(() => StorageCubit(sl(), sl(), sl()))
+    ..registerLazySingleton<Pronouncer>(FlutterTtsPronouncer.new)
+    ..registerLazySingleton(() => const SpacedRepetition())
+    ..registerFactory(() => ReviewCubit(sl(), sl()))
+    ..registerFactory(() => ExportVocabulary(sl(), sl()))
+    ..registerFactory(() => BackupVocabulary(sl(), sl()))
+    ..registerFactory(() => RestoreVocabulary(sl(), sl()))
     ..registerFactory(() => StudyCubit(sl(), sl()))
     ..registerFactory(() => VocabularyCubit(sl()))
     ..registerLazySingleton<FileDownloader>(HttpFileDownloader.new)
     ..registerFactory(() => ImportFromUrl(sl(), sl(), sl()))
     ..registerFactory(() => ToggleFavorite(sl()))
-    ..registerFactory(() => LibraryCubit(sl(), sl(), sl(), sl(), sl()))
+    ..registerFactory(() => SearchSubtitles(sl()))
+    ..registerFactory(() => LibraryCubit(sl(), sl(), sl(), sl(), sl(), sl()))
     ..registerLazySingleton(() => const SubtitleSerializer())
     ..registerLazySingleton<SubtitleExporter>(SharePlusSubtitleExporter.new)
     ..registerFactory(() => EditCueText(sl()))
+    ..registerFactory(() => RetranslateCue(sl(), sl()))
     ..registerFactory(() => ExportSubtitles(sl(), sl(), sl(), sl()))
     ..registerSingleton<SecretStore>(const KeystoreSecretStore())
     ..registerLazySingleton<DeviceCapability>(DeviceInfoCapability.new)
     ..registerLazySingleton<ModelRepository>(() => ModelRepositoryImpl(sl()))
     ..registerLazySingleton<AudioExtractor>(FfmpegAudioExtractor.new)
     ..registerLazySingleton<EngineProvider>(
-      () => EngineProviderImpl(sl(), sl(), sl()),
+      () => EngineProviderImpl(sl(), sl(), sl(), sl()),
     )
     ..registerLazySingleton(() => const CueSegmenter())
     ..registerLazySingleton(() => ProcessRange(sl(), sl(), _workPath))
@@ -178,4 +217,6 @@ EditorCubit newEditorCubit(String videoId) => EditorCubit(
   subtitles: sl(),
   edit: sl(),
   export: sl(),
+  retranslate: sl(),
+  language: SourceLanguage.fromCode(sl<SettingsStore>().readSourceLanguage()),
 );

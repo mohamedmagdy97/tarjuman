@@ -12,4 +12,5 @@ abstract interface class MediaPicker {
   /// otherwise any file from the system file browser.
   Future<Result<PickedFile?>> pickVideo({bool galleryOnly = false});
   Future<Result<PickedFile?>> pickSubtitle();
+  Future<Result<PickedFile?>> pickBackup();
 }

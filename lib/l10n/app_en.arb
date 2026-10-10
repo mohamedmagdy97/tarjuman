@@ -222,5 +222,89 @@
         "type": "int"
       }
     }
+  },
+  "glossaryTitle": "Glossary",
+  "glossaryEmpty": "No terms yet",
+  "glossaryHint": "Add terms and how you want them translated. They apply to future translations (experimental).",
+  "addTerm": "Add term",
+  "sourceTerm": "Term in the video's language",
+  "arabicTerm": "Wanted Arabic translation",
+  "retranslateOnline": "Retranslate this line online",
+  "retranslateNeedsOnline": "Enable online translation and add your key in Settings.",
+  "reviewTitle": "Review words",
+  "reviewDone": "Today's review is done",
+  "reviewDoneBody": "You reviewed {count} words. Come back later for more.",
+  "@reviewDoneBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewRemaining": "Remaining: {count}",
+  "@reviewRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "showAnswer": "Show meaning",
+  "gradeAgain": "Forgot",
+  "gradeHard": "Hard",
+  "gradeGood": "Good",
+  "gradeEasy": "Easy",
+  "pronounce": "Pronounce",
+  "startReview": "Start review",
+  "dueToday": "Due now: {count}",
+  "@dueToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportWords": "Export words (CSV)",
+  "saveSentence": "Save sentence",
+  "sentenceSaved": "Sentence saved",
+  "storageTitle": "Storage",
+  "storageVideos": "Videos",
+  "storageModels": "Models",
+  "storageTemp": "Temporary files",
+  "storageTotal": "Total",
+  "clearTemp": "Clear temporary files",
+  "storageVideosList": "Videos by size",
+  "freedSpace": "Freed {size}",
+  "@freedSpace": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "storageEntry": "Storage",
+  "backupWords": "Back up words (JSON)",
+  "restoreWords": "Restore words from a backup",
+  "wordsRestored": "Added {count} words",
+  "@wordsRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "invalidBackup": "Invalid backup file.",
+  "searchLibrary": "Search videos and subtitles",
+  "continueWatching": "Continue watching",
+  "inSubtitles": "In subtitles",
+  "sleepTimer": "Sleep timer",
+  "sleepOff": "Turn off timer",
+  "sleepMinutes": "{minutes} min",
+  "@sleepMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   }
 }

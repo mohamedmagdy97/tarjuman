@@ -9,6 +9,7 @@ import 'package:tarjuman/core/design_system/components/app_progress_bar.dart';
 import 'package:tarjuman/core/design_system/components/empty_state.dart';
 import 'package:tarjuman/core/design_system/components/status_pill.dart';
 import 'package:tarjuman/core/design_system/components/video_card.dart';
+import 'package:tarjuman/core/design_system/tokens/app_radius.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
@@ -36,6 +37,22 @@ class LibraryView extends StatefulWidget {
 
 class _LibraryViewState extends State<LibraryView> {
   var _progressOpen = false;
+  var _searching = false;
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _toggleSearch(LibraryCubit cubit) {
+    setState(() => _searching = !_searching);
+    if (!_searching) {
+      _search.clear();
+      unawaited(cubit.setQuery(''));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,28 +87,44 @@ class _LibraryViewState extends State<LibraryView> {
         final cubit = context.read<LibraryCubit>();
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              l10n.libraryTitle,
-              style: AppTypography.display.copyWith(fontSize: 26),
-            ),
+            title: _searching
+                ? TextField(
+                    controller: _search,
+                    autofocus: true,
+                    onChanged: (q) => unawaited(cubit.setQuery(q)),
+                    decoration: InputDecoration(hintText: l10n.searchLibrary),
+                  )
+                : Text(
+                    l10n.libraryTitle,
+                    style: AppTypography.display.copyWith(fontSize: 26),
+                  ),
             backgroundColor: Colors.transparent,
             elevation: 0,
             actions: [
               IconButton(
-                tooltip: l10n.myVocabulary,
-                onPressed: () => unawaited(context.push('/vocabulary')),
-                icon: const Icon(Icons.menu_book_outlined),
+                tooltip: l10n.searchLibrary,
+                onPressed: () => _toggleSearch(cubit),
+                icon: Icon(
+                  _searching ? Icons.close_rounded : Icons.search_rounded,
+                ),
               ),
-              IconButton(
-                tooltip: l10n.modelsTitle,
-                onPressed: () => unawaited(context.push('/models')),
-                icon: const Icon(Icons.download_for_offline_outlined),
-              ),
-              IconButton(
-                tooltip: l10n.settings,
-                onPressed: () => unawaited(context.push('/settings')),
-                icon: const Icon(Icons.settings_outlined),
-              ),
+              if (!_searching) ...[
+                IconButton(
+                  tooltip: l10n.myVocabulary,
+                  onPressed: () => unawaited(context.push('/vocabulary')),
+                  icon: const Icon(Icons.menu_book_outlined),
+                ),
+                IconButton(
+                  tooltip: l10n.modelsTitle,
+                  onPressed: () => unawaited(context.push('/models')),
+                  icon: const Icon(Icons.download_for_offline_outlined),
+                ),
+                IconButton(
+                  tooltip: l10n.settings,
+                  onPressed: () => unawaited(context.push('/settings')),
+                  icon: const Icon(Icons.settings_outlined),
+                ),
+              ],
             ],
           ),
           floatingActionButton: state.videos.isEmpty
@@ -241,6 +274,8 @@ class _LibraryViewState extends State<LibraryView> {
       LibraryFilter.processing: l10n.filterProcessing,
       LibraryFilter.favorites: l10n.filterFavorites,
     };
+    final searching = state.query.trim().isNotEmpty;
+    final continuing = state.continueWatching;
     return ListView(
       padding: const EdgeInsetsDirectional.fromSTEB(
         AppSpacing.screen,
@@ -249,6 +284,27 @@ class _LibraryViewState extends State<LibraryView> {
         96,
       ),
       children: [
+        if (!searching &&
+            continuing.isNotEmpty &&
+            state.filter == LibraryFilter.all) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Text(
+              l10n.continueWatching,
+              style: AppTypography.heading,
+            ),
+          ),
+          SizedBox(
+            height: 132,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: continuing.length,
+              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+              itemBuilder: (context, i) => _ContinueCard(video: continuing[i]),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         Wrap(
           spacing: AppSpacing.sm,
           children: [
@@ -281,6 +337,30 @@ class _LibraryViewState extends State<LibraryView> {
             ),
             onLongPress: () => _confirmDelete(context, v, cubit, l10n),
           ),
+        if (searching && state.hits.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.lg),
+            child: Text(l10n.inSubtitles, style: AppTypography.heading),
+          ),
+          for (final h in state.hits)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(h.text, maxLines: 2, overflow: TextOverflow.ellipsis),
+              subtitle: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  h.videoTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              onTap: () => unawaited(
+                context.push(
+                  '/player/${h.videoId}?t=${h.start.inMilliseconds}',
+                ),
+              ),
+            ),
+        ],
       ],
     );
   }
@@ -338,5 +418,65 @@ class _LibraryViewState extends State<LibraryView> {
       ),
     );
     if (ok ?? false) await cubit.delete(v.id);
+  }
+}
+
+/// Poster card with a progress bar for "continue watching".
+class _ContinueCard extends StatelessWidget {
+  const _ContinueCard({required this.video});
+  final Video video;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final total = video.duration?.inMilliseconds ?? 0;
+    final progress = total == 0
+        ? null
+        : (video.lastPosition.inMilliseconds / total).clamp(0.0, 1.0);
+    return InkWell(
+      borderRadius: AppRadius.mdAll,
+      onTap: () => unawaited(
+        context.push(
+          video.status == VideoStatus.ready
+              ? '/player/${video.id}'
+              : '/setup/${video.id}',
+        ),
+      ),
+      child: SizedBox(
+        width: 190,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: AppRadius.mdAll,
+            border: Border.all(color: c.line),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.play_circle_fill_rounded,
+                  color: c.primary,
+                  size: 30,
+                ),
+                const Spacer(),
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    video.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.label,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppProgressBar(value: progress),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

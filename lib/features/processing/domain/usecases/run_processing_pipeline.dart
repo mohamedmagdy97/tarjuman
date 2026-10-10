@@ -25,6 +25,7 @@ class RunProcessingPipeline {
     required EngineProvider engines,
     required ProcessRange processRange,
     this.chunk = const Duration(minutes: 3),
+    this.overlap = const Duration(seconds: 6),
   }) : _videos = videos,
        _subtitles = subtitles,
        _audio = audio,
@@ -37,6 +38,7 @@ class RunProcessingPipeline {
   final EngineProvider _engines;
   final ProcessRange _processRange;
   final Duration chunk;
+  final Duration overlap;
 
   Stream<ProcessingEvent> call({
     required String videoId,
@@ -98,21 +100,24 @@ class RunProcessingPipeline {
         total = (probed as Success<Duration>).value;
       }
 
-      // Resume: drop the possibly half-written last chunk, restart from it.
+      // Resume right after the last saved cue (cues are saved per chunk).
       final existing = await _subtitles.load(videoId);
       var startMs = 0;
       if (existing case Success(:final value) when !value.isEmpty) {
-        final lastEnd = value.cues.last.end.inMilliseconds;
-        startMs = (lastEnd ~/ chunk.inMilliseconds) * chunk.inMilliseconds;
+        startMs = value.cues.last.end.inMilliseconds;
       }
-      await _subtitles.deleteFrom(videoId, Duration(milliseconds: startMs));
 
       final clock = Stopwatch()..start();
       final baseMs = startMs;
       var cursor = Duration(milliseconds: startMs);
       while (cursor < total) {
         if (cancel.isCancelled) return _cancelled(video, out);
-        final length = total - cursor < chunk ? total - cursor : chunk;
+        // Each window reaches `overlap` past the chunk boundary so a sentence
+        // crossing it is transcribed whole; the next window then starts where
+        // the last kept sentence ended instead of at a fixed grid line.
+        final boundary = cursor + chunk;
+        final isLast = boundary + overlap >= total;
+        final length = isLast ? total - cursor : chunk + overlap;
 
         double fractionAt(Duration d) => total.inMilliseconds == 0
             ? 0
@@ -149,9 +154,17 @@ class RunProcessingPipeline {
             if (failure is CancelledFailure) return _cancelled(video, out);
             return fail(video, failure);
           case Success(:final value):
-            await _subtitles.append(videoId, value);
+            final keep = isLast
+                ? value
+                : value.where((c) => c.start < boundary).toList();
+            await _subtitles.append(videoId, keep);
+            if (isLast) {
+              cursor = total;
+            } else {
+              final lastEnd = keep.isEmpty ? boundary : keep.last.end;
+              cursor = lastEnd > boundary ? lastEnd : boundary;
+            }
         }
-        cursor += length;
       }
 
       final origin = kind == EngineKind.online

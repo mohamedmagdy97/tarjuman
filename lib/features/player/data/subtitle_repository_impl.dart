@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:tarjuman/core/database/app_database.dart' as db;
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
+import 'package:tarjuman/features/player/domain/entities/cue_hit.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_cue.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_timeline.dart';
 import 'package:tarjuman/features/player/domain/repositories/subtitle_repository.dart';
@@ -116,5 +117,27 @@ class SubtitleRepositoryImpl implements SubtitleRepository {
           ),
         );
     return const Result.success(null);
+  }
+
+  @override
+  Future<List<CueHit>> search(String query, {int limit = 40}) async {
+    final like = '%${query.replaceAll('%', r'\%').replaceAll('_', r'\_')}%';
+    final q =
+        _db.select(_db.cues).join([
+            innerJoin(_db.videos, _db.videos.id.equalsExp(_db.cues.videoId)),
+          ])
+          ..where(_db.cues.body.like(like) | _db.cues.original.like(like))
+          ..orderBy([OrderingTerm.desc(_db.videos.createdAt)])
+          ..limit(limit);
+    return [
+      for (final row in await q.get())
+        CueHit(
+          videoId: row.readTable(_db.videos).id,
+          videoTitle: row.readTable(_db.videos).title,
+          start: Duration(milliseconds: row.readTable(_db.cues).startMs),
+          text: row.readTable(_db.cues).body,
+          original: row.readTable(_db.cues).original,
+        ),
+    ];
   }
 }

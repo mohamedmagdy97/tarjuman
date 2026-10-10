@@ -55,6 +55,7 @@ class PlayerState extends Equatable {
     this.volume = 1,
     this.hud,
     this.subtitleOffset = Duration.zero,
+    this.sleepAt,
   });
 
   final PlayerStatus status;
@@ -79,6 +80,9 @@ class PlayerState extends Equatable {
   /// Subtitle shift for this video (positive = subtitles appear later).
   final Duration subtitleOffset;
 
+  /// When the sleep timer will pause playback (null = off).
+  final DateTime? sleepAt;
+
   PlayerState copyWith({
     PlayerStatus? status,
     Video? video,
@@ -101,6 +105,8 @@ class PlayerState extends Equatable {
     PlayerHud? hud,
     bool clearHud = false,
     Duration? subtitleOffset,
+    DateTime? sleepAt,
+    bool clearSleep = false,
   }) => PlayerState(
     status: status ?? this.status,
     video: video ?? this.video,
@@ -119,6 +125,7 @@ class PlayerState extends Equatable {
     volume: volume ?? this.volume,
     hud: clearHud ? null : hud ?? this.hud,
     subtitleOffset: subtitleOffset ?? this.subtitleOffset,
+    sleepAt: clearSleep ? null : sleepAt ?? this.sleepAt,
   );
 
   @override
@@ -139,6 +146,7 @@ class PlayerState extends Equatable {
     volume,
     hud,
     subtitleOffset,
+    sleepAt,
   ];
 }
 
@@ -179,6 +187,7 @@ class PlayerCubit extends Cubit<PlayerState> {
   final VideoRepository _videos;
   final BrightnessControl _brightness;
   Timer? _hudTimer;
+  Timer? _sleepTimer;
   double? _brightnessLevel;
 
   /// Explicit start position (e.g. jump from the editor); null = resume.
@@ -412,6 +421,23 @@ class PlayerCubit extends Cubit<PlayerState> {
     }
   }
 
+  /// Pauses playback after [after]; null cancels the timer.
+  void setSleepTimer(Duration? after) {
+    _sleepTimer?.cancel();
+    if (after == null) {
+      emit(state.copyWith(clearSleep: true));
+      return;
+    }
+    emit(state.copyWith(sleepAt: _now().add(after)));
+    _sleepTimer = Timer(after, () {
+      if (isClosed) return;
+      unawaited(engine.pause());
+      emit(state.copyWith(clearSleep: true));
+    });
+  }
+
+  DateTime _now() => DateTime.now();
+
   Future<void> adjustSubtitleOffset(Duration delta) async {
     final next = state.subtitleOffset + delta;
     emit(state.copyWith(subtitleOffset: next));
@@ -481,6 +507,7 @@ class PlayerCubit extends Cubit<PlayerState> {
     _savePosition();
     _hideTimer?.cancel();
     _hudTimer?.cancel();
+    _sleepTimer?.cancel();
     unawaited(_brightness.reset());
     await _sub?.cancel();
     await _liveSub?.cancel();

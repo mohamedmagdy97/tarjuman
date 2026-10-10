@@ -537,4 +537,144 @@ class AppLocalizationsEn extends AppLocalizations {
   String notificationProgress(int percent) {
     return '$percent% complete';
   }
+
+  @override
+  String get glossaryTitle => 'Glossary';
+
+  @override
+  String get glossaryEmpty => 'No terms yet';
+
+  @override
+  String get glossaryHint =>
+      'Add terms and how you want them translated. They apply to future translations (experimental).';
+
+  @override
+  String get addTerm => 'Add term';
+
+  @override
+  String get sourceTerm => 'Term in the video\'s language';
+
+  @override
+  String get arabicTerm => 'Wanted Arabic translation';
+
+  @override
+  String get retranslateOnline => 'Retranslate this line online';
+
+  @override
+  String get retranslateNeedsOnline =>
+      'Enable online translation and add your key in Settings.';
+
+  @override
+  String get reviewTitle => 'Review words';
+
+  @override
+  String get reviewDone => 'Today\'s review is done';
+
+  @override
+  String reviewDoneBody(int count) {
+    return 'You reviewed $count words. Come back later for more.';
+  }
+
+  @override
+  String reviewRemaining(int count) {
+    return 'Remaining: $count';
+  }
+
+  @override
+  String get showAnswer => 'Show meaning';
+
+  @override
+  String get gradeAgain => 'Forgot';
+
+  @override
+  String get gradeHard => 'Hard';
+
+  @override
+  String get gradeGood => 'Good';
+
+  @override
+  String get gradeEasy => 'Easy';
+
+  @override
+  String get pronounce => 'Pronounce';
+
+  @override
+  String get startReview => 'Start review';
+
+  @override
+  String dueToday(int count) {
+    return 'Due now: $count';
+  }
+
+  @override
+  String get exportWords => 'Export words (CSV)';
+
+  @override
+  String get saveSentence => 'Save sentence';
+
+  @override
+  String get sentenceSaved => 'Sentence saved';
+
+  @override
+  String get storageTitle => 'Storage';
+
+  @override
+  String get storageVideos => 'Videos';
+
+  @override
+  String get storageModels => 'Models';
+
+  @override
+  String get storageTemp => 'Temporary files';
+
+  @override
+  String get storageTotal => 'Total';
+
+  @override
+  String get clearTemp => 'Clear temporary files';
+
+  @override
+  String get storageVideosList => 'Videos by size';
+
+  @override
+  String freedSpace(String size) {
+    return 'Freed $size';
+  }
+
+  @override
+  String get storageEntry => 'Storage';
+
+  @override
+  String get backupWords => 'Back up words (JSON)';
+
+  @override
+  String get restoreWords => 'Restore words from a backup';
+
+  @override
+  String wordsRestored(int count) {
+    return 'Added $count words';
+  }
+
+  @override
+  String get invalidBackup => 'Invalid backup file.';
+
+  @override
+  String get searchLibrary => 'Search videos and subtitles';
+
+  @override
+  String get continueWatching => 'Continue watching';
+
+  @override
+  String get inSubtitles => 'In subtitles';
+
+  @override
+  String get sleepTimer => 'Sleep timer';
+
+  @override
+  String get sleepOff => 'Turn off timer';
+
+  @override
+  String sleepMinutes(int minutes) {
+    return '$minutes min';
+  }
 }

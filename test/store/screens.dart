@@ -26,6 +26,7 @@ import 'package:tarjuman/features/player/domain/entities/subtitle_timeline.dart'
 import 'package:tarjuman/features/player/domain/repositories/subtitle_repository.dart';
 import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
 import 'package:tarjuman/features/player/domain/usecases/load_player_data.dart';
+import 'package:tarjuman/features/player/domain/usecases/search_subtitles.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/player/presentation/pages/player_page.dart';
 import 'package:tarjuman/features/player/presentation/widgets/subtitle_style_sheet.dart';
@@ -93,6 +94,8 @@ class _MImportUrl extends Mock implements ImportFromUrl {}
 class _MDelete extends Mock implements DeleteVideo {}
 
 class _MFavorite extends Mock implements ToggleFavorite {}
+
+class _MSearch extends Mock implements SearchSubtitles {}
 
 class _MVideos extends Mock implements VideoRepository {}
 
@@ -208,7 +211,7 @@ Video _video(String title, VideoStatus s, SubtitleOrigin o) => Video(
   origin: o,
 );
 
-final sampleVideos = [
+final _baseVideos = [
   _video(
     'How AI Learns — Lecture 3.mp4',
     VideoStatus.ready,
@@ -234,6 +237,20 @@ final sampleVideos = [
     VideoStatus.imported,
     SubtitleOrigin.none,
   ),
+];
+
+final sampleVideos = [
+  _baseVideos[0].copyWith(
+    lastPosition: const Duration(minutes: 12),
+    lastPlayedAt: _now,
+  ),
+  _baseVideos[1],
+  _baseVideos[2].copyWith(
+    lastPosition: const Duration(minutes: 31),
+    lastPlayedAt: _now.subtract(const Duration(hours: 5)),
+  ),
+  _baseVideos[3],
+  _baseVideos[4],
 ];
 
 SubtitleCue _cue(
@@ -370,6 +387,7 @@ Map<String, Widget Function(Locale)> storeScreens() => {
       _MImportUrl(),
       _MDelete(),
       _MFavorite(),
+      _MSearch(),
     );
     return _app(
       l,

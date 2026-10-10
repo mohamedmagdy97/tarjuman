@@ -52,4 +52,37 @@ void main() {
     expect(out[0].end <= out[1].start, isTrue);
     expect(out[0].end - out[0].start > Duration.zero, isTrue);
   });
+
+  test('splits an overlong segment into readable pieces with shared timing', () {
+    const long =
+        'This is a very long sentence that keeps going, and going, '
+        'until it would never fit on two lines of a subtitle, so we split it.';
+    final out = segmenter.merge([seg(0, 12000, long)]);
+    expect(out.length, greaterThan(1));
+    expect(out.every((c) => c.text.length <= 84), isTrue);
+    expect(out.first.start, Duration.zero);
+    expect(out.last.end, const Duration(milliseconds: 12000));
+    for (var i = 1; i < out.length; i++) {
+      expect(out[i].start, out[i - 1].end);
+    }
+  });
+
+  test('drops Whisper artefacts and music notes', () {
+    final out = segmenter.merge([
+      seg(0, 2000, 'Thanks for watching!'),
+      seg(2000, 4000, '♪♪'),
+      seg(4000, 6000, 'Real speech.'),
+    ]);
+    expect(out.map((c) => c.text), ['Real speech.']);
+  });
+
+  test('drops a looped sentence after two repeats', () {
+    final out = segmenter.merge([
+      seg(0, 2000, 'I am here.'),
+      seg(2500, 4500, 'I am here.'),
+      seg(5000, 7000, 'I am here.'),
+      seg(7500, 9500, 'I am here.'),
+    ]);
+    expect(out, hasLength(2));
+  });
 }

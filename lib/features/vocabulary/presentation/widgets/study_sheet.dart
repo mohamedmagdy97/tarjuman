@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tarjuman/app/di/injection.dart';
 import 'package:tarjuman/core/design_system/components/app_button.dart';
 import 'package:tarjuman/core/design_system/tokens/app_radius.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
+import 'package:tarjuman/core/platform/speech/pronouncer.dart';
+import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/player/presentation/cubit/player_cubit.dart';
 import 'package:tarjuman/features/vocabulary/presentation/cubit/study_cubit.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
@@ -95,6 +98,41 @@ class StudySheet extends StatelessWidget {
                       p.activeText!,
                       style: AppTypography.body.copyWith(color: c.muted),
                     ),
+                  ),
+                if (english.isNotEmpty)
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => unawaited(
+                          sl<Pronouncer>().speak(
+                            english,
+                            languageCode: sl<SettingsStore>()
+                                .readSourceLanguage(),
+                          ),
+                        ),
+                        icon: const Icon(Icons.volume_up_rounded, size: 18),
+                        label: Text(l10n.pronounce),
+                      ),
+                      if (p.activeText != null)
+                        TextButton.icon(
+                          onPressed: () async {
+                            await context.read<StudyCubit>().saveSentence(
+                              english,
+                              p.activeText!,
+                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(l10n.sentenceSaved)),
+                              );
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.bookmark_add_outlined,
+                            size: 18,
+                          ),
+                          label: Text(l10n.saveSentence),
+                        ),
+                    ],
                   ),
                 const SizedBox(height: AppSpacing.lg),
                 const _WordCard(),

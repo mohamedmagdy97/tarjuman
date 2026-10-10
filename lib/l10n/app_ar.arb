@@ -222,5 +222,89 @@
         "type": "int"
       }
     }
+  },
+  "glossaryTitle": "قاموس المصطلحات",
+  "glossaryEmpty": "لا توجد مصطلحات",
+  "glossaryHint": "أضف مصطلحات إنجليزية وما تريدها أن تُترجم به، فتُطبَّق على الترجمات القادمة (ميزة تجريبية).",
+  "addTerm": "إضافة مصطلح",
+  "sourceTerm": "المصطلح بلغة الفيديو",
+  "arabicTerm": "الترجمة المطلوبة",
+  "retranslateOnline": "أعد ترجمة السطر أونلاين",
+  "retranslateNeedsOnline": "فعّل الترجمة عبر الإنترنت وأضف المفتاح من الإعدادات.",
+  "reviewTitle": "مراجعة الكلمات",
+  "reviewDone": "خلّصت مراجعة اليوم",
+  "reviewDoneBody": "راجعت {count} كلمة. ارجع لاحقًا لمراجعات جديدة.",
+  "@reviewDoneBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewRemaining": "المتبقي: {count}",
+  "@reviewRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "showAnswer": "أظهر المعنى",
+  "gradeAgain": "نسيت",
+  "gradeHard": "صعب",
+  "gradeGood": "جيد",
+  "gradeEasy": "سهل",
+  "pronounce": "نطق الكلمة",
+  "startReview": "ابدأ المراجعة",
+  "dueToday": "للمراجعة الآن: {count}",
+  "@dueToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportWords": "تصدير الكلمات (CSV)",
+  "saveSentence": "حفظ الجملة",
+  "sentenceSaved": "تم حفظ الجملة",
+  "storageTitle": "المساحة",
+  "storageVideos": "الفيديوهات",
+  "storageModels": "النماذج",
+  "storageTemp": "ملفات مؤقتة",
+  "storageTotal": "الإجمالي",
+  "clearTemp": "مسح الملفات المؤقتة",
+  "storageVideosList": "الفيديوهات حسب الحجم",
+  "freedSpace": "تم تحرير {size}",
+  "@freedSpace": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "storageEntry": "المساحة والتخزين",
+  "backupWords": "نسخة احتياطية للكلمات (JSON)",
+  "restoreWords": "استعادة الكلمات من نسخة",
+  "wordsRestored": "تمت إضافة {count} كلمة",
+  "@wordsRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "invalidBackup": "ملف النسخة الاحتياطية غير صالح.",
+  "searchLibrary": "ابحث في الفيديوهات والترجمات",
+  "continueWatching": "أكمل المشاهدة",
+  "inSubtitles": "في الترجمات",
+  "sleepTimer": "مؤقت النوم",
+  "sleepOff": "إيقاف المؤقت",
+  "sleepMinutes": "{minutes} دقيقة",
+  "@sleepMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   }
 }

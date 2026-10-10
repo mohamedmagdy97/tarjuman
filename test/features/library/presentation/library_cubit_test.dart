@@ -12,6 +12,7 @@ import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/toggle_favorite.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
 import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart';
+import 'package:tarjuman/features/player/domain/usecases/search_subtitles.dart';
 
 class _MockWatch extends Mock implements WatchLibrary {}
 
@@ -22,6 +23,8 @@ class _MockDelete extends Mock implements DeleteVideo {}
 class _MockImportUrl extends Mock implements ImportFromUrl {}
 
 class _MockFavorite extends Mock implements ToggleFavorite {}
+
+class _MockSearch extends Mock implements SearchSubtitles {}
 
 Video video(String id, VideoStatus s) => Video(
   id: id,
@@ -50,6 +53,7 @@ void main() {
     _MockImportUrl(),
     _MockDelete(),
     _MockFavorite(),
+    _MockSearch(),
   );
 
   blocTest<LibraryCubit, LibraryState>(

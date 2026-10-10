@@ -14,6 +14,8 @@ import 'package:whisper_cpp_flutter_plus/whisper_cpp_flutter_plus.dart';
 class WhisperSpeechRecognizer implements SpeechRecognizer {
   WhisperSpeechRecognizer(this._models, this._language);
 
+  static const _maxNoSpeech = 0.6;
+
   final ModelRepository _models;
   final SourceLanguage _language;
   WhisperEngine? _engine;
@@ -46,8 +48,10 @@ class WhisperSpeechRecognizer implements SpeechRecognizer {
       cancel?.onCancel(task.cancel);
       final result = await task.result;
       return Result.success([
+        // High no-speech probability = music/silence the model hallucinated over.
         for (final s in result.segments)
-          TranscriptSegment(start: s.start, end: s.end, text: s.text),
+          if (s.noSpeechProbability < _maxNoSpeech)
+            TranscriptSegment(start: s.start, end: s.end, text: s.text),
       ]);
     } on WhisperException catch (e) {
       if (cancel?.isCancelled ?? false) {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tarjuman/core/config/app_config.dart';
 import 'package:tarjuman/core/design_system/components/app_button.dart';
@@ -98,6 +99,19 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                   ),
                 ],
+                label(l10n.glossaryTitle),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.translate_rounded),
+                  title: Text(l10n.glossaryTitle),
+                  onTap: () => unawaited(context.push('/glossary')),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.storage_rounded),
+                  title: Text(l10n.storageEntry),
+                  onTap: () => unawaited(context.push('/storage')),
+                ),
                 label(l10n.aboutSection),
                 ListTile(
                   contentPadding: EdgeInsets.zero,

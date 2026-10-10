@@ -1,10 +1,13 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:tarjuman/core/database/app_database.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
+import 'package:tarjuman/features/library/domain/ports/media_picker.dart';
 import 'package:tarjuman/features/vocabulary/data/vocabulary_repository_impl.dart';
 import 'package:tarjuman/features/vocabulary/domain/ports/word_translator.dart';
+import 'package:tarjuman/features/vocabulary/domain/usecases/backup_vocabulary.dart';
 import 'package:tarjuman/features/vocabulary/presentation/cubit/study_cubit.dart';
 
 class _Translator implements WordTranslator {
@@ -65,4 +68,26 @@ void main() {
     expect(cubit.state.word, isNull);
     await cubit.close();
   });
+
+  group('vocabulary backup', () {
+    test('restore merges new words and skips duplicates', () async {
+      await repo.add(word: 'hello', translation: 'x');
+      final restore = RestoreVocabulary(_MockPicker(), repo);
+      final json = BackupVocabulary.encode([
+        {'word': 'hello', 'translation': 'مرحبا', 'sentence': null},
+        {'word': 'world', 'translation': 'عالم', 'sentence': 'Hello world'},
+      ]);
+      final res = await restore.restore(json);
+      expect((res as Success<int?>).value, 1);
+      expect(await repo.all(), hasLength(2));
+    });
+
+    test('restore rejects files that are not our backup', () async {
+      final restore = RestoreVocabulary(_MockPicker(), repo);
+      expect(await restore.restore('{"app":"other"}'), isA<Err<int?>>());
+      expect(await restore.restore('not json'), isA<Err<int?>>());
+    });
+  });
 }
+
+class _MockPicker extends Mock implements MediaPicker {}

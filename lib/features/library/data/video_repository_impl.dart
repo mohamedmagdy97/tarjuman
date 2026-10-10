@@ -84,6 +84,9 @@ class VideoRepositoryImpl implements VideoRepository {
     origin: SubtitleOrigin.values.byName(r.origin),
     lastPosition: Duration(milliseconds: r.lastPositionMs),
     isFavorite: r.isFavorite,
+    lastPlayedAt: r.lastPlayedMs == 0
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(r.lastPlayedMs),
   );
 
   db.VideosCompanion _toCompanion(Video v) => db.VideosCompanion(
@@ -96,12 +99,16 @@ class VideoRepositoryImpl implements VideoRepository {
     createdAt: Value(v.createdAt),
     lastPositionMs: Value(v.lastPosition.inMilliseconds),
     isFavorite: Value(v.isFavorite),
+    lastPlayedMs: Value(v.lastPlayedAt?.millisecondsSinceEpoch ?? 0),
   );
 
   @override
   Future<void> savePosition(String id, Duration position) =>
       (_db.update(_db.videos)..where((t) => t.id.equals(id))).write(
-        db.VideosCompanion(lastPositionMs: Value(position.inMilliseconds)),
+        db.VideosCompanion(
+          lastPositionMs: Value(position.inMilliseconds),
+          lastPlayedMs: Value(DateTime.now().millisecondsSinceEpoch),
+        ),
       );
 
   @override

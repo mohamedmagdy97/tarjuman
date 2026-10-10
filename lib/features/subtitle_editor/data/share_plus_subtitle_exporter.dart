@@ -10,12 +10,13 @@ class SharePlusSubtitleExporter implements SubtitleExporter {
   Future<void> share({
     required String fileName,
     required String content,
+    String mimeType = 'application/x-subrip',
   }) async {
     final dir = await getTemporaryDirectory();
     final file = File(p.join(dir.path, fileName));
     await file.writeAsString(content);
     await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path, mimeType: 'application/x-subrip')]),
+      ShareParams(files: [XFile(file.path, mimeType: mimeType)]),
     );
   }
 }

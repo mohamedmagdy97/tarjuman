@@ -9,6 +9,10 @@ class FilePickerMediaPicker implements MediaPicker {
       _pick(galleryOnly ? FileType.video : FileType.any);
 
   @override
+  Future<Result<PickedFile?>> pickBackup() =>
+      _pick(FileType.custom, extensions: const ['json']);
+
+  @override
   Future<Result<PickedFile?>> pickSubtitle() => _pick(
     FileType.custom,
     extensions: const ['srt', 'vtt'],

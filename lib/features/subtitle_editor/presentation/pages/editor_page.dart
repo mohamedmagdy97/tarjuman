@@ -9,6 +9,9 @@ import 'package:tarjuman/core/design_system/components/cue_tile.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
+import 'package:tarjuman/core/error/failure.dart';
+import 'package:tarjuman/core/error/failure_message.dart';
+import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_cue.dart';
 import 'package:tarjuman/features/subtitle_editor/presentation/cubit/editor_cubit.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
@@ -159,7 +162,33 @@ class EditorView extends StatelessWidget {
               ),
             const SizedBox(height: AppSpacing.md),
             TextField(controller: controller, autofocus: true, maxLines: 3),
-            const SizedBox(height: AppSpacing.lg),
+            if (cue.original != null && cubit.canRetranslate)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.cloud_sync_outlined, size: 18),
+                  label: Text(l10n.retranslateOnline),
+                  onPressed: () async {
+                    final res = await cubit.retranslate(cue);
+                    if (!ctx.mounted) return;
+                    switch (res) {
+                      case Success(:final value):
+                        controller.text = value;
+                      case Err(:final failure):
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              failure is OnlineNotConfiguredFailure
+                                  ? l10n.retranslateNeedsOnline
+                                  : failureMessage(failure, l10n),
+                            ),
+                          ),
+                        );
+                    }
+                  },
+                ),
+              ),
+            const SizedBox(height: AppSpacing.md),
             AppButton(
               label: l10n.saveEdit,
               expand: true,

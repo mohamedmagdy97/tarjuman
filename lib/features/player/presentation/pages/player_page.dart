@@ -589,7 +589,39 @@ class _HudView extends StatelessWidget {
   }
 }
 
-enum _MoreAction { loop, tracks, attach, edit }
+Future<void> _openSleep(BuildContext context) {
+  final cubit = context.read<PlayerCubit>();
+  final l10n = AppLocalizations.of(context);
+  return showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final m in const [15, 30, 60])
+            ListTile(
+              leading: const Icon(Icons.bedtime_outlined),
+              title: Text(l10n.sleepMinutes(m)),
+              onTap: () {
+                cubit.setSleepTimer(Duration(minutes: m));
+                Navigator.pop(ctx);
+              },
+            ),
+          ListTile(
+            leading: const Icon(Icons.timer_off_outlined),
+            title: Text(l10n.sleepOff),
+            onTap: () {
+              cubit.setSleepTimer(null);
+              Navigator.pop(ctx);
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+enum _MoreAction { loop, sleep, tracks, attach, edit }
 
 /// Secondary player actions, kept in a menu so the bar fits small screens.
 class _MoreMenu extends StatelessWidget {
@@ -609,6 +641,8 @@ class _MoreMenu extends StatelessWidget {
         switch (a) {
           case _MoreAction.loop:
             cubit.cycleLoop();
+          case _MoreAction.sleep:
+            unawaited(_openSleep(context));
           case _MoreAction.tracks:
             unawaited(_Controls.openTracks(context));
           case _MoreAction.attach:
@@ -622,6 +656,12 @@ class _MoreMenu extends StatelessWidget {
           value: _MoreAction.loop,
           child: Text(
             state.loopA != null ? '${l10n.loopAB} ✓' : l10n.loopAB,
+          ),
+        ),
+        PopupMenuItem(
+          value: _MoreAction.sleep,
+          child: Text(
+            state.sleepAt != null ? '${l10n.sleepTimer} ✓' : l10n.sleepTimer,
           ),
         ),
         if (hasTracks)

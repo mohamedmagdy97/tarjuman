@@ -99,11 +99,11 @@ void main() {
         cancel: CancelToken(),
       ).toList();
       expect(second.last, isA<ProcessingDone>());
-      // Chunks 0 and 1 were finished; chunk 1 is redone (last chunk can be half-written).
-      expect(audio.extracted.first, const Duration(minutes: 1));
+      // Resumes right after the last saved cue (the 1:00-1:02 one).
+      expect(audio.extracted.first, const Duration(seconds: 62));
       final cues =
           (await subtitles.load(videoId) as Success).value.cues as List;
-      expect(cues.length, 4);
+      expect(cues.length, 5);
     },
   );
 

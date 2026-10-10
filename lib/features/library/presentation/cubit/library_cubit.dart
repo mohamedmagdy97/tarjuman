@@ -11,6 +11,8 @@ import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
 import 'package:tarjuman/features/library/domain/usecases/toggle_favorite.dart';
 import 'package:tarjuman/features/library/domain/usecases/watch_library.dart';
+import 'package:tarjuman/features/player/domain/entities/cue_hit.dart';
+import 'package:tarjuman/features/player/domain/usecases/search_subtitles.dart';
 
 enum LibraryFilter { all, ready, processing, favorites }
 
@@ -24,6 +26,8 @@ class LibraryState extends Equatable {
     this.importedId,
     this.downloading = false,
     this.downloadProgress,
+    this.query = '',
+    this.hits = const [],
   });
 
   final List<Video> videos;
@@ -31,6 +35,10 @@ class LibraryState extends Equatable {
   final bool loading;
   final bool importing;
   final bool downloading;
+  final String query;
+
+  /// Subtitle lines matching [query] across the whole library.
+  final List<CueHit> hits;
 
   /// 0..1, or null when unknown / indeterminate.
   final double? downloadProgress;
@@ -41,7 +49,30 @@ class LibraryState extends Equatable {
   /// One-shot: the page shows it and calls [LibraryCubit.failureShown].
   final Failure? failure;
 
-  List<Video> get visible => switch (filter) {
+  /// Started but not finished, most recently played first.
+  List<Video> get continueWatching {
+    final list =
+        videos.where((v) {
+          final d = v.duration;
+          return v.lastPosition > const Duration(seconds: 10) &&
+              (d == null || v.lastPosition < d - const Duration(seconds: 10));
+        }).toList()..sort(
+          (a, b) => (b.lastPlayedAt ?? DateTime(0)).compareTo(
+            a.lastPlayedAt ?? DateTime(0),
+          ),
+        );
+    return list.take(6).toList();
+  }
+
+  List<Video> get visible => _byFilter
+      .where(
+        (v) =>
+            query.trim().isEmpty ||
+            v.title.toLowerCase().contains(query.trim().toLowerCase()),
+      )
+      .toList();
+
+  List<Video> get _byFilter => switch (filter) {
     LibraryFilter.all => videos,
     LibraryFilter.ready =>
       videos.where((v) => v.status == VideoStatus.ready).toList(),
@@ -62,6 +93,8 @@ class LibraryState extends Equatable {
     bool? downloading,
     double? downloadProgress,
     bool clearProgress = false,
+    String? query,
+    List<CueHit>? hits,
   }) => LibraryState(
     videos: videos ?? this.videos,
     filter: filter ?? this.filter,
@@ -73,6 +106,8 @@ class LibraryState extends Equatable {
     downloadProgress: clearProgress
         ? null
         : downloadProgress ?? this.downloadProgress,
+    query: query ?? this.query,
+    hits: hits ?? this.hits,
   );
 
   @override
@@ -85,6 +120,8 @@ class LibraryState extends Equatable {
     importedId,
     downloading,
     downloadProgress,
+    query,
+    hits,
   ];
 }
 
@@ -95,6 +132,7 @@ class LibraryCubit extends Cubit<LibraryState> {
     this._importUrl,
     this._delete,
     this._favorite,
+    this._search,
   ) : super(const LibraryState()) {
     _sub = _watch().listen(
       (v) => emit(state.copyWith(videos: v, loading: false)),
@@ -108,6 +146,7 @@ class LibraryCubit extends Cubit<LibraryState> {
 
   final DeleteVideo _delete;
   final ToggleFavorite _favorite;
+  final SearchSubtitles _search;
   late final StreamSubscription<List<Video>> _sub;
 
   void setFilter(LibraryFilter f) => emit(state.copyWith(filter: f));
@@ -161,6 +200,13 @@ class LibraryCubit extends Cubit<LibraryState> {
   }
 
   void cancelDownload() => _download?.cancel();
+
+  /// Filters titles instantly and looks up matching subtitle lines.
+  Future<void> setQuery(String q) async {
+    emit(state.copyWith(query: q, hits: const []));
+    final hits = await _search(q);
+    if (state.query == q) emit(state.copyWith(hits: hits));
+  }
 
   Future<void> delete(String id) => _delete(id);
 

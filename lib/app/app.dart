@@ -1,14 +1,36 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tarjuman/app/di/injection.dart';
+import 'package:tarjuman/app/incoming_media_handler.dart';
 import 'package:tarjuman/core/design_system/tokens/app_theme.dart';
 import 'package:tarjuman/features/settings/presentation/cubit/app_settings_cubit.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
-class TarjumanApp extends StatelessWidget {
+class TarjumanApp extends StatefulWidget {
   const TarjumanApp({super.key});
+
+  @override
+  State<TarjumanApp> createState() => _TarjumanAppState();
+}
+
+class _TarjumanAppState extends State<TarjumanApp> {
+  @override
+  void initState() {
+    super.initState();
+    // After the first frame so the router and messenger are mounted.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(
+        sl<IncomingMediaHandler>().start(
+          sl<GoRouter>(),
+          sl<GlobalKey<ScaffoldMessengerState>>(),
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +51,7 @@ class TarjumanApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
+          scaffoldMessengerKey: sl<GlobalKey<ScaffoldMessengerState>>(),
           routerConfig: sl<GoRouter>(),
         ),
       ),

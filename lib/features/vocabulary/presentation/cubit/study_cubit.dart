@@ -58,6 +58,12 @@ class StudyCubit extends Cubit<StudyState> {
     );
   }
 
+  /// Saves the whole sentence as a card (English -> Arabic translation).
+  Future<void> saveSentence(String english, String arabic) async {
+    if (english.trim().isEmpty || arabic.trim().isEmpty) return;
+    await _vocab.add(word: english.trim(), translation: arabic.trim());
+  }
+
   Future<void> save() async {
     final w = state.word;
     final t = state.translation;

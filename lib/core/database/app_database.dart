@@ -14,6 +14,9 @@ class Videos extends Table {
   IntColumn get lastPositionMs => integer().withDefault(const Constant(0))();
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
 
+  /// Epoch ms of the last playback (0 = never); drives "continue watching".
+  IntColumn get lastPlayedMs => integer().withDefault(const Constant(0))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -36,15 +39,29 @@ class Vocabulary extends Table {
   TextColumn get translation => text()();
   TextColumn get sentence => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
+
+  /// Spaced repetition: next review (epoch ms, 0 = due now), interval in
+  /// days, ease factor and successful repetitions.
+  IntColumn get dueAtMs => integer().withDefault(const Constant(0))();
+  IntColumn get intervalDays => integer().withDefault(const Constant(0))();
+  RealColumn get ease => real().withDefault(const Constant(2.5))();
+  IntColumn get reps => integer().withDefault(const Constant(0))();
 }
 
-@DriftDatabase(tables: [Videos, Cues, Vocabulary])
+/// User terms applied before translation (English term -> Arabic term).
+class Glossary extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get term => text()();
+  TextColumn get arabic => text()();
+}
+
+@DriftDatabase(tables: [Videos, Cues, Vocabulary, Glossary])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'tarjuman'));
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -53,6 +70,14 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) await m.addColumn(videos, videos.lastPositionMs);
       if (from < 3) await m.addColumn(videos, videos.isFavorite);
       if (from < 4) await m.createTable(vocabulary);
+      if (from == 4) {
+        await m.addColumn(vocabulary, vocabulary.dueAtMs);
+        await m.addColumn(vocabulary, vocabulary.intervalDays);
+        await m.addColumn(vocabulary, vocabulary.ease);
+        await m.addColumn(vocabulary, vocabulary.reps);
+      }
+      if (from < 5) await m.createTable(glossary);
+      if (from < 6) await m.addColumn(videos, videos.lastPlayedMs);
     },
     onCreate: (m) async {
       await m.createAll();

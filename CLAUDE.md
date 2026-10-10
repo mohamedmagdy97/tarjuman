@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.5.0+8, package `com.megtech.tarjuman`)
+## 9. Current status (v1.6.0+9, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -162,6 +162,17 @@ v1.4–1.5 (analyzer + 48 tests green; the user confirmed the processing flow wo
 - Background processing: `flutter_foreground_task` (dataSync foreground service + progress notification) via `BackgroundProcessing`;
   boot receivers removed. Needs the Play “Foreground service permissions” declaration (see `store/PLAY_STORE_CHECKLIST.md` §4b).
 - FFmpeg fix: the async session must be awaited through the complete callback (verified on macOS).
+v1.6 (analyzer + 64 tests green; Kotlin compiled via `./gradlew :app:compileReleaseKotlin`; NOT device-tested):
+- Open with / Share: `MainActivity.kt` copies the content:// stream to cache and sends {path,name} over the `com.megtech.tarjuman/incoming`
+  channel -> `IncomingMediaHandler` -> `ImportSharedMedia` -> /setup/:id. Intent filters in the manifest (video/*, audio/*, VIEW+SEND).
+- Quality: adaptive chunk boundaries (3 min + 6 s overlap, next window starts at the end of the last kept cue, resume = end of last cue),
+  `CueSegmenter` splits long segments / drops loops and artefacts, Whisper segments with noSpeechProbability >= 0.6 dropped,
+  glossary applied before translation (`GlossaryTextTranslator`, experimental), per-line online re-translation in the editor.
+  Not possible: sentence context for ML Kit (API has none), word-level timestamps (not wired).
+- Vocabulary: spaced repetition (`SpacedRepetition`, SM-2-like; schema v5), review screen, TTS pronunciation (`flutter_tts`), save a whole
+  sentence, CSV export + JSON backup/restore.
+- Storage screen (videos / models / temp, clear temp, delete video), library-wide subtitle search, Continue watching row (schema v6),
+  sleep timer.
 Deliberately NOT done: burned-in subtitle video export (needs an FFmpeg build with libass + a video encoder → much larger APK),
 in-app gallery browser (needs `READ_MEDIA_VIDEO`), sibling-.srt auto-load, PiP/background audio, playlists, iOS.
 

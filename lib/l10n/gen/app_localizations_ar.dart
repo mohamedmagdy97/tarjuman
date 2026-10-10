@@ -530,4 +530,144 @@ class AppLocalizationsAr extends AppLocalizations {
   String notificationProgress(int percent) {
     return '$percent٪ مكتمل';
   }
+
+  @override
+  String get glossaryTitle => 'قاموس المصطلحات';
+
+  @override
+  String get glossaryEmpty => 'لا توجد مصطلحات';
+
+  @override
+  String get glossaryHint =>
+      'أضف مصطلحات إنجليزية وما تريدها أن تُترجم به، فتُطبَّق على الترجمات القادمة (ميزة تجريبية).';
+
+  @override
+  String get addTerm => 'إضافة مصطلح';
+
+  @override
+  String get sourceTerm => 'المصطلح بلغة الفيديو';
+
+  @override
+  String get arabicTerm => 'الترجمة المطلوبة';
+
+  @override
+  String get retranslateOnline => 'أعد ترجمة السطر أونلاين';
+
+  @override
+  String get retranslateNeedsOnline =>
+      'فعّل الترجمة عبر الإنترنت وأضف المفتاح من الإعدادات.';
+
+  @override
+  String get reviewTitle => 'مراجعة الكلمات';
+
+  @override
+  String get reviewDone => 'خلّصت مراجعة اليوم';
+
+  @override
+  String reviewDoneBody(int count) {
+    return 'راجعت $count كلمة. ارجع لاحقًا لمراجعات جديدة.';
+  }
+
+  @override
+  String reviewRemaining(int count) {
+    return 'المتبقي: $count';
+  }
+
+  @override
+  String get showAnswer => 'أظهر المعنى';
+
+  @override
+  String get gradeAgain => 'نسيت';
+
+  @override
+  String get gradeHard => 'صعب';
+
+  @override
+  String get gradeGood => 'جيد';
+
+  @override
+  String get gradeEasy => 'سهل';
+
+  @override
+  String get pronounce => 'نطق الكلمة';
+
+  @override
+  String get startReview => 'ابدأ المراجعة';
+
+  @override
+  String dueToday(int count) {
+    return 'للمراجعة الآن: $count';
+  }
+
+  @override
+  String get exportWords => 'تصدير الكلمات (CSV)';
+
+  @override
+  String get saveSentence => 'حفظ الجملة';
+
+  @override
+  String get sentenceSaved => 'تم حفظ الجملة';
+
+  @override
+  String get storageTitle => 'المساحة';
+
+  @override
+  String get storageVideos => 'الفيديوهات';
+
+  @override
+  String get storageModels => 'النماذج';
+
+  @override
+  String get storageTemp => 'ملفات مؤقتة';
+
+  @override
+  String get storageTotal => 'الإجمالي';
+
+  @override
+  String get clearTemp => 'مسح الملفات المؤقتة';
+
+  @override
+  String get storageVideosList => 'الفيديوهات حسب الحجم';
+
+  @override
+  String freedSpace(String size) {
+    return 'تم تحرير $size';
+  }
+
+  @override
+  String get storageEntry => 'المساحة والتخزين';
+
+  @override
+  String get backupWords => 'نسخة احتياطية للكلمات (JSON)';
+
+  @override
+  String get restoreWords => 'استعادة الكلمات من نسخة';
+
+  @override
+  String wordsRestored(int count) {
+    return 'تمت إضافة $count كلمة';
+  }
+
+  @override
+  String get invalidBackup => 'ملف النسخة الاحتياطية غير صالح.';
+
+  @override
+  String get searchLibrary => 'ابحث في الفيديوهات والترجمات';
+
+  @override
+  String get continueWatching => 'أكمل المشاهدة';
+
+  @override
+  String get inSubtitles => 'في الترجمات';
+
+  @override
+  String get sleepTimer => 'مؤقت النوم';
+
+  @override
+  String get sleepOff => 'إيقاف المؤقت';
+
+  @override
+  String sleepMinutes(int minutes) {
+    return '$minutes دقيقة';
+  }
 }

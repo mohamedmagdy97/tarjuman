@@ -1,5 +1,6 @@
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
+import 'package:tarjuman/features/player/domain/entities/cue_hit.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_cue.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_timeline.dart';
 
@@ -10,6 +11,9 @@ abstract interface class SubtitleRepository {
     SubtitleTimeline timeline,
     SubtitleOrigin origin,
   );
+
+  /// Library-wide search in Arabic and source text (newest videos first).
+  Future<List<CueHit>> search(String query, {int limit = 40});
 
   /// Edits one cue's Arabic text (identified by its start time).
   Future<Result<void>> updateText(String videoId, Duration start, String text);
