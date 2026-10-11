@@ -1,12 +1,13 @@
 name: tarjuman
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.13.0+16
+version: 1.14.0+17
 
 environment:
   sdk: ^3.11.5
 
 dependencies:
+  audio_service: ^0.18.19
   device_info_plus: ^13.3.0
   drift: 2.31.0
   drift_flutter: 0.2.7

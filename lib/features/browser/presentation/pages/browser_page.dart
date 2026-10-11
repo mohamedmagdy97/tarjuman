@@ -8,12 +8,15 @@ import 'package:go_router/go_router.dart';
 import 'package:tarjuman/app/di/injection.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
+import 'package:tarjuman/core/error/failure_message.dart';
+import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/browser/presentation/cubit/browser_cubit.dart';
 import 'package:tarjuman/features/browser/presentation/widgets/browser_start.dart';
 import 'package:tarjuman/features/browser/presentation/widgets/detected_sheet.dart';
 import 'package:tarjuman/features/downloads/presentation/cubit/downloads_cubit.dart';
 import 'package:tarjuman/features/library/data/links/page_link_resolver.dart';
 import 'package:tarjuman/features/library/domain/link_normalizer.dart';
+import 'package:tarjuman/features/library/domain/ports/link_lister.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 /// A small in-app browser: open any site, play a video, and the app lists the
@@ -116,6 +119,65 @@ return r;})()''',
     cubit.titleChanged(await web.getTitle());
   }
 
+  /// Playlist / channel pages: list their videos and queue them all as an
+  /// ordered playlist in the library.
+  Future<void> _downloadWholeList() async {
+    final l10n = AppLocalizations.of(context);
+    final browser = context.read<BrowserCubit>();
+    final downloads = context.read<DownloadsCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    final page = browser.state.pageUrl;
+    final uri = page == null ? null : Uri.tryParse(page);
+    if (uri == null) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(l10n.listingVideos),
+        duration: const Duration(seconds: 20),
+      ),
+    );
+    final res = await sl<LinkLister>().list(uri);
+    messenger.hideCurrentSnackBar();
+    if (!mounted) return;
+    switch (res) {
+      case Err(:final failure):
+        messenger.showSnackBar(
+          SnackBar(content: Text(failureMessage(failure, l10n))),
+        );
+      case Success(:final value):
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(value.title),
+            content: Text(l10n.downloadAllBody(value.entries.length)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l10n.linkDownload),
+              ),
+            ],
+          ),
+        );
+        if (ok ?? false) {
+          downloads.add([
+            for (var i = 0; i < value.entries.length; i++)
+              DownloadRequest(
+                url: value.entries[i].url,
+                title: value.entries[i].title,
+                playlist: value.title,
+                order: i,
+              ),
+          ]);
+          messenger.showSnackBar(
+            SnackBar(content: Text(l10n.browserAdded(value.entries.length))),
+          );
+        }
+    }
+  }
+
   Future<void> _showDetected() async {
     await _scan();
     if (!mounted) return;
@@ -177,6 +239,20 @@ return r;})()''',
           ),
         ),
         actions: [
+          BlocBuilder<BrowserCubit, BrowserState>(
+            buildWhen: (a, b) => a.pageUrl != b.pageUrl,
+            builder: (context, s) {
+              final uri = s.pageUrl == null ? null : Uri.tryParse(s.pageUrl!);
+              if (uri == null || !sl<LinkLister>().supports(uri)) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                tooltip: l10n.downloadWholeList,
+                onPressed: () => unawaited(_downloadWholeList()),
+                icon: const Icon(Icons.playlist_add_check_rounded),
+              );
+            },
+          ),
           BlocBuilder<DownloadsCubit, DownloadsState>(
             builder: (context, d) => IconButton(
               tooltip: l10n.downloadsTitle,

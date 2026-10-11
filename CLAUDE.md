@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.13.0+16, package `com.megtech.tarjuman`)
+## 9. Current status (v1.14.0+17, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -210,6 +210,17 @@ Per-video glossary (`/glossary?video=ID`, `GlossaryRepository.effective(videoId)
 take `videoId`; applies to new translations only). Review mode in the editor (`CueReviewer`: untranslated, mostly-Latin, much shorter/longer than source,
 unreadably fast, repeated; edited lines count as reviewed; "Needs review (N)" filter + warnings on the tile). Speaker colours are MANUAL tags (1..4) set in
 the edit sheet, shown in the player subtitle and as a bar in the editor — automatic speaker diarization is NOT implemented (needs a heavy model).
+v1.14 listening + series tools (analyzer clean, 116 tests, Kotlin compile OK; schema v8; NOT device-tested):
+- Audio-only mode (player ⋮ menu): `PlayerEngine.setVideoEnabled`, `BackgroundAudioSession` (`audio_service`, BSD-3) gives notification/lock-screen/headset controls
+  (play/pause, ±10 s, next episode, stop) and keeps playback alive; manifest has the `mediaPlayback` service + `FOREGROUND_SERVICE_MEDIA_PLAYBACK`,
+  `MainActivity` extends `AudioServiceActivity`. Play needs a foreground-service (media playback) declaration. Separate from the processing/download service.
+- Playlists (`features/playlists`, tables `Playlists`/`PlaylistItems`): `/playlists`, `/playlist/:id`, "Add to playlist" in the library long-press sheet,
+  natural-sort picker, "Play all / Continue" (remembers `lastVideoId`; per-video resume already existed), auto-advance to the next episode
+  (`/player/:id?playlist=ID`, `PlayerState.nextVideoId/advanceTo`).
+- YouTube playlist/channel download: `LinkLister` (`YoutubeLinkLister`, max 50) via the browser app-bar button; downloads carry `playlist` + `order`, and
+  `DownloadsCubit` adds finished episodes to the library playlist strictly in order (serialised flush).
+- Extract audio as MP3 (`ExtractAudio`, FFmpeg audio build has libmp3lame, `-q:a 2`) -> Music/Tarjuman or share sheet.
+- "Speed up silences" (player ⋮): `SubtitleTimeline.inSilence` — gaps >= 1.5 s between cues play at 2.5x the base speed (needs subtitles; music in gaps is sped up too).
 Deliberately NOT done: burned-in subtitle video export (needs an FFmpeg build with libass + a video encoder → much larger APK),
 in-app gallery browser (needs `READ_MEDIA_VIDEO`), sibling-.srt auto-load, PiP/background audio, playlists, iOS.
 

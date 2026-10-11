@@ -27,6 +27,7 @@ class PlayerPage extends StatelessWidget {
     this.language = SourceLanguage.en,
     this.follow = false,
     this.startAtMs,
+    this.playlistId,
     super.key,
   });
   final String videoId;
@@ -34,6 +35,7 @@ class PlayerPage extends StatelessWidget {
   final SourceLanguage language;
   final bool follow;
   final int? startAtMs;
+  final String? playlistId;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
@@ -44,16 +46,18 @@ class PlayerPage extends StatelessWidget {
         language: language,
         follow: follow,
         startAt: startAtMs == null ? null : Duration(milliseconds: startAtMs!),
+        playlistId: playlistId,
       );
       unawaited(cubit.start());
       return cubit;
     },
-    child: const PlayerView(),
+    child: PlayerView(playlistId: playlistId),
   );
 }
 
 class PlayerView extends StatefulWidget {
-  const PlayerView({super.key});
+  const PlayerView({this.playlistId, super.key});
+  final String? playlistId;
 
   @override
   State<PlayerView> createState() => _PlayerViewState();
@@ -109,8 +113,25 @@ class _PlayerViewState extends State<PlayerView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return BlocConsumer<PlayerCubit, PlayerState>(
-      listenWhen: (a, b) => b.failure != null && a.failure != b.failure,
+      listenWhen: (a, b) =>
+          (b.failure != null && a.failure != b.failure) ||
+          (b.advanceTo != null && a.advanceTo != b.advanceTo),
       listener: (context, s) {
+        final next = s.advanceTo;
+        if (next != null) {
+          context.read<PlayerCubit>().advanceHandled();
+          unawaited(
+            Future.microtask(() {
+              if (context.mounted) {
+                context.pushReplacement(
+                  '/player/$next?playlist=${widget.playlistId}',
+                );
+              }
+            }),
+          );
+          return;
+        }
+        if (s.failure == null) return;
         if (s.status != PlayerStatus.error) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(failureMessage(s.failure!, l10n))),
@@ -144,7 +165,10 @@ class _PlayerViewState extends State<PlayerView> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                cubit.engine.buildSurface(),
+                if (state.audioOnly)
+                  const _AudioOnlyBackdrop()
+                else
+                  cubit.engine.buildSurface(),
                 if (state.timeline.isEmpty &&
                     state.status == PlayerStatus.ready)
                   _NoSubtitles(
@@ -625,7 +649,17 @@ Future<void> _openSleep(BuildContext context) {
   );
 }
 
-enum _MoreAction { loop, sleep, tracks, attach, edit, transcript }
+enum _MoreAction {
+  loop,
+  sleep,
+  smartSpeed,
+  audioOnly,
+  nextEpisode,
+  tracks,
+  attach,
+  edit,
+  transcript,
+}
 
 /// Secondary player actions, kept in a menu so the bar fits small screens.
 class _MoreMenu extends StatelessWidget {
@@ -647,6 +681,12 @@ class _MoreMenu extends StatelessWidget {
             cubit.cycleLoop();
           case _MoreAction.sleep:
             unawaited(_openSleep(context));
+          case _MoreAction.smartSpeed:
+            unawaited(cubit.toggleSmartSpeed());
+          case _MoreAction.audioOnly:
+            unawaited(cubit.toggleAudioOnly());
+          case _MoreAction.nextEpisode:
+            cubit.playNext();
           case _MoreAction.tracks:
             unawaited(_Controls.openTracks(context));
           case _MoreAction.attach:
@@ -670,6 +710,24 @@ class _MoreMenu extends StatelessWidget {
             state.sleepAt != null ? '${l10n.sleepTimer} ✓' : l10n.sleepTimer,
           ),
         ),
+        if (state.timeline.cues.isNotEmpty && !state.isLive)
+          PopupMenuItem(
+            value: _MoreAction.smartSpeed,
+            child: Text(
+              state.smartSpeed ? '${l10n.smartSpeed} ✓' : l10n.smartSpeed,
+            ),
+          ),
+        PopupMenuItem(
+          value: _MoreAction.audioOnly,
+          child: Text(
+            state.audioOnly ? '${l10n.audioOnly} ✓' : l10n.audioOnly,
+          ),
+        ),
+        if (state.nextVideoId != null)
+          PopupMenuItem(
+            value: _MoreAction.nextEpisode,
+            child: Text(l10n.nextEpisode),
+          ),
         if (hasTracks)
           PopupMenuItem(value: _MoreAction.tracks, child: Text(l10n.tracks)),
         PopupMenuItem(
@@ -689,4 +747,21 @@ class _MoreMenu extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Shown instead of the picture in audio-only mode.
+class _AudioOnlyBackdrop extends StatelessWidget {
+  const _AudioOnlyBackdrop();
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(
+    color: Colors.black,
+    child: Center(
+      child: Icon(
+        Icons.headphones_rounded,
+        size: 96,
+        color: Colors.white.withValues(alpha: .18),
+      ),
+    ),
+  );
 }

@@ -875,4 +875,87 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get issueRepeated => 'مثل السطر السابق';
+
+  @override
+  String get smartSpeed => 'تسريع فترات الصمت';
+
+  @override
+  String get extractAudio => 'استخراج الصوت (MP3)';
+
+  @override
+  String get extractingAudio => 'جارٍ التحويل إلى MP3…';
+
+  @override
+  String get audioSaved => 'تم حفظ الـMP3 في Music/Tarjuman';
+
+  @override
+  String get playlistsTitle => 'قوائم التشغيل';
+
+  @override
+  String get playlistsEmpty => 'لا توجد قوائم بعد';
+
+  @override
+  String get playlistsEmptyBody =>
+      'اجمع مسلسلًا أو كورسًا في قائمة ليعمل حلقة بعد حلقة ويتذكر آخر ما وصلت إليه.';
+
+  @override
+  String get playlistName => 'اسم القائمة';
+
+  @override
+  String playlistCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count فيديوهات',
+      one: 'فيديو واحد',
+      zero: 'فارغة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get playlistEmpty => 'هذه القائمة فارغة';
+
+  @override
+  String get playlistEmptyBody => 'أضف فيديوهات من الزر بالأعلى.';
+
+  @override
+  String get playAll => 'تشغيل الكل';
+
+  @override
+  String get removeFromPlaylist => 'إزالة من القائمة';
+
+  @override
+  String get addToPlaylist => 'إضافة إلى قائمة';
+
+  @override
+  String get newPlaylist => 'قائمة جديدة';
+
+  @override
+  String get addedToPlaylist => 'تمت الإضافة للقائمة';
+
+  @override
+  String get noVideosToAdd => 'كل فيديوهاتك موجودة هنا بالفعل.';
+
+  @override
+  String addToPlaylistCount(int count) {
+    return 'إضافة ($count)';
+  }
+
+  @override
+  String get downloadWholeList => 'تحميل القائمة / القناة كاملة';
+
+  @override
+  String get listingVideos => 'جارٍ قراءة القائمة…';
+
+  @override
+  String downloadAllBody(int count) {
+    return 'تم العثور على $count فيديو (حتى 50). تُحمَّل بالترتيب وتُجمَّع في قائمة تشغيل واحدة بمكتبتك.';
+  }
+
+  @override
+  String get audioOnly => 'صوت فقط (في الخلفية)';
+
+  @override
+  String get nextEpisode => 'الحلقة التالية';
 }

@@ -35,6 +35,29 @@ class Cues extends Table {
   IntColumn get speaker => integer().withDefault(const Constant(0))();
 }
 
+class Playlists extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  /// Last video opened from this playlist ("continue").
+  TextColumn get lastVideoId => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class PlaylistItems extends Table {
+  TextColumn get playlistId =>
+      text().references(Playlists, #id, onDelete: KeyAction.cascade)();
+  TextColumn get videoId =>
+      text().references(Videos, #id, onDelete: KeyAction.cascade)();
+  IntColumn get position => integer()();
+
+  @override
+  Set<Column> get primaryKey => {playlistId, videoId};
+}
+
 /// Words saved from the study sheet.
 class Vocabulary extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -61,13 +84,15 @@ class Glossary extends Table {
   TextColumn get videoId => text().nullable()();
 }
 
-@DriftDatabase(tables: [Videos, Cues, Vocabulary, Glossary])
+@DriftDatabase(
+  tables: [Videos, Cues, Vocabulary, Glossary, Playlists, PlaylistItems],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'tarjuman'));
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -84,6 +109,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 5) await m.createTable(glossary);
       if (from < 6) await m.addColumn(videos, videos.lastPlayedMs);
+      if (from < 8) {
+        await m.createTable(playlists);
+        await m.createTable(playlistItems);
+      }
       if (from < 7) {
         await m.addColumn(cues, cues.speaker);
         // Glossary created at v5/v6 predates videoId; a fresh create has it.

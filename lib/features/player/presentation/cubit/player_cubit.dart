@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarjuman/core/design_system/tokens/app_motion.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/platform/device/brightness_control.dart';
+import 'package:tarjuman/core/platform/media/background_audio_session.dart';
 import 'package:tarjuman/core/platform/media/player_engine.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
@@ -15,6 +16,7 @@ import 'package:tarjuman/features/player/domain/entities/subtitle_style.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_timeline.dart';
 import 'package:tarjuman/features/player/domain/usecases/attach_subtitles.dart';
 import 'package:tarjuman/features/player/domain/usecases/load_player_data.dart';
+import 'package:tarjuman/features/playlists/domain/playlist_repository.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/domain/ports/engine_provider.dart';
@@ -57,6 +59,10 @@ class PlayerState extends Equatable {
     this.hud,
     this.subtitleOffset = Duration.zero,
     this.sleepAt,
+    this.smartSpeed = false,
+    this.nextVideoId,
+    this.advanceTo,
+    this.audioOnly = false,
   });
 
   final PlayerStatus status;
@@ -84,6 +90,17 @@ class PlayerState extends Equatable {
 
   /// When the sleep timer will pause playback (null = off).
   final DateTime? sleepAt;
+  final bool smartSpeed;
+
+  /// Next episode in the playlist this video is played from.
+  final String? nextVideoId;
+
+  /// One-shot: the video ended and the page should open this one.
+  final String? advanceTo;
+
+  /// Listening mode: video decoding is off and a media session keeps
+  /// playback alive in the background with notification controls.
+  final bool audioOnly;
 
   PlayerState copyWith({
     PlayerStatus? status,
@@ -110,6 +127,11 @@ class PlayerState extends Equatable {
     Duration? subtitleOffset,
     DateTime? sleepAt,
     bool clearSleep = false,
+    bool? smartSpeed,
+    String? nextVideoId,
+    String? advanceTo,
+    bool clearAdvance = false,
+    bool? audioOnly,
   }) => PlayerState(
     status: status ?? this.status,
     video: video ?? this.video,
@@ -130,6 +152,10 @@ class PlayerState extends Equatable {
     hud: clearHud ? null : hud ?? this.hud,
     subtitleOffset: subtitleOffset ?? this.subtitleOffset,
     sleepAt: clearSleep ? null : sleepAt ?? this.sleepAt,
+    smartSpeed: smartSpeed ?? this.smartSpeed,
+    nextVideoId: nextVideoId ?? this.nextVideoId,
+    advanceTo: clearAdvance ? null : advanceTo ?? this.advanceTo,
+    audioOnly: audioOnly ?? this.audioOnly,
   );
 
   @override
@@ -152,6 +178,10 @@ class PlayerState extends Equatable {
     hud,
     subtitleOffset,
     sleepAt,
+    smartSpeed,
+    nextVideoId,
+    advanceTo,
+    audioOnly,
   ];
 }
 
@@ -171,7 +201,12 @@ class PlayerCubit extends Cubit<PlayerState> {
     this.liveLanguage = SourceLanguage.en,
     this.followProcessing = false,
     this.startAt,
-  }) : _brightness = brightness,
+    this.playlistId,
+    PlaylistRepository? playlists,
+    BackgroundAudioSession? audioSession,
+  }) : _playlists = playlists,
+       _audioSession = audioSession,
+       _brightness = brightness,
        _videos = videos,
        _load = load,
        _attach = attach,
@@ -186,6 +221,13 @@ class PlayerCubit extends Cubit<PlayerState> {
        );
 
   final String videoId;
+
+  /// Set when opened from a playlist: remembers progress and plays on.
+  final String? playlistId;
+  final PlaylistRepository? _playlists;
+  final BackgroundAudioSession? _audioSession;
+  var _lastSessionPush = DateTime.fromMillisecondsSinceEpoch(0);
+  var _advanced = false;
   final PlayerEngine engine;
   final LoadPlayerData _load;
   final AttachSubtitles _attach;
@@ -229,6 +271,7 @@ class PlayerCubit extends Cubit<PlayerState> {
         subtitleOffset: _settings.readSubtitleOffset(videoId),
       ),
     );
+    await _initPlaylist();
     _sub = engine.snapshots.listen(_onSnapshot);
     if (followProcessing && d.video.status == VideoStatus.processing) {
       emit(state.copyWith(liveBusy: true));
@@ -248,6 +291,79 @@ class PlayerCubit extends Cubit<PlayerState> {
       await engine.seekTo(resume);
     }
     await engine.play();
+  }
+
+  Future<void> _initPlaylist() async {
+    final id = playlistId;
+    final repo = _playlists;
+    if (id == null || repo == null) return;
+    await repo.setLast(id, videoId);
+    final ids = await repo.videoIds(id);
+    final i = ids.indexOf(videoId);
+    if (i >= 0 && i + 1 < ids.length) {
+      emit(state.copyWith(nextVideoId: ids[i + 1]));
+    }
+  }
+
+  /// Audio-only listening with notification / lock-screen controls.
+  Future<void> toggleAudioOnly() async {
+    final on = !state.audioOnly;
+    emit(state.copyWith(audioOnly: on));
+    await engine.setVideoEnabled(enabled: !on);
+    final session = _audioSession;
+    if (session == null) return;
+    if (on) {
+      await session.attach(
+        id: videoId,
+        title: state.video?.title ?? '',
+        controls: BackgroundAudioControls(
+          play: engine.play,
+          pause: engine.pause,
+          seek: engine.seekTo,
+          seekBy: seekBy,
+          stop: () async {
+            await engine.pause();
+            if (state.audioOnly) {
+              emit(state.copyWith(audioOnly: false));
+              await engine.setVideoEnabled(enabled: true);
+            }
+          },
+          next: state.nextVideoId == null ? null : () async => playNext(),
+        ),
+      );
+      _pushSession(state.snapshot, force: true);
+    } else {
+      await session.detach();
+    }
+  }
+
+  void _pushSession(PlaybackSnapshot s, {bool force = false}) {
+    final session = _audioSession;
+    if (session == null || !state.audioOnly) return;
+    final now = DateTime.now();
+    if (!force &&
+        now.difference(_lastSessionPush) < const Duration(seconds: 1) &&
+        s.isPlaying == state.snapshot.isPlaying) {
+      return;
+    }
+    _lastSessionPush = now;
+    session.update(
+      playing: s.isPlaying,
+      position: s.position,
+      duration: s.duration,
+      speed: s.speed,
+    );
+  }
+
+  void advanceHandled() => emit(state.copyWith(clearAdvance: true));
+
+  /// Jump to the next episode now (menu action).
+  void playNext() {
+    final next = state.nextVideoId;
+    if (next != null && !_advanced) {
+      _advanced = true;
+      emit(state.copyWith(advanceTo: next));
+    }
   }
 
   /// Reloads cues saved by the background job and stops once it is finished.
@@ -304,6 +420,16 @@ class PlayerCubit extends Cubit<PlayerState> {
     if (liveKind != null && s.isReady && _session == null && !_liveStarting) {
       _liveStarting = true;
       unawaited(_startLive(s.duration, s.position));
+    }
+    _pushSession(s);
+    _applySmartSpeed(s.position);
+    if (state.nextVideoId != null &&
+        !_advanced &&
+        s.isReady &&
+        s.duration > Duration.zero &&
+        !s.isPlaying &&
+        s.position >= s.duration - const Duration(milliseconds: 800)) {
+      playNext();
     }
     // Active cue comes from the media position (audio time), never wall-clock.
     final cue = state.timeline.activeAt(s.position - state.subtitleOffset);
@@ -367,7 +493,36 @@ class PlayerCubit extends Cubit<PlayerState> {
 
   Future<void> seek(Duration p) => engine.seekTo(p);
 
-  Future<void> setSpeed(double s) => engine.setSpeed(s);
+  Future<void> setSpeed(double s) {
+    _baseSpeed = s;
+    return engine.setSpeed(s);
+  }
+
+  /// Speed used outside silences; [_inGap] marks that we temporarily sped up.
+  double _baseSpeed = 1;
+  var _inGap = false;
+
+  /// Plays quiet stretches (no subtitle) faster; speech stays at the base speed.
+  Future<void> toggleSmartSpeed() async {
+    final on = !state.smartSpeed;
+    emit(state.copyWith(smartSpeed: on));
+    if (!on && _inGap) {
+      _inGap = false;
+      await engine.setSpeed(_baseSpeed);
+    }
+  }
+
+  void _applySmartSpeed(Duration position) {
+    if (!state.smartSpeed || state.isLive) return;
+    final gap = state.timeline.inSilence(position - state.subtitleOffset);
+    if (gap && !_inGap) {
+      _inGap = true;
+      unawaited(engine.setSpeed((_baseSpeed * 2.5).clamp(1, 4)));
+    } else if (!gap && _inGap) {
+      _inGap = false;
+      unawaited(engine.setSpeed(_baseSpeed));
+    }
+  }
 
   void toggleControls() {
     final show = !state.controlsVisible;
@@ -549,6 +704,7 @@ class PlayerCubit extends Cubit<PlayerState> {
 
   @override
   Future<void> close() async {
+    if (state.audioOnly) unawaited(_audioSession?.detach() ?? Future.value());
     _saveTimer?.cancel();
     _savePosition();
     _hideTimer?.cancel();

@@ -1681,6 +1681,144 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مثل السطر السابق'**
   String get issueRepeated;
+
+  /// No description provided for @smartSpeed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسريع فترات الصمت'**
+  String get smartSpeed;
+
+  /// No description provided for @extractAudio.
+  ///
+  /// In ar, this message translates to:
+  /// **'استخراج الصوت (MP3)'**
+  String get extractAudio;
+
+  /// No description provided for @extractingAudio.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ التحويل إلى MP3…'**
+  String get extractingAudio;
+
+  /// No description provided for @audioSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حفظ الـMP3 في Music/Tarjuman'**
+  String get audioSaved;
+
+  /// No description provided for @playlistsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'قوائم التشغيل'**
+  String get playlistsTitle;
+
+  /// No description provided for @playlistsEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد قوائم بعد'**
+  String get playlistsEmpty;
+
+  /// No description provided for @playlistsEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'اجمع مسلسلًا أو كورسًا في قائمة ليعمل حلقة بعد حلقة ويتذكر آخر ما وصلت إليه.'**
+  String get playlistsEmptyBody;
+
+  /// No description provided for @playlistName.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم القائمة'**
+  String get playlistName;
+
+  /// No description provided for @playlistCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{فارغة} =1{فيديو واحد} other{{count} فيديوهات}}'**
+  String playlistCount(int count);
+
+  /// No description provided for @playlistEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذه القائمة فارغة'**
+  String get playlistEmpty;
+
+  /// No description provided for @playlistEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف فيديوهات من الزر بالأعلى.'**
+  String get playlistEmptyBody;
+
+  /// No description provided for @playAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'تشغيل الكل'**
+  String get playAll;
+
+  /// No description provided for @removeFromPlaylist.
+  ///
+  /// In ar, this message translates to:
+  /// **'إزالة من القائمة'**
+  String get removeFromPlaylist;
+
+  /// No description provided for @addToPlaylist.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة إلى قائمة'**
+  String get addToPlaylist;
+
+  /// No description provided for @newPlaylist.
+  ///
+  /// In ar, this message translates to:
+  /// **'قائمة جديدة'**
+  String get newPlaylist;
+
+  /// No description provided for @addedToPlaylist.
+  ///
+  /// In ar, this message translates to:
+  /// **'تمت الإضافة للقائمة'**
+  String get addedToPlaylist;
+
+  /// No description provided for @noVideosToAdd.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل فيديوهاتك موجودة هنا بالفعل.'**
+  String get noVideosToAdd;
+
+  /// No description provided for @addToPlaylistCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة ({count})'**
+  String addToPlaylistCount(int count);
+
+  /// No description provided for @downloadWholeList.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحميل القائمة / القناة كاملة'**
+  String get downloadWholeList;
+
+  /// No description provided for @listingVideos.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ قراءة القائمة…'**
+  String get listingVideos;
+
+  /// No description provided for @downloadAllBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم العثور على {count} فيديو (حتى 50). تُحمَّل بالترتيب وتُجمَّع في قائمة تشغيل واحدة بمكتبتك.'**
+  String downloadAllBody(int count);
+
+  /// No description provided for @audioOnly.
+  ///
+  /// In ar, this message translates to:
+  /// **'صوت فقط (في الخلفية)'**
+  String get audioOnly;
+
+  /// No description provided for @nextEpisode.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحلقة التالية'**
+  String get nextEpisode;
 }
 
 class _AppLocalizationsDelegate

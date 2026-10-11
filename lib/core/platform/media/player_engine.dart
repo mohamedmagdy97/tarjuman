@@ -70,6 +70,9 @@ abstract interface class PlayerEngine {
 
   /// null turns embedded subtitles off.
   Future<void> setSubtitleTrack(String? id);
+
+  /// Turns video decoding off (audio-only listening) or back on.
+  Future<void> setVideoEnabled({required bool enabled});
   Widget buildSurface();
   Future<void> dispose();
 }

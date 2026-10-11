@@ -86,6 +86,8 @@ class SceneEngine implements PlayerEngine {
   @override
   Future<void> setSubtitleTrack(String? id) async {}
   @override
+  Future<void> setVideoEnabled({required bool enabled}) async {}
+  @override
   Widget buildSurface() => const SceneBackdrop();
   @override
   Future<void> dispose() async {}

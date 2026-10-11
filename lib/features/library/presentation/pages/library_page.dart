@@ -17,6 +17,7 @@ import 'package:tarjuman/core/error/failure_message.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart';
 import 'package:tarjuman/features/library/presentation/export_actions.dart';
+import 'package:tarjuman/features/playlists/presentation/pages/add_to_playlist.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 class LibraryPage extends StatelessWidget {
@@ -101,6 +102,11 @@ class _LibraryViewState extends State<LibraryView> {
                 ),
               ),
               if (!_searching) ...[
+                IconButton(
+                  tooltip: l10n.playlistsTitle,
+                  onPressed: () => unawaited(context.push('/playlists')),
+                  icon: const Icon(Icons.playlist_play_rounded),
+                ),
                 IconButton(
                   tooltip: l10n.myVocabulary,
                   onPressed: () => unawaited(context.push('/vocabulary')),
@@ -340,6 +346,16 @@ class _LibraryViewState extends State<LibraryView> {
               onTap: () => Navigator.pop(ctx, 'share'),
             ),
             ListTile(
+              leading: const Icon(Icons.playlist_add_rounded),
+              title: Text(l10n.addToPlaylist),
+              onTap: () => Navigator.pop(ctx, 'playlist'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.audiotrack_rounded),
+              title: Text(l10n.extractAudio),
+              onTap: () => Navigator.pop(ctx, 'audio'),
+            ),
+            ListTile(
               leading: Icon(
                 Icons.delete_outline_rounded,
                 color: ctx.colors.error,
@@ -357,6 +373,10 @@ class _LibraryViewState extends State<LibraryView> {
         await runVideoFileAction(context, v.id, VideoFileAction.saveToDevice);
       case 'share':
         await runVideoFileAction(context, v.id, VideoFileAction.share);
+      case 'playlist':
+        await addToPlaylistDialog(context, [v.id]);
+      case 'audio':
+        await runVideoFileAction(context, v.id, VideoFileAction.extractAudio);
       case 'delete':
         await _confirmDelete(context, v, cubit, l10n);
     }

@@ -7,7 +7,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.OpenableColumns
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
@@ -17,7 +17,7 @@ import java.util.concurrent.Executors
  * Receives videos/audio opened with or shared to the app ("Open with" / "Share"),
  * copies the content:// stream into the app cache and hands the path to Dart.
  */
-class MainActivity : FlutterActivity() {
+class MainActivity : AudioServiceActivity() {
     private var channel: MethodChannel? = null
     private var pending: Map<String, String>? = null
     private var dartReady = false

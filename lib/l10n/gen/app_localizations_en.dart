@@ -882,4 +882,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get issueRepeated => 'Same as the previous line';
+
+  @override
+  String get smartSpeed => 'Speed up silences';
+
+  @override
+  String get extractAudio => 'Extract audio (MP3)';
+
+  @override
+  String get extractingAudio => 'Converting to MP3…';
+
+  @override
+  String get audioSaved => 'MP3 saved to Music/Tarjuman';
+
+  @override
+  String get playlistsTitle => 'Playlists';
+
+  @override
+  String get playlistsEmpty => 'No playlists yet';
+
+  @override
+  String get playlistsEmptyBody =>
+      'Group a series or course and it plays one episode after another, remembering where you stopped.';
+
+  @override
+  String get playlistName => 'Playlist name';
+
+  @override
+  String playlistCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count videos',
+      one: '1 video',
+      zero: 'Empty',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get playlistEmpty => 'This playlist is empty';
+
+  @override
+  String get playlistEmptyBody => 'Add videos with the button above.';
+
+  @override
+  String get playAll => 'Play all';
+
+  @override
+  String get removeFromPlaylist => 'Remove from playlist';
+
+  @override
+  String get addToPlaylist => 'Add to playlist';
+
+  @override
+  String get newPlaylist => 'New playlist';
+
+  @override
+  String get addedToPlaylist => 'Added to playlist';
+
+  @override
+  String get noVideosToAdd => 'All your videos are already here.';
+
+  @override
+  String addToPlaylistCount(int count) {
+    return 'Add ($count)';
+  }
+
+  @override
+  String get downloadWholeList => 'Download the whole playlist / channel';
+
+  @override
+  String get listingVideos => 'Reading the list…';
+
+  @override
+  String downloadAllBody(int count) {
+    return '$count videos found (up to 50). They download in order and are grouped into one playlist in your library.';
+  }
+
+  @override
+  String get audioOnly => 'Audio only (background)';
+
+  @override
+  String get nextEpisode => 'Next episode';
 }

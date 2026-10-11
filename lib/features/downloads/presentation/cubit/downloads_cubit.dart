@@ -9,17 +9,30 @@ import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/domain/usecases/export_video_file.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
+import 'package:tarjuman/features/playlists/domain/playlist_repository.dart';
 
 enum DownloadStatus { queued, running, done, failed }
 
 class DownloadRequest extends Equatable {
-  const DownloadRequest({required this.url, this.title, this.referer});
+  const DownloadRequest({
+    required this.url,
+    this.title,
+    this.referer,
+    this.playlist,
+    this.order = 0,
+  });
   final String url;
   final String? title;
   final String? referer;
 
+  /// Playlist the finished video joins (created when missing).
+  final String? playlist;
+
+  /// Position inside [playlist]; episodes are added in this order.
+  final int order;
+
   @override
-  List<Object?> get props => [url, title, referer];
+  List<Object?> get props => [url, title, referer, playlist, order];
 }
 
 class DownloadTask extends Equatable {
@@ -107,12 +120,17 @@ class DownloadsCubit extends Cubit<DownloadsState> {
     this._import,
     this._export,
     this._settings, {
+    PlaylistRepository? playlists,
     this.concurrency = 2,
-  }) : super(const DownloadsState());
+  }) : _playlists = playlists,
+       super(const DownloadsState());
 
   final ImportFromUrl _import;
   final ExportVideoFile _export;
   final SettingsStore _settings;
+  final PlaylistRepository? _playlists;
+  final _queuedInPlaylist = <int>{};
+  Future<void> _flushing = Future.value();
   final int concurrency;
   final _tokens = <int, CancelToken>{};
   var _nextId = 1;
@@ -224,7 +242,47 @@ class DownloadsCubit extends Cubit<DownloadsState> {
           ),
         );
     }
+    await _flushPlaylists();
     _pump();
+  }
+
+  /// Adds finished episodes to their playlist strictly in order: an episode
+  /// waits until every earlier one has finished (or failed).
+  Future<void> _flushPlaylists() {
+    // Serialised so two finishing tasks can't interleave their inserts.
+    return _flushing = _flushing.then((_) => _flushOnce());
+  }
+
+  Future<void> _flushOnce() async {
+    final repo = _playlists;
+    if (repo == null) return;
+    final byList = <String, List<DownloadTask>>{};
+    for (final t in state.tasks) {
+      final name = t.request.playlist;
+      if (name != null) (byList[name] ??= []).add(t);
+    }
+    for (final entry in byList.entries) {
+      final tasks = entry.value
+        ..sort((a, b) => a.request.order.compareTo(b.request.order));
+      final ready = <String>[];
+      final taskIds = <int>[];
+      for (final t in tasks) {
+        if (t.status == DownloadStatus.queued ||
+            t.status == DownloadStatus.running) {
+          break;
+        }
+        if (t.status == DownloadStatus.done &&
+            t.videoId != null &&
+            !_queuedInPlaylist.contains(t.id)) {
+          ready.add(t.videoId!);
+          taskIds.add(t.id);
+        }
+      }
+      if (ready.isEmpty) continue;
+      _queuedInPlaylist.addAll(taskIds);
+      final playlist = await repo.getOrCreate(entry.key);
+      await repo.addVideos(playlist.id, ready);
+    }
   }
 
   /// Auto-save never blocks the queue on the share-sheet fallback.

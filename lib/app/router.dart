@@ -7,6 +7,8 @@ import 'package:tarjuman/features/library/presentation/pages/library_page.dart';
 import 'package:tarjuman/features/model_manager/presentation/pages/models_page.dart';
 import 'package:tarjuman/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:tarjuman/features/player/presentation/pages/player_page.dart';
+import 'package:tarjuman/features/playlists/presentation/pages/playlist_page.dart';
+import 'package:tarjuman/features/playlists/presentation/pages/playlists_page.dart';
 import 'package:tarjuman/features/processing/domain/entities/processing.dart';
 import 'package:tarjuman/features/processing/domain/entities/source_language.dart';
 import 'package:tarjuman/features/processing/presentation/pages/processing_page.dart';
@@ -51,6 +53,7 @@ GoRouter buildRouter(SettingsStore settings) => GoRouter(
         language: SourceLanguage.fromCode(s.uri.queryParameters['lang']),
         startAtMs: int.tryParse(s.uri.queryParameters['t'] ?? ''),
         follow: s.uri.queryParameters['follow'] == '1',
+        playlistId: s.uri.queryParameters['playlist'],
       ),
     ),
     GoRoute(
@@ -68,6 +71,11 @@ GoRouter buildRouter(SettingsStore settings) => GoRouter(
       builder: (_, s) => BrowserPage(initialUrl: s.uri.queryParameters['url']),
     ),
     GoRoute(path: '/downloads', builder: (_, _) => const DownloadsPage()),
+    GoRoute(path: '/playlists', builder: (_, _) => const PlaylistsPage()),
+    GoRoute(
+      path: '/playlist/:id',
+      builder: (_, s) => PlaylistPage(playlistId: s.pathParameters['id']!),
+    ),
     GoRoute(path: '/storage', builder: (_, _) => const StoragePage()),
     GoRoute(
       path: '/glossary',

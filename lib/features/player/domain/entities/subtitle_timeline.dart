@@ -26,6 +26,28 @@ class SubtitleTimeline {
     return null;
   }
 
+  /// True while [position] is inside a quiet stretch between two cues that is
+  /// at least [minGap] long. Keeps a short lead-in/out so normal speed is back
+  /// before the next line starts.
+  bool inSilence(
+    Duration position, {
+    Duration minGap = const Duration(milliseconds: 1500),
+    Duration margin = const Duration(milliseconds: 500),
+  }) {
+    if (cues.isEmpty) return false;
+    final i = _lastStartingAtOrBefore(position);
+    if (i + 1 >= cues.length) return false; // after the last line: leave alone
+    if (activeAt(position) != null) return false;
+    var prevEnd = Duration.zero;
+    for (var j = i; j >= 0 && j > i - 3; j--) {
+      if (cues[j].end > prevEnd) prevEnd = cues[j].end;
+    }
+    final nextStart = cues[i + 1].start;
+    return nextStart - prevEnd >= minGap &&
+        position >= prevEnd + margin &&
+        position <= nextStart - margin;
+  }
+
   /// Replaces an existing cue with the same start (partial -> committed) or inserts.
   SubtitleTimeline upsert(SubtitleCue cue) {
     final next = cues.where((c) => c.start != cue.start).toList()..add(cue);

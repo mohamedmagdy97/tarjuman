@@ -163,6 +163,10 @@ class MediaKitEngine implements PlayerEngine {
   }
 
   @override
+  Future<void> setVideoEnabled({required bool enabled}) =>
+      _player.setVideoTrack(enabled ? VideoTrack.auto() : VideoTrack.no());
+
+  @override
   Widget buildSurface() => Video(
     controller: _controller,
     controls: (_) => const SizedBox.shrink(),
