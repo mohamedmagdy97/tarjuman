@@ -14,16 +14,33 @@ extension SubtitleColorValue on SubtitleColorPreset {
   };
 }
 
+/// Colours for speaker tags 1..4 (0 = untagged, uses the style colour).
+const speakerColors = <Color>[
+  Color(0xFFFFC93C),
+  Color(0xFF35D0BA),
+  Color(0xFFFF8A9B),
+  Color(0xFF7DB7FF),
+];
+
+Color? speakerColor(int speaker) =>
+    speaker >= 1 && speaker <= speakerColors.length
+    ? speakerColors[speaker - 1]
+    : null;
+
 /// Renders one cue. Stateless: knows nothing about the player.
 class SubtitleView extends StatelessWidget {
   const SubtitleView({
     required this.text,
     required this.style,
     this.original,
+    this.speaker = 0,
     super.key,
   });
 
   final String? text;
+
+  /// Speaker tag; non-zero overrides the style colour for this line.
+  final int speaker;
 
   /// English source line, shown above the Arabic when the style asks for it.
   final String? original;
@@ -32,7 +49,7 @@ class SubtitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = style.color.value;
+    final color = speakerColor(speaker) ?? style.color.value;
     final base = AppTypography.subtitle.copyWith(
       fontSize: style.fontSize,
       color: color,

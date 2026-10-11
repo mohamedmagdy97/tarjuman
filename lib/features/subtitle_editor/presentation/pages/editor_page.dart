@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tarjuman/app/di/injection.dart';
 import 'package:tarjuman/core/design_system/components/app_button.dart';
+import 'package:tarjuman/core/design_system/components/app_chip.dart';
 import 'package:tarjuman/core/design_system/components/cue_tile.dart';
+import 'package:tarjuman/core/design_system/components/subtitle_view.dart';
 import 'package:tarjuman/core/design_system/tokens/app_spacing.dart';
 import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
@@ -13,6 +15,7 @@ import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/error/failure_message.dart';
 import 'package:tarjuman/core/result/result.dart';
 import 'package:tarjuman/features/player/domain/entities/subtitle_cue.dart';
+import 'package:tarjuman/features/subtitle_editor/domain/cue_reviewer.dart';
 import 'package:tarjuman/features/subtitle_editor/presentation/cubit/editor_cubit.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
@@ -51,6 +54,12 @@ class EditorView extends StatelessWidget {
           appBar: AppBar(
             title: Text(l10n.editSubtitles),
             actions: [
+              IconButton(
+                tooltip: l10n.videoGlossaryTitle,
+                icon: const Icon(Icons.spellcheck_rounded),
+                onPressed: () =>
+                    unawaited(context.push('/glossary?video=$videoId')),
+              ),
               PopupMenuButton<bool>(
                 tooltip: l10n.exportSrt,
                 icon: const Icon(Icons.ios_share_rounded),
@@ -85,6 +94,23 @@ class EditorView extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (s.flaggedCount > 0 || s.reviewOnly)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.screen,
+                          0,
+                          AppSpacing.screen,
+                          AppSpacing.sm,
+                        ),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: AppChip(
+                            label: l10n.needsReview(s.flaggedCount),
+                            selected: s.reviewOnly,
+                            onTap: cubit.toggleReviewOnly,
+                          ),
+                        ),
+                      ),
                     Expanded(
                       child: s.visible.isEmpty
                           ? Center(
@@ -108,6 +134,11 @@ class EditorView extends StatelessWidget {
                                   original: c.original,
                                   edited: c.status == CueStatus.edited,
                                   editedLabel: l10n.edited,
+                                  speakerColor: speakerColor(c.speaker),
+                                  flags: [
+                                    for (final i in s.issuesOf(c))
+                                      _issueLabel(i, l10n),
+                                  ],
                                   onTap: () => unawaited(
                                     context.push(
                                       '/player/$videoId'
@@ -126,6 +157,15 @@ class EditorView extends StatelessWidget {
       },
     );
   }
+
+  static String _issueLabel(CueIssue i, AppLocalizations l10n) => switch (i) {
+    CueIssue.untranslated => l10n.issueUntranslated,
+    CueIssue.leftoverLatin => l10n.issueLatin,
+    CueIssue.tooShort => l10n.issueTooShort,
+    CueIssue.tooLong => l10n.issueTooLong,
+    CueIssue.readsTooFast => l10n.issueFast,
+    CueIssue.repeated => l10n.issueRepeated,
+  };
 
   Future<void> _edit(
     BuildContext context,
@@ -188,6 +228,12 @@ class EditorView extends StatelessWidget {
                   },
                 ),
               ),
+            const SizedBox(height: AppSpacing.sm),
+            _SpeakerPicker(
+              current: cue.speaker,
+              label: l10n.speakerLabel,
+              onPick: (n) => unawaited(cubit.setSpeaker(cue, n)),
+            ),
             const SizedBox(height: AppSpacing.md),
             AppButton(
               label: l10n.saveEdit,
@@ -203,4 +249,58 @@ class EditorView extends StatelessWidget {
     );
     controller.dispose();
   }
+}
+
+/// Pick which speaker colour a line gets (none, or 1..4).
+class _SpeakerPicker extends StatefulWidget {
+  const _SpeakerPicker({
+    required this.current,
+    required this.label,
+    required this.onPick,
+  });
+  final int current;
+  final String label;
+  final ValueChanged<int> onPick;
+
+  @override
+  State<_SpeakerPicker> createState() => _SpeakerPickerState();
+}
+
+class _SpeakerPickerState extends State<_SpeakerPicker> {
+  late int _value = widget.current;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Text(widget.label, style: AppTypography.caption),
+      const SizedBox(width: AppSpacing.sm),
+      for (var n = 0; n <= speakerColors.length; n++)
+        Padding(
+          padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+          child: InkResponse(
+            onTap: () {
+              setState(() => _value = n);
+              widget.onPick(n);
+            },
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: speakerColor(n),
+                border: Border.all(
+                  color: n == _value
+                      ? context.colors.primaryText
+                      : context.colors.line,
+                  width: n == _value ? 3 : 1,
+                ),
+              ),
+              child: n == 0
+                  ? Icon(Icons.block, size: 16, color: context.colors.muted)
+                  : null,
+            ),
+          ),
+        ),
+    ],
+  );
 }

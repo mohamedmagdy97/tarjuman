@@ -842,4 +842,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get downloadFailedTitle => 'فشل التحميل';
+
+  @override
+  String get videoGlossaryTitle => 'قاموس هذا الفيديو';
+
+  @override
+  String get videoGlossaryHint =>
+      'هذه المصطلحات تخص هذا الفيديو فقط وتتقدّم على القاموس العام. تؤثر على الترجمات الجديدة (أعد الترجمة لتطبيقها على السطور الحالية).';
+
+  @override
+  String needsReview(int count) {
+    return 'يحتاج مراجعة ($count)';
+  }
+
+  @override
+  String get speakerLabel => 'المتحدث';
+
+  @override
+  String get issueUntranslated => 'لم تُترجم';
+
+  @override
+  String get issueLatin => 'أغلبها حروف لاتينية';
+
+  @override
+  String get issueTooShort => 'أقصر بكثير من الأصل';
+
+  @override
+  String get issueTooLong => 'أطول بكثير من الأصل';
+
+  @override
+  String get issueFast => 'أسرع من أن تُقرأ';
+
+  @override
+  String get issueRepeated => 'مثل السطر السابق';
 }

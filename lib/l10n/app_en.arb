@@ -366,5 +366,16 @@
   "downloadingCount": "{count, plural, =1{1 download in progress} other{{count} downloads in progress}}",
   "@downloadingCount": {"placeholders": {"count": {"type": "int"}}},
   "downloadFinishedTitle": "Download finished",
-  "downloadFailedTitle": "Download failed"
+  "downloadFailedTitle": "Download failed",
+  "videoGlossaryTitle": "Glossary for this video",
+  "videoGlossaryHint": "These terms apply only to this video and win over the general glossary. They affect new translations (re-run the translation to apply them to existing lines).",
+  "needsReview": "Needs review ({count})",
+  "@needsReview": {"placeholders": {"count": {"type": "int"}}},
+  "speakerLabel": "Speaker",
+  "issueUntranslated": "Not translated",
+  "issueLatin": "Mostly Latin letters",
+  "issueTooShort": "Much shorter than the source",
+  "issueTooLong": "Much longer than the source",
+  "issueFast": "Too fast to read",
+  "issueRepeated": "Same as the previous line"
 }

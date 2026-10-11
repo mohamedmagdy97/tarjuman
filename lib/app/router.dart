@@ -69,7 +69,10 @@ GoRouter buildRouter(SettingsStore settings) => GoRouter(
     ),
     GoRoute(path: '/downloads', builder: (_, _) => const DownloadsPage()),
     GoRoute(path: '/storage', builder: (_, _) => const StoragePage()),
-    GoRoute(path: '/glossary', builder: (_, _) => const GlossaryPage()),
+    GoRoute(
+      path: '/glossary',
+      builder: (_, s) => GlossaryPage(videoId: s.uri.queryParameters['video']),
+    ),
     GoRoute(path: '/models', builder: (_, _) => const ModelsPage()),
     GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
   ],

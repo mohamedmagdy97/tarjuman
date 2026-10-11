@@ -21,12 +21,16 @@ class EngineProviderImpl implements EngineProvider {
 
   @override
   Future<Result<TextTranslator>> acquireTranslator(
-    SourceLanguage language,
-  ) async {
+    SourceLanguage language, {
+    String? videoId,
+  }) async {
     final res = await _online.translator(language);
     return switch (res) {
       Success(:final value) => Result.success(
-        GlossaryTextTranslator(value, await _glossary.all()),
+        GlossaryTextTranslator(
+          value,
+          await _glossary.effective(videoId: videoId),
+        ),
       ),
       Err(:final failure) => Result.failure(failure),
     };
@@ -36,6 +40,7 @@ class EngineProviderImpl implements EngineProvider {
   Future<Result<EngineSet>> acquire(
     EngineKind kind, {
     SourceLanguage language = SourceLanguage.en,
+    String? videoId,
   }) async {
     switch (kind) {
       case EngineKind.offline:
@@ -50,7 +55,7 @@ class EngineProviderImpl implements EngineProvider {
             recognizer: WhisperSpeechRecognizer(_models, language),
             translator: GlossaryTextTranslator(
               MlKitTextTranslator(language),
-              await _glossary.all(),
+              await _glossary.effective(videoId: videoId),
             ),
           ),
         );
@@ -59,7 +64,10 @@ class EngineProviderImpl implements EngineProvider {
         if (recognizer case Err(:final failure)) {
           return Result.failure(failure);
         }
-        final translator = await acquireTranslator(language);
+        final translator = await acquireTranslator(
+          language,
+          videoId: videoId,
+        );
         if (translator case Err(:final failure)) {
           await (recognizer as Success<SpeechRecognizer>).value.dispose();
           return Result.failure(failure);

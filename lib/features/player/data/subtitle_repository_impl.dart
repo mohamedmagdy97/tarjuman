@@ -27,6 +27,7 @@ class SubtitleRepositoryImpl implements SubtitleRepository {
             text: r.body,
             original: r.original,
             status: CueStatus.values.byName(r.status),
+            speaker: r.speaker,
           ),
         ),
       ),
@@ -54,6 +55,7 @@ class SubtitleRepositoryImpl implements SubtitleRepository {
               body: c.text,
               original: Value(c.original),
               status: Value(c.status.name),
+              speaker: Value(c.speaker),
             ),
           ),
         ),
@@ -81,6 +83,7 @@ class SubtitleRepositoryImpl implements SubtitleRepository {
             body: c.text,
             original: Value(c.original),
             status: Value(c.status.name),
+            speaker: Value(c.speaker),
           ),
         ),
       ),
@@ -96,6 +99,21 @@ class SubtitleRepositoryImpl implements SubtitleRepository {
               t.startMs.isBiggerOrEqualValue(from.inMilliseconds),
         ))
         .go();
+    return const Result.success(null);
+  }
+
+  @override
+  Future<Result<void>> setSpeaker(
+    String videoId,
+    Duration start,
+    int speaker,
+  ) async {
+    await (_db.update(_db.cues)..where(
+          (t) =>
+              t.videoId.equals(videoId) &
+              t.startMs.equals(start.inMilliseconds),
+        ))
+        .write(db.CuesCompanion(speaker: Value(speaker)));
     return const Result.success(null);
   }
 

@@ -30,6 +30,9 @@ class Cues extends Table {
   TextColumn get body => text()();
   TextColumn get original => text().nullable()();
   TextColumn get status => text().withDefault(const Constant('committed'))();
+
+  /// 0 = not tagged; 1..4 pick a colour in the subtitle.
+  IntColumn get speaker => integer().withDefault(const Constant(0))();
 }
 
 /// Words saved from the study sheet.
@@ -53,6 +56,9 @@ class Glossary extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get term => text()();
   TextColumn get arabic => text()();
+
+  /// Null = applies to every video; otherwise only to that video.
+  TextColumn get videoId => text().nullable()();
 }
 
 @DriftDatabase(tables: [Videos, Cues, Vocabulary, Glossary])
@@ -61,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -78,6 +84,11 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 5) await m.createTable(glossary);
       if (from < 6) await m.addColumn(videos, videos.lastPlayedMs);
+      if (from < 7) {
+        await m.addColumn(cues, cues.speaker);
+        // Glossary created at v5/v6 predates videoId; a fresh create has it.
+        if (from >= 5) await m.addColumn(glossary, glossary.videoId);
+      }
     },
     onCreate: (m) async {
       await m.createAll();

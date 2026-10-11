@@ -366,5 +366,16 @@
   "downloadingCount": "{count, plural, =1{تحميل واحد قيد التنفيذ} other{{count} تحميلات قيد التنفيذ}}",
   "@downloadingCount": {"placeholders": {"count": {"type": "int"}}},
   "downloadFinishedTitle": "اكتمل التحميل",
-  "downloadFailedTitle": "فشل التحميل"
+  "downloadFailedTitle": "فشل التحميل",
+  "videoGlossaryTitle": "قاموس هذا الفيديو",
+  "videoGlossaryHint": "هذه المصطلحات تخص هذا الفيديو فقط وتتقدّم على القاموس العام. تؤثر على الترجمات الجديدة (أعد الترجمة لتطبيقها على السطور الحالية).",
+  "needsReview": "يحتاج مراجعة ({count})",
+  "@needsReview": {"placeholders": {"count": {"type": "int"}}},
+  "speakerLabel": "المتحدث",
+  "issueUntranslated": "لم تُترجم",
+  "issueLatin": "أغلبها حروف لاتينية",
+  "issueTooShort": "أقصر بكثير من الأصل",
+  "issueTooLong": "أطول بكثير من الأصل",
+  "issueFast": "أسرع من أن تُقرأ",
+  "issueRepeated": "مثل السطر السابق"
 }

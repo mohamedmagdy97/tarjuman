@@ -1621,6 +1621,66 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'فشل التحميل'**
   String get downloadFailedTitle;
+
+  /// No description provided for @videoGlossaryTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'قاموس هذا الفيديو'**
+  String get videoGlossaryTitle;
+
+  /// No description provided for @videoGlossaryHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذه المصطلحات تخص هذا الفيديو فقط وتتقدّم على القاموس العام. تؤثر على الترجمات الجديدة (أعد الترجمة لتطبيقها على السطور الحالية).'**
+  String get videoGlossaryHint;
+
+  /// No description provided for @needsReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'يحتاج مراجعة ({count})'**
+  String needsReview(int count);
+
+  /// No description provided for @speakerLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتحدث'**
+  String get speakerLabel;
+
+  /// No description provided for @issueUntranslated.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تُترجم'**
+  String get issueUntranslated;
+
+  /// No description provided for @issueLatin.
+  ///
+  /// In ar, this message translates to:
+  /// **'أغلبها حروف لاتينية'**
+  String get issueLatin;
+
+  /// No description provided for @issueTooShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'أقصر بكثير من الأصل'**
+  String get issueTooShort;
+
+  /// No description provided for @issueTooLong.
+  ///
+  /// In ar, this message translates to:
+  /// **'أطول بكثير من الأصل'**
+  String get issueTooLong;
+
+  /// No description provided for @issueFast.
+  ///
+  /// In ar, this message translates to:
+  /// **'أسرع من أن تُقرأ'**
+  String get issueFast;
+
+  /// No description provided for @issueRepeated.
+  ///
+  /// In ar, this message translates to:
+  /// **'مثل السطر السابق'**
+  String get issueRepeated;
 }
 
 class _AppLocalizationsDelegate

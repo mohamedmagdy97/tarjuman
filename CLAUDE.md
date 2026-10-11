@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.12.0+15, package `com.megtech.tarjuman`)
+## 9. Current status (v1.13.0+16, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -205,6 +205,11 @@ v1.12 background downloads + notifications (analyzer clean, 102 tests, Kotlin co
 `DownloadsSystemBridge` (app level, listens to `DownloadsCubit`) starts the service while downloads are active (count + % in the notification) and posts
 a "download finished/failed" notification via `AppNotifier` (`flutter_local_notifications`, BSD-3); tapping opens `/setup/:id` or `/downloads`.
 Limits: swiping the app away from recents can still kill the process; Android 13+ needs the notification permission (requested when the service starts).
+v1.13 translation quality tools (analyzer clean, 110 tests; NOT device-tested; drift schema v7 = `Cues.speaker`, `Glossary.videoId`):
+Per-video glossary (`/glossary?video=ID`, `GlossaryRepository.effective(videoId)` = video terms first then global; `EngineProvider.acquire/acquireTranslator`
+take `videoId`; applies to new translations only). Review mode in the editor (`CueReviewer`: untranslated, mostly-Latin, much shorter/longer than source,
+unreadably fast, repeated; edited lines count as reviewed; "Needs review (N)" filter + warnings on the tile). Speaker colours are MANUAL tags (1..4) set in
+the edit sheet, shown in the player subtitle and as a bar in the editor — automatic speaker diarization is NOT implemented (needs a heavy model).
 Deliberately NOT done: burned-in subtitle video export (needs an FFmpeg build with libass + a video encoder → much larger APK),
 in-app gallery browser (needs `READ_MEDIA_VIDEO`), sibling-.srt auto-load, PiP/background audio, playlists, iOS.
 

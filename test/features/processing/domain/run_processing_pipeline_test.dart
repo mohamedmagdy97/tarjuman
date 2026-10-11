@@ -272,10 +272,12 @@ class _SetProvider implements EngineProvider {
   Future<Result<EngineSet>> acquire(
     EngineKind kind, {
     SourceLanguage language = SourceLanguage.en,
+    String? videoId,
   }) async => Result.success(set);
 
   @override
   Future<Result<TextTranslator>> acquireTranslator(
-    SourceLanguage language,
-  ) async => Result.success(set.translator);
+    SourceLanguage language, {
+    String? videoId,
+  }) async => Result.success(set.translator);
 }

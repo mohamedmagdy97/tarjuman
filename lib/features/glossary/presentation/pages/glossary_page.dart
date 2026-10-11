@@ -12,17 +12,21 @@ import 'package:tarjuman/features/glossary/presentation/cubit/glossary_cubit.dar
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 class GlossaryPage extends StatelessWidget {
-  const GlossaryPage({super.key});
+  const GlossaryPage({this.videoId, super.key});
+
+  /// Set to edit the terms of one video instead of the global glossary.
+  final String? videoId;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (_) => sl<GlossaryCubit>(),
-    child: const GlossaryView(),
+    create: (_) => GlossaryCubit(sl(), videoId: videoId),
+    child: GlossaryView(perVideo: videoId != null),
   );
 }
 
 class GlossaryView extends StatelessWidget {
-  const GlossaryView({super.key});
+  const GlossaryView({this.perVideo = false, super.key});
+  final bool perVideo;
 
   Future<void> _add(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -71,7 +75,9 @@ class GlossaryView extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final c = context.colors;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.glossaryTitle)),
+      appBar: AppBar(
+        title: Text(perVideo ? l10n.videoGlossaryTitle : l10n.glossaryTitle),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => unawaited(_add(context)),
         backgroundColor: c.primary,
@@ -96,7 +102,7 @@ class GlossaryView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.md),
                 child: Text(
-                  l10n.glossaryHint,
+                  perVideo ? l10n.videoGlossaryHint : l10n.glossaryHint,
                   style: AppTypography.caption.copyWith(color: c.muted),
                 ),
               ),

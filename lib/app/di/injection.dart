@@ -21,7 +21,6 @@ import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/downloads/presentation/cubit/downloads_cubit.dart';
 import 'package:tarjuman/features/glossary/data/glossary_repository_impl.dart';
 import 'package:tarjuman/features/glossary/domain/repositories/glossary_repository.dart';
-import 'package:tarjuman/features/glossary/presentation/cubit/glossary_cubit.dart';
 import 'package:tarjuman/features/library/data/file_picker_media_picker.dart';
 import 'package:tarjuman/features/library/data/http_file_downloader.dart';
 import 'package:tarjuman/features/library/data/links/composite_link_resolver.dart';
@@ -125,7 +124,6 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<GlossaryRepository>(
       () => GlossaryRepositoryImpl(sl()),
     )
-    ..registerFactory(() => GlossaryCubit(sl()))
     ..registerLazySingleton<GoRouter>(() => buildRouter(sl()))
     ..registerSingleton<GlobalKey<ScaffoldMessengerState>>(
       GlobalKey<ScaffoldMessengerState>(),

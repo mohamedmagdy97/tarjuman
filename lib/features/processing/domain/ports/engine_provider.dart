@@ -22,9 +22,13 @@ abstract interface class EngineProvider {
   Future<Result<EngineSet>> acquire(
     EngineKind kind, {
     SourceLanguage language = SourceLanguage.en,
+    String? videoId,
   });
 
   /// Online translator only (no speech key needed) — used to re-translate
   /// a single line.
-  Future<Result<TextTranslator>> acquireTranslator(SourceLanguage language);
+  Future<Result<TextTranslator>> acquireTranslator(
+    SourceLanguage language, {
+    String? videoId,
+  });
 }

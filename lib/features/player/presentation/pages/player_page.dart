@@ -199,6 +199,7 @@ class _SubtitleLayer extends StatelessWidget {
               child: SubtitleView(
                 text: state.activeText,
                 original: state.activeOriginal,
+                speaker: state.activeSpeaker,
                 style: state.style,
               ),
             ),

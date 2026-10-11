@@ -694,6 +694,18 @@ class $CuesTable extends Cues with TableInfo<$CuesTable, Cue> {
     requiredDuringInsert: false,
     defaultValue: const Constant('committed'),
   );
+  static const VerificationMeta _speakerMeta = const VerificationMeta(
+    'speaker',
+  );
+  @override
+  late final GeneratedColumn<int> speaker = GeneratedColumn<int>(
+    'speaker',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     rowId,
@@ -703,6 +715,7 @@ class $CuesTable extends Cues with TableInfo<$CuesTable, Cue> {
     body,
     original,
     status,
+    speaker,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -766,6 +779,12 @@ class $CuesTable extends Cues with TableInfo<$CuesTable, Cue> {
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
       );
     }
+    if (data.containsKey('speaker')) {
+      context.handle(
+        _speakerMeta,
+        speaker.isAcceptableOrUnknown(data['speaker']!, _speakerMeta),
+      );
+    }
     return context;
   }
 
@@ -803,6 +822,10 @@ class $CuesTable extends Cues with TableInfo<$CuesTable, Cue> {
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      speaker: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}speaker'],
+      )!,
     );
   }
 
@@ -820,6 +843,9 @@ class Cue extends DataClass implements Insertable<Cue> {
   final String body;
   final String? original;
   final String status;
+
+  /// 0 = not tagged; 1..4 pick a colour in the subtitle.
+  final int speaker;
   const Cue({
     required this.rowId,
     required this.videoId,
@@ -828,6 +854,7 @@ class Cue extends DataClass implements Insertable<Cue> {
     required this.body,
     this.original,
     required this.status,
+    required this.speaker,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -841,6 +868,7 @@ class Cue extends DataClass implements Insertable<Cue> {
       map['original'] = Variable<String>(original);
     }
     map['status'] = Variable<String>(status);
+    map['speaker'] = Variable<int>(speaker);
     return map;
   }
 
@@ -855,6 +883,7 @@ class Cue extends DataClass implements Insertable<Cue> {
           ? const Value.absent()
           : Value(original),
       status: Value(status),
+      speaker: Value(speaker),
     );
   }
 
@@ -871,6 +900,7 @@ class Cue extends DataClass implements Insertable<Cue> {
       body: serializer.fromJson<String>(json['body']),
       original: serializer.fromJson<String?>(json['original']),
       status: serializer.fromJson<String>(json['status']),
+      speaker: serializer.fromJson<int>(json['speaker']),
     );
   }
   @override
@@ -884,6 +914,7 @@ class Cue extends DataClass implements Insertable<Cue> {
       'body': serializer.toJson<String>(body),
       'original': serializer.toJson<String?>(original),
       'status': serializer.toJson<String>(status),
+      'speaker': serializer.toJson<int>(speaker),
     };
   }
 
@@ -895,6 +926,7 @@ class Cue extends DataClass implements Insertable<Cue> {
     String? body,
     Value<String?> original = const Value.absent(),
     String? status,
+    int? speaker,
   }) => Cue(
     rowId: rowId ?? this.rowId,
     videoId: videoId ?? this.videoId,
@@ -903,6 +935,7 @@ class Cue extends DataClass implements Insertable<Cue> {
     body: body ?? this.body,
     original: original.present ? original.value : this.original,
     status: status ?? this.status,
+    speaker: speaker ?? this.speaker,
   );
   Cue copyWithCompanion(CuesCompanion data) {
     return Cue(
@@ -913,6 +946,7 @@ class Cue extends DataClass implements Insertable<Cue> {
       body: data.body.present ? data.body.value : this.body,
       original: data.original.present ? data.original.value : this.original,
       status: data.status.present ? data.status.value : this.status,
+      speaker: data.speaker.present ? data.speaker.value : this.speaker,
     );
   }
 
@@ -925,14 +959,23 @@ class Cue extends DataClass implements Insertable<Cue> {
           ..write('endMs: $endMs, ')
           ..write('body: $body, ')
           ..write('original: $original, ')
-          ..write('status: $status')
+          ..write('status: $status, ')
+          ..write('speaker: $speaker')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(rowId, videoId, startMs, endMs, body, original, status);
+  int get hashCode => Object.hash(
+    rowId,
+    videoId,
+    startMs,
+    endMs,
+    body,
+    original,
+    status,
+    speaker,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -943,7 +986,8 @@ class Cue extends DataClass implements Insertable<Cue> {
           other.endMs == this.endMs &&
           other.body == this.body &&
           other.original == this.original &&
-          other.status == this.status);
+          other.status == this.status &&
+          other.speaker == this.speaker);
 }
 
 class CuesCompanion extends UpdateCompanion<Cue> {
@@ -954,6 +998,7 @@ class CuesCompanion extends UpdateCompanion<Cue> {
   final Value<String> body;
   final Value<String?> original;
   final Value<String> status;
+  final Value<int> speaker;
   const CuesCompanion({
     this.rowId = const Value.absent(),
     this.videoId = const Value.absent(),
@@ -962,6 +1007,7 @@ class CuesCompanion extends UpdateCompanion<Cue> {
     this.body = const Value.absent(),
     this.original = const Value.absent(),
     this.status = const Value.absent(),
+    this.speaker = const Value.absent(),
   });
   CuesCompanion.insert({
     this.rowId = const Value.absent(),
@@ -971,6 +1017,7 @@ class CuesCompanion extends UpdateCompanion<Cue> {
     required String body,
     this.original = const Value.absent(),
     this.status = const Value.absent(),
+    this.speaker = const Value.absent(),
   }) : videoId = Value(videoId),
        startMs = Value(startMs),
        endMs = Value(endMs),
@@ -983,6 +1030,7 @@ class CuesCompanion extends UpdateCompanion<Cue> {
     Expression<String>? body,
     Expression<String>? original,
     Expression<String>? status,
+    Expression<int>? speaker,
   }) {
     return RawValuesInsertable({
       if (rowId != null) 'row_id': rowId,
@@ -992,6 +1040,7 @@ class CuesCompanion extends UpdateCompanion<Cue> {
       if (body != null) 'body': body,
       if (original != null) 'original': original,
       if (status != null) 'status': status,
+      if (speaker != null) 'speaker': speaker,
     });
   }
 
@@ -1003,6 +1052,7 @@ class CuesCompanion extends UpdateCompanion<Cue> {
     Value<String>? body,
     Value<String?>? original,
     Value<String>? status,
+    Value<int>? speaker,
   }) {
     return CuesCompanion(
       rowId: rowId ?? this.rowId,
@@ -1012,6 +1062,7 @@ class CuesCompanion extends UpdateCompanion<Cue> {
       body: body ?? this.body,
       original: original ?? this.original,
       status: status ?? this.status,
+      speaker: speaker ?? this.speaker,
     );
   }
 
@@ -1039,6 +1090,9 @@ class CuesCompanion extends UpdateCompanion<Cue> {
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
+    if (speaker.present) {
+      map['speaker'] = Variable<int>(speaker.value);
+    }
     return map;
   }
 
@@ -1051,7 +1105,8 @@ class CuesCompanion extends UpdateCompanion<Cue> {
           ..write('endMs: $endMs, ')
           ..write('body: $body, ')
           ..write('original: $original, ')
-          ..write('status: $status')
+          ..write('status: $status, ')
+          ..write('speaker: $speaker')
           ..write(')'))
         .toString();
   }
@@ -1644,8 +1699,19 @@ class $GlossaryTable extends Glossary
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _videoIdMeta = const VerificationMeta(
+    'videoId',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, term, arabic];
+  late final GeneratedColumn<String> videoId = GeneratedColumn<String>(
+    'video_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, term, arabic, videoId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1677,6 +1743,12 @@ class $GlossaryTable extends Glossary
     } else if (isInserting) {
       context.missing(_arabicMeta);
     }
+    if (data.containsKey('video_id')) {
+      context.handle(
+        _videoIdMeta,
+        videoId.isAcceptableOrUnknown(data['video_id']!, _videoIdMeta),
+      );
+    }
     return context;
   }
 
@@ -1698,6 +1770,10 @@ class $GlossaryTable extends Glossary
         DriftSqlType.string,
         data['${effectivePrefix}arabic'],
       )!,
+      videoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}video_id'],
+      ),
     );
   }
 
@@ -1711,10 +1787,14 @@ class GlossaryData extends DataClass implements Insertable<GlossaryData> {
   final int id;
   final String term;
   final String arabic;
+
+  /// Null = applies to every video; otherwise only to that video.
+  final String? videoId;
   const GlossaryData({
     required this.id,
     required this.term,
     required this.arabic,
+    this.videoId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1722,6 +1802,9 @@ class GlossaryData extends DataClass implements Insertable<GlossaryData> {
     map['id'] = Variable<int>(id);
     map['term'] = Variable<String>(term);
     map['arabic'] = Variable<String>(arabic);
+    if (!nullToAbsent || videoId != null) {
+      map['video_id'] = Variable<String>(videoId);
+    }
     return map;
   }
 
@@ -1730,6 +1813,9 @@ class GlossaryData extends DataClass implements Insertable<GlossaryData> {
       id: Value(id),
       term: Value(term),
       arabic: Value(arabic),
+      videoId: videoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(videoId),
     );
   }
 
@@ -1742,6 +1828,7 @@ class GlossaryData extends DataClass implements Insertable<GlossaryData> {
       id: serializer.fromJson<int>(json['id']),
       term: serializer.fromJson<String>(json['term']),
       arabic: serializer.fromJson<String>(json['arabic']),
+      videoId: serializer.fromJson<String?>(json['videoId']),
     );
   }
   @override
@@ -1751,20 +1838,27 @@ class GlossaryData extends DataClass implements Insertable<GlossaryData> {
       'id': serializer.toJson<int>(id),
       'term': serializer.toJson<String>(term),
       'arabic': serializer.toJson<String>(arabic),
+      'videoId': serializer.toJson<String?>(videoId),
     };
   }
 
-  GlossaryData copyWith({int? id, String? term, String? arabic}) =>
-      GlossaryData(
-        id: id ?? this.id,
-        term: term ?? this.term,
-        arabic: arabic ?? this.arabic,
-      );
+  GlossaryData copyWith({
+    int? id,
+    String? term,
+    String? arabic,
+    Value<String?> videoId = const Value.absent(),
+  }) => GlossaryData(
+    id: id ?? this.id,
+    term: term ?? this.term,
+    arabic: arabic ?? this.arabic,
+    videoId: videoId.present ? videoId.value : this.videoId,
+  );
   GlossaryData copyWithCompanion(GlossaryCompanion data) {
     return GlossaryData(
       id: data.id.present ? data.id.value : this.id,
       term: data.term.present ? data.term.value : this.term,
       arabic: data.arabic.present ? data.arabic.value : this.arabic,
+      videoId: data.videoId.present ? data.videoId.value : this.videoId,
     );
   }
 
@@ -1773,46 +1867,53 @@ class GlossaryData extends DataClass implements Insertable<GlossaryData> {
     return (StringBuffer('GlossaryData(')
           ..write('id: $id, ')
           ..write('term: $term, ')
-          ..write('arabic: $arabic')
+          ..write('arabic: $arabic, ')
+          ..write('videoId: $videoId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, term, arabic);
+  int get hashCode => Object.hash(id, term, arabic, videoId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is GlossaryData &&
           other.id == this.id &&
           other.term == this.term &&
-          other.arabic == this.arabic);
+          other.arabic == this.arabic &&
+          other.videoId == this.videoId);
 }
 
 class GlossaryCompanion extends UpdateCompanion<GlossaryData> {
   final Value<int> id;
   final Value<String> term;
   final Value<String> arabic;
+  final Value<String?> videoId;
   const GlossaryCompanion({
     this.id = const Value.absent(),
     this.term = const Value.absent(),
     this.arabic = const Value.absent(),
+    this.videoId = const Value.absent(),
   });
   GlossaryCompanion.insert({
     this.id = const Value.absent(),
     required String term,
     required String arabic,
+    this.videoId = const Value.absent(),
   }) : term = Value(term),
        arabic = Value(arabic);
   static Insertable<GlossaryData> custom({
     Expression<int>? id,
     Expression<String>? term,
     Expression<String>? arabic,
+    Expression<String>? videoId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (term != null) 'term': term,
       if (arabic != null) 'arabic': arabic,
+      if (videoId != null) 'video_id': videoId,
     });
   }
 
@@ -1820,11 +1921,13 @@ class GlossaryCompanion extends UpdateCompanion<GlossaryData> {
     Value<int>? id,
     Value<String>? term,
     Value<String>? arabic,
+    Value<String?>? videoId,
   }) {
     return GlossaryCompanion(
       id: id ?? this.id,
       term: term ?? this.term,
       arabic: arabic ?? this.arabic,
+      videoId: videoId ?? this.videoId,
     );
   }
 
@@ -1840,6 +1943,9 @@ class GlossaryCompanion extends UpdateCompanion<GlossaryData> {
     if (arabic.present) {
       map['arabic'] = Variable<String>(arabic.value);
     }
+    if (videoId.present) {
+      map['video_id'] = Variable<String>(videoId.value);
+    }
     return map;
   }
 
@@ -1848,7 +1954,8 @@ class GlossaryCompanion extends UpdateCompanion<GlossaryData> {
     return (StringBuffer('GlossaryCompanion(')
           ..write('id: $id, ')
           ..write('term: $term, ')
-          ..write('arabic: $arabic')
+          ..write('arabic: $arabic, ')
+          ..write('videoId: $videoId')
           ..write(')'))
         .toString();
   }
@@ -2288,6 +2395,7 @@ typedef $$CuesTableCreateCompanionBuilder =
       required String body,
       Value<String?> original,
       Value<String> status,
+      Value<int> speaker,
     });
 typedef $$CuesTableUpdateCompanionBuilder =
     CuesCompanion Function({
@@ -2298,6 +2406,7 @@ typedef $$CuesTableUpdateCompanionBuilder =
       Value<String> body,
       Value<String?> original,
       Value<String> status,
+      Value<int> speaker,
     });
 
 final class $$CuesTableReferences
@@ -2358,6 +2467,11 @@ class $$CuesTableFilterComposer extends Composer<_$AppDatabase, $CuesTable> {
 
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get speaker => $composableBuilder(
+    column: $table.speaker,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2423,6 +2537,11 @@ class $$CuesTableOrderingComposer extends Composer<_$AppDatabase, $CuesTable> {
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get speaker => $composableBuilder(
+    column: $table.speaker,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$VideosTableOrderingComposer get videoId {
     final $$VideosTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2473,6 +2592,9 @@ class $$CuesTableAnnotationComposer
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get speaker =>
+      $composableBuilder(column: $table.speaker, builder: (column) => column);
 
   $$VideosTableAnnotationComposer get videoId {
     final $$VideosTableAnnotationComposer composer = $composerBuilder(
@@ -2533,6 +2655,7 @@ class $$CuesTableTableManager
                 Value<String> body = const Value.absent(),
                 Value<String?> original = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<int> speaker = const Value.absent(),
               }) => CuesCompanion(
                 rowId: rowId,
                 videoId: videoId,
@@ -2541,6 +2664,7 @@ class $$CuesTableTableManager
                 body: body,
                 original: original,
                 status: status,
+                speaker: speaker,
               ),
           createCompanionCallback:
               ({
@@ -2551,6 +2675,7 @@ class $$CuesTableTableManager
                 required String body,
                 Value<String?> original = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<int> speaker = const Value.absent(),
               }) => CuesCompanion.insert(
                 rowId: rowId,
                 videoId: videoId,
@@ -2559,6 +2684,7 @@ class $$CuesTableTableManager
                 body: body,
                 original: original,
                 status: status,
+                speaker: speaker,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -2904,12 +3030,14 @@ typedef $$GlossaryTableCreateCompanionBuilder =
       Value<int> id,
       required String term,
       required String arabic,
+      Value<String?> videoId,
     });
 typedef $$GlossaryTableUpdateCompanionBuilder =
     GlossaryCompanion Function({
       Value<int> id,
       Value<String> term,
       Value<String> arabic,
+      Value<String?> videoId,
     });
 
 class $$GlossaryTableFilterComposer
@@ -2933,6 +3061,11 @@ class $$GlossaryTableFilterComposer
 
   ColumnFilters<String> get arabic => $composableBuilder(
     column: $table.arabic,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get videoId => $composableBuilder(
+    column: $table.videoId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2960,6 +3093,11 @@ class $$GlossaryTableOrderingComposer
     column: $table.arabic,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get videoId => $composableBuilder(
+    column: $table.videoId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$GlossaryTableAnnotationComposer
@@ -2979,6 +3117,9 @@ class $$GlossaryTableAnnotationComposer
 
   GeneratedColumn<String> get arabic =>
       $composableBuilder(column: $table.arabic, builder: (column) => column);
+
+  GeneratedColumn<String> get videoId =>
+      $composableBuilder(column: $table.videoId, builder: (column) => column);
 }
 
 class $$GlossaryTableTableManager
@@ -3015,14 +3156,25 @@ class $$GlossaryTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> term = const Value.absent(),
                 Value<String> arabic = const Value.absent(),
-              }) => GlossaryCompanion(id: id, term: term, arabic: arabic),
+                Value<String?> videoId = const Value.absent(),
+              }) => GlossaryCompanion(
+                id: id,
+                term: term,
+                arabic: arabic,
+                videoId: videoId,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String term,
                 required String arabic,
-              }) =>
-                  GlossaryCompanion.insert(id: id, term: term, arabic: arabic),
+                Value<String?> videoId = const Value.absent(),
+              }) => GlossaryCompanion.insert(
+                id: id,
+                term: term,
+                arabic: arabic,
+                videoId: videoId,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),

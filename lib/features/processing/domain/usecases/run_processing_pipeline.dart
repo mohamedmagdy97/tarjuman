@@ -81,7 +81,11 @@ class RunProcessingPipeline {
     }
     var video = (got as Success<Video>).value;
 
-    final acquired = await _engines.acquire(kind, language: language);
+    final acquired = await _engines.acquire(
+      kind,
+      language: language,
+      videoId: videoId,
+    );
     if (acquired case Err(:final failure)) {
       out.add(ProcessingFailed(failure));
       return;

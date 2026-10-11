@@ -15,18 +15,23 @@ class GlossaryState extends Equatable {
 }
 
 class GlossaryCubit extends Cubit<GlossaryState> {
-  GlossaryCubit(this._repo) : super(const GlossaryState()) {
-    _sub = _repo.watchAll().listen(
-      (e) => emit(GlossaryState(entries: e, loading: false)),
-    );
+  GlossaryCubit(this._repo, {this.videoId}) : super(const GlossaryState()) {
+    _sub = _repo
+        .watch(videoId: videoId)
+        .listen(
+          (e) => emit(GlossaryState(entries: e, loading: false)),
+        );
   }
 
   final GlossaryRepository _repo;
+
+  /// Null = the global glossary; otherwise terms for this video only.
+  final String? videoId;
   late final StreamSubscription<List<GlossaryEntry>> _sub;
 
   Future<void> add(String term, String arabic) async {
     if (term.trim().isEmpty || arabic.trim().isEmpty) return;
-    await _repo.add(term, arabic);
+    await _repo.add(term, arabic, videoId: videoId);
   }
 
   Future<void> remove(int id) => _repo.remove(id);

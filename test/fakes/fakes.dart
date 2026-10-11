@@ -80,6 +80,7 @@ class FakeEngineProvider implements EngineProvider {
   Future<Result<EngineSet>> acquire(
     EngineKind kind, {
     SourceLanguage language = SourceLanguage.en,
+    String? videoId,
   }) async => failure != null
       ? Result.failure(failure!)
       : Result.success(
@@ -88,8 +89,9 @@ class FakeEngineProvider implements EngineProvider {
 
   @override
   Future<Result<TextTranslator>> acquireTranslator(
-    SourceLanguage language,
-  ) async => failure != null
+    SourceLanguage language, {
+    String? videoId,
+  }) async => failure != null
       ? Result.failure(failure!)
       : Result.success(FakeTranslator());
 }

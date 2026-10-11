@@ -22,7 +22,10 @@ class RetranslateCue {
     if (original == null || original.trim().isEmpty) {
       return const Result.failure(UnknownFailure('No source text'));
     }
-    final acquired = await _engines.acquireTranslator(language);
+    final acquired = await _engines.acquireTranslator(
+      language,
+      videoId: videoId,
+    );
     if (acquired case Err(:final failure)) return Result.failure(failure);
     final translator = (acquired as Success<TextTranslator>).value;
     try {

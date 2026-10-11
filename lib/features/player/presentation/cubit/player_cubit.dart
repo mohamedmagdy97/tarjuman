@@ -46,6 +46,7 @@ class PlayerState extends Equatable {
     this.style = const SubtitleStyle(),
     this.activeText,
     this.activeOriginal,
+    this.activeSpeaker = 0,
     this.controlsVisible = true,
     this.failure,
     this.isLive = false,
@@ -65,6 +66,7 @@ class PlayerState extends Equatable {
   final SubtitleStyle style;
   final String? activeText;
   final String? activeOriginal;
+  final int activeSpeaker;
 
   final bool controlsVisible;
   final Failure? failure;
@@ -91,6 +93,7 @@ class PlayerState extends Equatable {
     SubtitleStyle? style,
     String? activeText,
     String? activeOriginal,
+    int? activeSpeaker,
 
     bool clearActive = false,
     bool? controlsVisible,
@@ -115,6 +118,7 @@ class PlayerState extends Equatable {
     style: style ?? this.style,
     activeText: clearActive ? null : activeText ?? this.activeText,
     activeOriginal: clearActive ? null : activeOriginal ?? this.activeOriginal,
+    activeSpeaker: clearActive ? 0 : activeSpeaker ?? this.activeSpeaker,
 
     controlsVisible: controlsVisible ?? this.controlsVisible,
     failure: clearFailure ? null : failure ?? this.failure,
@@ -137,6 +141,7 @@ class PlayerState extends Equatable {
     style,
     activeText,
     activeOriginal,
+    activeSpeaker,
     controlsVisible,
     failure,
     isLive,
@@ -261,6 +266,7 @@ class PlayerCubit extends Cubit<PlayerState> {
         liveBusy: stillRunning,
         activeText: cue?.text,
         activeOriginal: cue?.original,
+        activeSpeaker: cue?.speaker ?? 0,
         clearActive: cue == null,
       ),
     );
@@ -307,13 +313,18 @@ class PlayerCubit extends Cubit<PlayerState> {
         snapshot: s,
         activeText: cue?.text,
         activeOriginal: cue?.original,
+        activeSpeaker: cue?.speaker ?? 0,
         clearActive: cue == null,
       ),
     );
   }
 
   Future<void> _startLive(Duration total, Duration position) async {
-    final acquired = await _engines.acquire(liveKind!, language: liveLanguage);
+    final acquired = await _engines.acquire(
+      liveKind!,
+      language: liveLanguage,
+      videoId: videoId,
+    );
     if (acquired case Err(:final failure)) {
       emit(state.copyWith(failure: failure));
       return;
@@ -330,6 +341,7 @@ class PlayerCubit extends Cubit<PlayerState> {
           failure: u.failure,
           activeText: cue?.text,
           activeOriginal: cue?.original,
+          activeSpeaker: cue?.speaker ?? 0,
           clearActive: cue == null,
         ),
       );

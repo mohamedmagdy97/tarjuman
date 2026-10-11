@@ -13,6 +13,8 @@ class CueTile extends StatelessWidget {
     this.original,
     this.edited = false,
     this.editedLabel = '',
+    this.speakerColor,
+    this.flags = const [],
     super.key,
   });
 
@@ -23,6 +25,12 @@ class CueTile extends StatelessWidget {
   final String editedLabel;
   final VoidCallback onTap;
   final VoidCallback onEdit;
+
+  /// Colour bar at the start edge when the line has a speaker tag.
+  final Color? speakerColor;
+
+  /// Short review warnings shown under the text.
+  final List<String> flags;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +48,16 @@ class CueTile extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (speakerColor != null)
+                  Container(
+                    width: 4,
+                    height: 36,
+                    margin: const EdgeInsetsDirectional.only(end: 10),
+                    decoration: BoxDecoration(
+                      color: speakerColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 Directionality(
                   textDirection: TextDirection.ltr,
                   child: Padding(
@@ -71,6 +89,22 @@ class CueTile extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                      if (flags.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Wrap(
+                            spacing: 6,
+                            children: [
+                              for (final f in flags)
+                                Text(
+                                  '⚠ $f',
+                                  style: AppTypography.caption.copyWith(
+                                    color: c.error,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       if (edited)
                         Padding(
                           padding: const EdgeInsets.only(top: 2),

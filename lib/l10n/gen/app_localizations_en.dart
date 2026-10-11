@@ -849,4 +849,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadFailedTitle => 'Download failed';
+
+  @override
+  String get videoGlossaryTitle => 'Glossary for this video';
+
+  @override
+  String get videoGlossaryHint =>
+      'These terms apply only to this video and win over the general glossary. They affect new translations (re-run the translation to apply them to existing lines).';
+
+  @override
+  String needsReview(int count) {
+    return 'Needs review ($count)';
+  }
+
+  @override
+  String get speakerLabel => 'Speaker';
+
+  @override
+  String get issueUntranslated => 'Not translated';
+
+  @override
+  String get issueLatin => 'Mostly Latin letters';
+
+  @override
+  String get issueTooShort => 'Much shorter than the source';
+
+  @override
+  String get issueTooLong => 'Much longer than the source';
+
+  @override
+  String get issueFast => 'Too fast to read';
+
+  @override
+  String get issueRepeated => 'Same as the previous line';
 }
