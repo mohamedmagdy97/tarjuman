@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
@@ -72,6 +73,12 @@ class _BrowserViewState extends State<_BrowserView> {
       unawaited(_web!.loadUrl(urlRequest: URLRequest(url: WebUri.uri(uri))));
     }
     FocusScope.of(context).unfocus();
+  }
+
+  Future<void> _paste() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text;
+    if (text != null && text.trim().isNotEmpty) _open(text);
   }
 
   /// Reads `<video>` sources and the page HTML for anything the network
@@ -162,6 +169,11 @@ return r;})()''',
           decoration: InputDecoration(
             hintText: l10n.browserHint,
             border: InputBorder.none,
+            suffixIcon: IconButton(
+              tooltip: l10n.pasteLink,
+              icon: const Icon(Icons.content_paste_rounded),
+              onPressed: () => unawaited(_paste()),
+            ),
           ),
         ),
         actions: [

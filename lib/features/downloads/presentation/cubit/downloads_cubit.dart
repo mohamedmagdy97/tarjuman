@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarjuman/core/cancel/cancel_token.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
+import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
+import 'package:tarjuman/features/library/domain/usecases/export_video_file.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 
 enum DownloadStatus { queued, running, done, failed }
@@ -29,6 +31,7 @@ class DownloadTask extends Equatable {
     this.failure,
     this.videoId,
     this.title,
+    this.savedToDevice = false,
   });
 
   final int id;
@@ -43,6 +46,9 @@ class DownloadTask extends Equatable {
   /// Real title once resolved, otherwise the requested one.
   final String? title;
 
+  /// A public copy exists in Movies/Tarjuman.
+  final bool savedToDevice;
+
   String get displayTitle => title ?? request.title ?? request.url;
 
   DownloadTask copyWith({
@@ -53,6 +59,7 @@ class DownloadTask extends Equatable {
     bool clearFailure = false,
     String? videoId,
     String? title,
+    bool? savedToDevice,
   }) => DownloadTask(
     id: id,
     request: request,
@@ -61,6 +68,7 @@ class DownloadTask extends Equatable {
     failure: clearFailure ? null : failure ?? this.failure,
     videoId: videoId ?? this.videoId,
     title: title ?? this.title,
+    savedToDevice: savedToDevice ?? this.savedToDevice,
   );
 
   @override
@@ -72,6 +80,7 @@ class DownloadTask extends Equatable {
     failure,
     videoId,
     title,
+    savedToDevice,
   ];
 }
 
@@ -94,10 +103,16 @@ class DownloadsState extends Equatable {
 /// App-lifetime download queue: downloads keep going while the user browses
 /// or leaves the browser page. At most [concurrency] run at once.
 class DownloadsCubit extends Cubit<DownloadsState> {
-  DownloadsCubit(this._import, {this.concurrency = 2})
-    : super(const DownloadsState());
+  DownloadsCubit(
+    this._import,
+    this._export,
+    this._settings, {
+    this.concurrency = 2,
+  }) : super(const DownloadsState());
 
   final ImportFromUrl _import;
+  final ExportVideoFile _export;
+  final SettingsStore _settings;
   final int concurrency;
   final _tokens = <int, CancelToken>{};
   var _nextId = 1;
@@ -186,6 +201,7 @@ class DownloadsCubit extends Cubit<DownloadsState> {
     _tokens.remove(task.id);
     switch (result) {
       case Success<Video>(:final value):
+        final saved = await _autoSave(value.id);
         _update(
           task.id,
           (t) => t.copyWith(
@@ -193,6 +209,7 @@ class DownloadsCubit extends Cubit<DownloadsState> {
             videoId: value.id,
             title: value.title,
             progress: 1,
+            savedToDevice: saved,
           ),
         );
       case Err(:final failure) when failure is CancelledFailure:
@@ -209,6 +226,10 @@ class DownloadsCubit extends Cubit<DownloadsState> {
     }
     _pump();
   }
+
+  /// Auto-save never blocks the queue on the share-sheet fallback.
+  Future<bool> _autoSave(String videoId) async =>
+      _settings.readAutoSaveDownloads() && await _export.saveSilently(videoId);
 
   void _update(int id, DownloadTask Function(DownloadTask) f) {
     if (isClosed) return;

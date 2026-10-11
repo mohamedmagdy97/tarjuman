@@ -11,6 +11,7 @@ import 'package:tarjuman/core/design_system/tokens/app_typography.dart';
 import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
 import 'package:tarjuman/core/error/failure_message.dart';
 import 'package:tarjuman/features/downloads/presentation/cubit/downloads_cubit.dart';
+import 'package:tarjuman/features/library/presentation/export_actions.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 class DownloadsPage extends StatelessWidget {
@@ -67,7 +68,7 @@ class DownloadTile extends StatelessWidget {
       DownloadStatus.queued => (l10n.downloadWaiting, null),
       DownloadStatus.running => ('', null),
       DownloadStatus.done => (
-        l10n.downloadDone,
+        task.savedToDevice ? l10n.downloadSaved : l10n.downloadDone,
         TextButton(
           onPressed: () => unawaited(context.push('/setup/${task.videoId}')),
           child: Text(l10n.downloadOpen),
@@ -112,8 +113,41 @@ class DownloadTile extends StatelessWidget {
                 ),
               ],
             ),
-            if (task.status == DownloadStatus.running)
+            if (task.status == DownloadStatus.running) ...[
               AppProgressBar(value: task.progress),
+              if (task.progress != null)
+                Text(
+                  '${(task.progress! * 100).round()}%',
+                  style: AppTypography.caption.copyWith(color: c.muted),
+                ),
+            ],
+            if (task.status == DownloadStatus.done && task.videoId != null)
+              Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () => unawaited(
+                      runVideoFileAction(
+                        context,
+                        task.videoId!,
+                        VideoFileAction.saveToDevice,
+                      ),
+                    ),
+                    icon: const Icon(Icons.save_alt_rounded),
+                    label: Text(l10n.saveToDevice),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => unawaited(
+                      runVideoFileAction(
+                        context,
+                        task.videoId!,
+                        VideoFileAction.share,
+                      ),
+                    ),
+                    icon: const Icon(Icons.ios_share_rounded),
+                    label: Text(l10n.shareFile),
+                  ),
+                ],
+              ),
             if (status.isNotEmpty)
               Text(
                 status,

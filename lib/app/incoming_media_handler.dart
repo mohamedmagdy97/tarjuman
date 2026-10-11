@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tarjuman/core/error/failure_message.dart';
 import 'package:tarjuman/core/platform/share/incoming_media.dart';
 import 'package:tarjuman/core/result/result.dart';
+import 'package:tarjuman/features/library/domain/link_normalizer.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_shared_media.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
@@ -22,6 +23,21 @@ class IncomingMediaHandler {
     GlobalKey<ScaffoldMessengerState> messenger,
   ) async {
     Future<void> handle(IncomingMedia m) async {
+      final link = m.link;
+      if (link != null) {
+        final uri = normalizeUrl(link);
+        final ctx = messenger.currentContext;
+        if (uri != null) {
+          unawaited(
+            router.push('/browser?url=${Uri.encodeComponent(uri.toString())}'),
+          );
+        } else if (ctx != null && ctx.mounted) {
+          messenger.currentState?.showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(ctx).errInvalidLink)),
+          );
+        }
+        return;
+      }
       final res = await _import(path: m.path, name: m.name);
       switch (res) {
         case Success(:final value):

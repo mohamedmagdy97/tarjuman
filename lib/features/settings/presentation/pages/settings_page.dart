@@ -61,6 +61,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   value: s.themeMode,
                   onChanged: cubit.setTheme,
                 ),
+                label(l10n.downloadsTitle),
+                SwitchTile(
+                  title: l10n.autoSaveTitle,
+                  subtitle: l10n.autoSaveBody,
+                  value: s.autoSaveDownloads,
+                  onChanged: (v) => cubit.setAutoSave(value: v),
+                ),
                 label(l10n.onlineSection),
                 SwitchTile(
                   title: l10n.onlineConsentTitle,

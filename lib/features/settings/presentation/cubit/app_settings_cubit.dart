@@ -8,6 +8,7 @@ class AppSettingsState extends Equatable {
   const AppSettingsState({
     this.themeMode = ThemeMode.dark,
     this.onlineConsent = false,
+    this.autoSaveDownloads = false,
     this.speechProvider = OnlineProvider.groq,
     this.translationProvider = OnlineProvider.groq,
     this.providersWithKey = const {},
@@ -15,6 +16,7 @@ class AppSettingsState extends Equatable {
 
   final ThemeMode themeMode;
   final bool onlineConsent;
+  final bool autoSaveDownloads;
   final OnlineProvider speechProvider;
   final OnlineProvider translationProvider;
   final Set<OnlineProvider> providersWithKey;
@@ -24,12 +26,14 @@ class AppSettingsState extends Equatable {
   AppSettingsState copyWith({
     ThemeMode? themeMode,
     bool? onlineConsent,
+    bool? autoSaveDownloads,
     OnlineProvider? speechProvider,
     OnlineProvider? translationProvider,
     Set<OnlineProvider>? providersWithKey,
   }) => AppSettingsState(
     themeMode: themeMode ?? this.themeMode,
     onlineConsent: onlineConsent ?? this.onlineConsent,
+    autoSaveDownloads: autoSaveDownloads ?? this.autoSaveDownloads,
     speechProvider: speechProvider ?? this.speechProvider,
     translationProvider: translationProvider ?? this.translationProvider,
     providersWithKey: providersWithKey ?? this.providersWithKey,
@@ -39,6 +43,7 @@ class AppSettingsState extends Equatable {
   List<Object?> get props => [
     themeMode,
     onlineConsent,
+    autoSaveDownloads,
     speechProvider,
     translationProvider,
     providersWithKey,
@@ -52,6 +57,7 @@ class AppSettingsCubit extends Cubit<AppSettingsState> {
         AppSettingsState(
           themeMode: _settings.readThemeMode(),
           onlineConsent: _settings.readOnlineConsent(),
+          autoSaveDownloads: _settings.readAutoSaveDownloads(),
           speechProvider: OnlineProvider.fromId(
             _settings.readSpeechProvider(),
             speech: true,
@@ -83,6 +89,11 @@ class AppSettingsCubit extends Cubit<AppSettingsState> {
   Future<void> setConsent({required bool value}) async {
     emit(state.copyWith(onlineConsent: value));
     await _settings.writeOnlineConsent(value: value);
+  }
+
+  Future<void> setAutoSave({required bool value}) async {
+    emit(state.copyWith(autoSaveDownloads: value));
+    await _settings.writeAutoSaveDownloads(value: value);
   }
 
   Future<void> setSpeechProvider(OnlineProvider p) async {

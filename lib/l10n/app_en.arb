@@ -352,5 +352,19 @@
   "downloadClearDone": "Clear finished",
   "downloadDone": "Added to your library",
   "downloadFailedReason": "Reason: {reason}",
-  "@downloadFailedReason": {"placeholders": {"reason": {"type": "String"}}}
+  "@downloadFailedReason": {"placeholders": {"reason": {"type": "String"}}},
+  "autoSaveTitle": "Also save downloads to the gallery",
+  "autoSaveBody": "Keeps a copy in Movies/Tarjuman so other apps can see it. Uses extra storage.",
+  "saveToDevice": "Save to device",
+  "shareFile": "Share file",
+  "videoActions": "Video actions",
+  "savedToDevice": "Saved to Movies/Tarjuman",
+  "sharedInstead": "Choose where to save the file",
+  "downloadSaved": "Saved in gallery too",
+  "pasteLink": "Paste link",
+  "downloadingNotificationTitle": "Downloading videos",
+  "downloadingCount": "{count, plural, =1{1 download in progress} other{{count} downloads in progress}}",
+  "@downloadingCount": {"placeholders": {"count": {"type": "int"}}},
+  "downloadFinishedTitle": "Download finished",
+  "downloadFailedTitle": "Download failed"
 }

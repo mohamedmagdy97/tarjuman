@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tarjuman/app/downloads_system_bridge.dart';
 import 'package:tarjuman/app/incoming_media_handler.dart';
 import 'package:tarjuman/app/router.dart';
 import 'package:tarjuman/core/database/app_database.dart';
@@ -13,6 +14,7 @@ import 'package:tarjuman/core/platform/background/background_processing.dart';
 import 'package:tarjuman/core/platform/device/brightness_control.dart';
 import 'package:tarjuman/core/platform/device/device_capability.dart';
 import 'package:tarjuman/core/platform/media/media_kit_engine.dart';
+import 'package:tarjuman/core/platform/notifications/app_notifier.dart';
 import 'package:tarjuman/core/platform/share/incoming_media.dart';
 import 'package:tarjuman/core/platform/speech/pronouncer.dart';
 import 'package:tarjuman/core/settings/settings_store.dart';
@@ -24,12 +26,15 @@ import 'package:tarjuman/features/library/data/file_picker_media_picker.dart';
 import 'package:tarjuman/features/library/data/http_file_downloader.dart';
 import 'package:tarjuman/features/library/data/links/composite_link_resolver.dart';
 import 'package:tarjuman/features/library/data/media_storage.dart';
+import 'package:tarjuman/features/library/data/platform_media_exporter.dart';
 import 'package:tarjuman/features/library/data/video_repository_impl.dart';
 import 'package:tarjuman/features/library/domain/ports/file_downloader.dart';
 import 'package:tarjuman/features/library/domain/ports/link_source.dart';
+import 'package:tarjuman/features/library/domain/ports/media_exporter.dart';
 import 'package:tarjuman/features/library/domain/ports/media_picker.dart';
 import 'package:tarjuman/features/library/domain/repositories/video_repository.dart';
 import 'package:tarjuman/features/library/domain/usecases/delete_video.dart';
+import 'package:tarjuman/features/library/domain/usecases/export_video_file.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_shared_media.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_video.dart';
@@ -129,6 +134,8 @@ Future<void> configureDependencies() async {
       MethodChannelIncomingMediaSource(),
     )
     ..registerFactory(() => ImportSharedMedia(sl(), sl()))
+    ..registerLazySingleton<AppNotifier>(LocalAppNotifier.new)
+    ..registerLazySingleton(() => DownloadsSystemBridge(sl(), sl(), sl()))
     ..registerLazySingleton(() => IncomingMediaHandler(sl(), sl()))
     ..registerLazySingleton<BackgroundProcessing>(
       ForegroundTaskBackgroundProcessing.new,
@@ -146,7 +153,9 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => VocabularyCubit(sl()))
     ..registerLazySingleton<FileDownloader>(HttpFileDownloader.new)
     ..registerLazySingleton<LinkResolver>(CompositeLinkResolver.new)
-    ..registerLazySingleton(() => DownloadsCubit(sl()))
+    ..registerLazySingleton<MediaExporter>(PlatformMediaExporter.new)
+    ..registerFactory(() => ExportVideoFile(sl(), sl()))
+    ..registerLazySingleton(() => DownloadsCubit(sl(), sl(), sl()))
     ..registerFactory(() => ImportFromUrl(sl(), sl(), sl(), sl()))
     ..registerFactory(() => ToggleFavorite(sl()))
     ..registerFactory(() => SearchSubtitles(sl()))

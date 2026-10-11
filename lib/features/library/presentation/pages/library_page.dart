@@ -16,6 +16,7 @@ import 'package:tarjuman/core/design_system/tokens/theme_context.dart';
 import 'package:tarjuman/core/error/failure_message.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
 import 'package:tarjuman/features/library/presentation/cubit/library_cubit.dart';
+import 'package:tarjuman/features/library/presentation/export_actions.dart';
 import 'package:tarjuman/l10n/gen/app_localizations.dart';
 
 class LibraryPage extends StatelessWidget {
@@ -260,7 +261,7 @@ class _LibraryViewState extends State<LibraryView> {
                     : '/setup/${v.id}',
               ),
             ),
-            onLongPress: () => _confirmDelete(context, v, cubit, l10n),
+            onLongPress: () => unawaited(_showActions(context, v, cubit, l10n)),
           ),
         if (searching && state.hits.isNotEmpty) ...[
           Padding(
@@ -315,6 +316,51 @@ class _LibraryViewState extends State<LibraryView> {
     VideoStatus.failed => PillTone.failed,
     VideoStatus.imported => PillTone.processing,
   };
+
+  Future<void> _showActions(
+    BuildContext context,
+    Video v,
+    LibraryCubit cubit,
+    AppLocalizations l10n,
+  ) async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.save_alt_rounded),
+              title: Text(l10n.saveToDevice),
+              onTap: () => Navigator.pop(ctx, 'save'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.ios_share_rounded),
+              title: Text(l10n.shareFile),
+              onTap: () => Navigator.pop(ctx, 'share'),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.delete_outline_rounded,
+                color: ctx.colors.error,
+              ),
+              title: Text(l10n.delete),
+              onTap: () => Navigator.pop(ctx, 'delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null || !context.mounted) return;
+    switch (choice) {
+      case 'save':
+        await runVideoFileAction(context, v.id, VideoFileAction.saveToDevice);
+      case 'share':
+        await runVideoFileAction(context, v.id, VideoFileAction.share);
+      case 'delete':
+        await _confirmDelete(context, v, cubit, l10n);
+    }
+  }
 
   Future<void> _confirmDelete(
     BuildContext context,

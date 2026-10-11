@@ -75,6 +75,10 @@ class _Settings implements SettingsStore {
   @override
   Future<void> writeOnboardingDone() async {}
   @override
+  bool readAutoSaveDownloads() => false;
+  @override
+  Future<void> writeAutoSaveDownloads({required bool value}) async {}
+  @override
   String readSpeechProvider() => 'groq';
   @override
   Future<void> writeSpeechProvider(String id) async {}
@@ -143,11 +147,15 @@ class _MLive extends Mock implements LiveSubtitleSession {}
 
 class _NoBackground implements BackgroundProcessing {
   @override
-  Future<void> start({required String title, required String text}) async {}
+  Future<void> start({
+    required String owner,
+    required String title,
+    required String text,
+  }) async {}
   @override
   Future<void> update(String text) async {}
   @override
-  Future<void> stop() async {}
+  Future<void> stop({required String owner}) async {}
 }
 
 class _Brightness implements BrightnessControl {

@@ -794,4 +794,52 @@ class AppLocalizationsAr extends AppLocalizations {
   String downloadFailedReason(String reason) {
     return 'السبب: $reason';
   }
+
+  @override
+  String get autoSaveTitle => 'احفظ التحميلات في المعرض أيضًا';
+
+  @override
+  String get autoSaveBody =>
+      'يحتفظ بنسخة في Movies/Tarjuman لتراها التطبيقات الأخرى. يستهلك مساحة إضافية.';
+
+  @override
+  String get saveToDevice => 'حفظ على الجهاز';
+
+  @override
+  String get shareFile => 'مشاركة الملف';
+
+  @override
+  String get videoActions => 'إجراءات الفيديو';
+
+  @override
+  String get savedToDevice => 'تم الحفظ في Movies/Tarjuman';
+
+  @override
+  String get sharedInstead => 'اختر مكان حفظ الملف';
+
+  @override
+  String get downloadSaved => 'محفوظ في المعرض أيضًا';
+
+  @override
+  String get pasteLink => 'لصق الرابط';
+
+  @override
+  String get downloadingNotificationTitle => 'جارٍ تحميل الفيديوهات';
+
+  @override
+  String downloadingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count تحميلات قيد التنفيذ',
+      one: 'تحميل واحد قيد التنفيذ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get downloadFinishedTitle => 'اكتمل التحميل';
+
+  @override
+  String get downloadFailedTitle => 'فشل التحميل';
 }

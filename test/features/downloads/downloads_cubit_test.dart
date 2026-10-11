@@ -4,11 +4,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tarjuman/core/error/failure.dart';
 import 'package:tarjuman/core/result/result.dart';
+import 'package:tarjuman/core/settings/settings_store.dart';
 import 'package:tarjuman/features/downloads/presentation/cubit/downloads_cubit.dart';
 import 'package:tarjuman/features/library/domain/entities/video.dart';
+import 'package:tarjuman/features/library/domain/usecases/export_video_file.dart';
 import 'package:tarjuman/features/library/domain/usecases/import_from_url.dart';
 
 class _MockImport extends Mock implements ImportFromUrl {}
+
+class _MockExport extends Mock implements ExportVideoFile {}
+
+class _FakeSettings extends Fake implements SettingsStore {
+  @override
+  bool readAutoSaveDownloads() => false;
+}
 
 void main() {
   late _MockImport import;
@@ -37,7 +46,7 @@ void main() {
     for (final e in gates.entries) {
       stub(e.key, () => e.value.future);
     }
-    final cubit = DownloadsCubit(import)
+    final cubit = DownloadsCubit(import, _MockExport(), _FakeSettings())
       ..add([
         for (final u in gates.keys) DownloadRequest(url: u),
       ]);
@@ -65,7 +74,7 @@ void main() {
     'duplicate active request is ignored; retry re-queues a failure',
     () async {
       stub('x', () async => const Result.failure(NoVideoFoundFailure()));
-      final cubit = DownloadsCubit(import)
+      final cubit = DownloadsCubit(import, _MockExport(), _FakeSettings())
         ..add(const [DownloadRequest(url: 'x')])
         ..add(const [DownloadRequest(url: 'x')]);
       expect(cubit.state.tasks, hasLength(1));
@@ -85,7 +94,7 @@ void main() {
   test('cancelling a running download removes it', () async {
     final gate = Completer<Result<Video>>();
     stub('slow', () => gate.future);
-    final cubit = DownloadsCubit(import)
+    final cubit = DownloadsCubit(import, _MockExport(), _FakeSettings())
       ..add(const [DownloadRequest(url: 'slow')]);
     await Future<void>.delayed(Duration.zero);
     cubit.cancel(cubit.state.tasks.single.id);

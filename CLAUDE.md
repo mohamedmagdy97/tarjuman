@@ -130,7 +130,7 @@ flutter test
 flutter run --release            # for any perf/ASR work
 ```
 
-## 9. Current status (v1.10.0+13, package `com.megtech.tarjuman`)
+## 9. Current status (v1.12.0+15, package `com.megtech.tarjuman`)
 
 Built (ASR/translation quality and speed are **NOT yet verified end-to-end on a real device** — the emulator has 2 GB RAM and kills the app):
 - Foundation: design system (tokens + components incl. CueTile, StageStepper, SubtitleView), library (drift v2), player (`media_kit`),
@@ -194,6 +194,17 @@ v1.10 in-app browser + download queue (analyzer clean, 98 tests, Android Kotlin 
 `/downloads` page, badge on the browser app bar). Errors are specific: `InvalidLinkFailure`, `NoVideoFoundFailure`, `SiteRefusedFailure` (+ technical
 reason line, e.g. HTTP 403); `NetworkFailure` is now only for real connectivity/TLS/5xx. `normalizeUrl` accepts bare domains and pasted sentences.
 Limits: blob:/DASH-only players, login-only videos, encrypted HLS; cookies are not forwarded to the downloader.
+v1.11 export + share-in (analyzer clean, 101 tests, Kotlin compile OK; NOT device-tested): downloaded/imported videos live in app-private
+`getApplicationSupportDirectory()/videos/` (invisible to gallery). New `MediaExporter` port (`PlatformMediaExporter`, channel `com.megtech.tarjuman/export`):
+"Save to device" copies into public `Movies/Tarjuman` (or `Music/Tarjuman`) via MediaStore on Android 10+ with no permission; on older Android it falls back to
+the share sheet. `ExportVideoFile` use case, long-press sheet on library cards (save / share / delete), save + share buttons on finished downloads,
+Settings switch "also save downloads to the gallery" (`readAutoSaveDownloads`). Sharing a link from YouTube/Facebook/any app to Tarjuman
+(`SEND text/plain`) opens `/browser?url=…`. Browser address bar has a paste button; download tiles show percent.
+v1.12 background downloads + notifications (analyzer clean, 102 tests, Kotlin compile OK with core-library desugaring; NOT device-tested):
+`BackgroundProcessing` is now owner-keyed ('processing', 'downloads'): one dataSync foreground service shared, stops when the last owner stops.
+`DownloadsSystemBridge` (app level, listens to `DownloadsCubit`) starts the service while downloads are active (count + % in the notification) and posts
+a "download finished/failed" notification via `AppNotifier` (`flutter_local_notifications`, BSD-3); tapping opens `/setup/:id` or `/downloads`.
+Limits: swiping the app away from recents can still kill the process; Android 13+ needs the notification permission (requested when the service starts).
 Deliberately NOT done: burned-in subtitle video export (needs an FFmpeg build with libass + a video encoder → much larger APK),
 in-app gallery browser (needs `READ_MEDIA_VIDEO`), sibling-.srt auto-load, PiP/background audio, playlists, iOS.
 

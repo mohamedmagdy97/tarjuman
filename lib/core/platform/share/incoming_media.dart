@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 class IncomingMedia {
-  const IncomingMedia({required this.path, required this.name});
+  const IncomingMedia({this.path = '', this.name = '', this.link});
   final String path;
   final String name;
+
+  /// Raw text shared from another app (a video/page link), instead of a file.
+  final String? link;
 }
 
 /// Files opened with / shared to the app from other apps.
@@ -32,6 +35,8 @@ class MethodChannelIncomingMediaSource implements IncomingMediaSource {
 
   IncomingMedia? _parse(Object? raw) {
     if (raw is! Map) return null;
+    final url = raw['url'];
+    if (url is String) return IncomingMedia(link: url);
     final path = raw['path'];
     final name = raw['name'];
     if (path is! String || name is! String) return null;

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tarjuman/app/di/injection.dart';
+import 'package:tarjuman/app/downloads_system_bridge.dart';
 import 'package:tarjuman/app/incoming_media_handler.dart';
 import 'package:tarjuman/core/design_system/tokens/app_theme.dart';
 import 'package:tarjuman/features/settings/presentation/cubit/app_settings_cubit.dart';
@@ -25,6 +26,12 @@ class _TarjumanAppState extends State<TarjumanApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(
         sl<IncomingMediaHandler>().start(
+          sl<GoRouter>(),
+          sl<GlobalKey<ScaffoldMessengerState>>(),
+        ),
+      );
+      unawaited(
+        sl<DownloadsSystemBridge>().start(
           sl<GoRouter>(),
           sl<GlobalKey<ScaffoldMessengerState>>(),
         ),

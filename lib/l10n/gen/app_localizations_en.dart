@@ -801,4 +801,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String downloadFailedReason(String reason) {
     return 'Reason: $reason';
   }
+
+  @override
+  String get autoSaveTitle => 'Also save downloads to the gallery';
+
+  @override
+  String get autoSaveBody =>
+      'Keeps a copy in Movies/Tarjuman so other apps can see it. Uses extra storage.';
+
+  @override
+  String get saveToDevice => 'Save to device';
+
+  @override
+  String get shareFile => 'Share file';
+
+  @override
+  String get videoActions => 'Video actions';
+
+  @override
+  String get savedToDevice => 'Saved to Movies/Tarjuman';
+
+  @override
+  String get sharedInstead => 'Choose where to save the file';
+
+  @override
+  String get downloadSaved => 'Saved in gallery too';
+
+  @override
+  String get pasteLink => 'Paste link';
+
+  @override
+  String get downloadingNotificationTitle => 'Downloading videos';
+
+  @override
+  String downloadingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count downloads in progress',
+      one: '1 download in progress',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get downloadFinishedTitle => 'Download finished';
+
+  @override
+  String get downloadFailedTitle => 'Download failed';
 }

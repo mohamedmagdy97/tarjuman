@@ -87,7 +87,11 @@ class ProcessingCubit extends Cubit<ProcessingState> {
     unawaited(WakelockPlus.enable()); // keep the screen on during long jobs
     _lastPercent = -1;
     unawaited(
-      _background.start(title: notificationTitle, text: notificationText(0)),
+      _background.start(
+        owner: 'processing',
+        title: notificationTitle,
+        text: notificationText(0),
+      ),
     );
     emit(const ProcessingState());
     _sub =
@@ -136,7 +140,7 @@ class ProcessingCubit extends Cubit<ProcessingState> {
     }
     if (change.nextState.status != ProcessingStatus.running) {
       unawaited(WakelockPlus.disable());
-      unawaited(_background.stop());
+      unawaited(_background.stop(owner: 'processing'));
     }
   }
 
@@ -144,7 +148,7 @@ class ProcessingCubit extends Cubit<ProcessingState> {
   Future<void> close() async {
     _cancel.cancel();
     unawaited(WakelockPlus.disable());
-    unawaited(_background.stop());
+    unawaited(_background.stop(owner: 'processing'));
     await _sub?.cancel();
     return super.close();
   }

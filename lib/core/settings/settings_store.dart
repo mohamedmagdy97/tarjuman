@@ -10,6 +10,9 @@ abstract interface class SettingsStore {
   ThemeMode readThemeMode();
   Future<void> writeThemeMode(ThemeMode mode);
 
+  bool readAutoSaveDownloads();
+  Future<void> writeAutoSaveDownloads({required bool value});
+
   bool readOnlineConsent();
   Future<void> writeOnlineConsent({required bool value});
 
@@ -114,6 +117,13 @@ class SharedPrefsSettingsStore implements SettingsStore {
   @override
   Future<void> writeThemeMode(ThemeMode mode) =>
       _prefs.setString(_theme, mode.name);
+
+  @override
+  bool readAutoSaveDownloads() => _prefs.getBool('downloads.autosave') ?? false;
+
+  @override
+  Future<void> writeAutoSaveDownloads({required bool value}) =>
+      _prefs.setBool('downloads.autosave', value);
 
   @override
   bool readOnlineConsent() => _prefs.getBool(_consent) ?? false;

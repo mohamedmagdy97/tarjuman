@@ -71,6 +71,10 @@ class _Settings implements SettingsStore {
   @override
   Future<void> writeOnboardingDone() async {}
   @override
+  bool readAutoSaveDownloads() => false;
+  @override
+  Future<void> writeAutoSaveDownloads({required bool value}) async {}
+  @override
   String readSpeechProvider() => 'groq';
   @override
   Future<void> writeSpeechProvider(String id) async {}

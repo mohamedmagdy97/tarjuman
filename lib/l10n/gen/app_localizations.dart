@@ -1543,6 +1543,84 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'السبب: {reason}'**
   String downloadFailedReason(String reason);
+
+  /// No description provided for @autoSaveTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ التحميلات في المعرض أيضًا'**
+  String get autoSaveTitle;
+
+  /// No description provided for @autoSaveBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'يحتفظ بنسخة في Movies/Tarjuman لتراها التطبيقات الأخرى. يستهلك مساحة إضافية.'**
+  String get autoSaveBody;
+
+  /// No description provided for @saveToDevice.
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ على الجهاز'**
+  String get saveToDevice;
+
+  /// No description provided for @shareFile.
+  ///
+  /// In ar, this message translates to:
+  /// **'مشاركة الملف'**
+  String get shareFile;
+
+  /// No description provided for @videoActions.
+  ///
+  /// In ar, this message translates to:
+  /// **'إجراءات الفيديو'**
+  String get videoActions;
+
+  /// No description provided for @savedToDevice.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الحفظ في Movies/Tarjuman'**
+  String get savedToDevice;
+
+  /// No description provided for @sharedInstead.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر مكان حفظ الملف'**
+  String get sharedInstead;
+
+  /// No description provided for @downloadSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'محفوظ في المعرض أيضًا'**
+  String get downloadSaved;
+
+  /// No description provided for @pasteLink.
+  ///
+  /// In ar, this message translates to:
+  /// **'لصق الرابط'**
+  String get pasteLink;
+
+  /// No description provided for @downloadingNotificationTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ تحميل الفيديوهات'**
+  String get downloadingNotificationTitle;
+
+  /// No description provided for @downloadingCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{تحميل واحد قيد التنفيذ} other{{count} تحميلات قيد التنفيذ}}'**
+  String downloadingCount(int count);
+
+  /// No description provided for @downloadFinishedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتمل التحميل'**
+  String get downloadFinishedTitle;
+
+  /// No description provided for @downloadFailedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'فشل التحميل'**
+  String get downloadFailedTitle;
 }
 
 class _AppLocalizationsDelegate

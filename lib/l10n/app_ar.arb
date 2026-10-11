@@ -352,5 +352,19 @@
   "downloadClearDone": "مسح المنتهية",
   "downloadDone": "أُضيف إلى مكتبتك",
   "downloadFailedReason": "السبب: {reason}",
-  "@downloadFailedReason": {"placeholders": {"reason": {"type": "String"}}}
+  "@downloadFailedReason": {"placeholders": {"reason": {"type": "String"}}},
+  "autoSaveTitle": "احفظ التحميلات في المعرض أيضًا",
+  "autoSaveBody": "يحتفظ بنسخة في Movies/Tarjuman لتراها التطبيقات الأخرى. يستهلك مساحة إضافية.",
+  "saveToDevice": "حفظ على الجهاز",
+  "shareFile": "مشاركة الملف",
+  "videoActions": "إجراءات الفيديو",
+  "savedToDevice": "تم الحفظ في Movies/Tarjuman",
+  "sharedInstead": "اختر مكان حفظ الملف",
+  "downloadSaved": "محفوظ في المعرض أيضًا",
+  "pasteLink": "لصق الرابط",
+  "downloadingNotificationTitle": "جارٍ تحميل الفيديوهات",
+  "downloadingCount": "{count, plural, =1{تحميل واحد قيد التنفيذ} other{{count} تحميلات قيد التنفيذ}}",
+  "@downloadingCount": {"placeholders": {"count": {"type": "int"}}},
+  "downloadFinishedTitle": "اكتمل التحميل",
+  "downloadFailedTitle": "فشل التحميل"
 }
